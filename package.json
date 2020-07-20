@@ -1,0 +1,55 @@
+{
+  "name": "iwo-examples",
+  "sideEffects": false,
+  "version": "0.0.1",
+  "description": "iwo examples",
+  "main": "dist/index.html",
+  "scripts": {
+    "watch": "webpack --progress --colors --watch --mode=production",
+    "build": "webpack --progress --colors --mode=production",
+    "builddev": "webpack --progress --colors --mode=development",
+    "dev": "webpack-dev-server --config webpack.dev.js --content-base ./ --colors --hot --inline --mode=development --env.devServer",
+    "gh-publish": "npm run build&&cd dist&&git add --all&&git commit -m \"Deploy to gh-pages\"&&git push origin gh-pages&&cd.."
+  },
+  "author": "caboyd",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/caboyd/iwo-examples/"
+  },
+  "engines": {
+    "node": ">12.0.0"
+  },
+  "prettier": {
+    "tabWidth": 4,
+    "useTabs": false,
+    "printWidth": 120,
+    "parser": "typescript",
+    "semi": true,
+    "trailingComma": "es5"
+  },
+  "dependencies": {
+    "gl-matrix": "^3.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^13.13.12",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "file-loader": "^5.1.0",
+    "html-webpack-externals-plugin": "^3.8.0",
+    "html-webpack-plugin": "^3.2.0",
+    "imagemin-webpack-plugin": "^2.4.2",
+    "prettier": "^1.19.1",
+    "raw-loader": "^4.0.1",
+    "source-map-loader": "^1.0.1",
+    "string-replace-loader": "^2.3.0",
+    "terser-webpack-plugin": "^2.3.7",
+    "test": "github:caboyd/test#master",
+    "ts-loader": "^6.2.2",
+    "typescript": "^3.9.6",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
+  }
+}

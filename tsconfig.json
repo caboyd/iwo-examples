@@ -1,0 +1,40 @@
+{
+  "compilerOptions": {
+    "target": "es2017",
+    "moduleResolution": "node",
+    "module": "es6",
+    "sourceMap": true,
+    "declaration": false,
+    "baseUrl": ".",
+    "paths":{
+      "*":[
+        "src/*",
+        "examples/*",
+        "*",
+        "testlib/src/*"
+      ]
+    },
+    "outDir": "dist",
+    "strict": true,
+    "noImplicitReturns": true,
+    "strictNullChecks": true,
+    "strictPropertyInitialization" : true
+  },
+  "typedef":[
+    true,
+    "call-signature",
+    "property-declaration"
+  ],
+  "exclude": [
+    "dist",
+    "node_modules",
+    "rollup.config.ts",
+    "testlib/*"
+  ],
+  "include": [
+    "src/*",
+    "testlib/src/*",
+    "examples/*"
+  ]
+
+}

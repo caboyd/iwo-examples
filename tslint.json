@@ -1,0 +1,10 @@
+{
+  "rules":{
+    "typedef": [
+      true,
+      "call-signature",
+      "property-declaration"
+    ],
+    "trailing-comma": true
+  }
+}
