@@ -13,8 +13,7 @@ module.exports = {
     }, {}),
     externals: {
         "gl-matrix": "glMatrix",
-        test: "test",
-        testlib: "testlib",
+        iwo:"iwo"
     },
     plugins: [
         new HtmlWebpackPlugin({
@@ -46,7 +45,7 @@ module.exports = {
     ],
 
     resolve: {
-        modules: [path.resolve(__dirname), "src", "node_modules", "testlib/src"],
+        modules: [path.resolve(__dirname), "src", "node_modules"],
         // Add `.ts` and `.tsx` as a resolvable extension.
         extensions: [".webpack.js", ".web.js", ".ts", ".tsx", ".js", ".vert", ".frag"],
     },

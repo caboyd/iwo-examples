@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es2017",
+    "target": "es2018",
     "moduleResolution": "node",
     "module": "es6",
     "sourceMap": true,
@@ -28,12 +28,10 @@
   "exclude": [
     "dist",
     "node_modules",
-    "rollup.config.ts",
-    "testlib/*"
+    "rollup.config.js"
   ],
   "include": [
     "src/*",
-    "testlib/src/*",
     "examples/*"
   ]
 

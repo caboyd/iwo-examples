@@ -19,9 +19,9 @@ const buildExamplesConfig = (env, argv) => {
                             global: "glMatrix",
                         },
                         {
-                            module: "test",
-                            entry: "dist/test.umd.js",
-                            global: "test",
+                            module: "ts-pbr-renderer",
+                            entry: "dist/iwo.js",
+                            global: "iwo",
                         }
                     ],
                 });
