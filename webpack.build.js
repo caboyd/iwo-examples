@@ -1,5 +1,5 @@
 const HtmlWebpackExternalsPlugin = require("html-webpack-externals-plugin");
-import common from './webpack.common'
+const common = require("./webpack.common");
 
 const buildExamplesConfig = (env, argv) => {
     return {
@@ -12,20 +12,16 @@ const buildExamplesConfig = (env, argv) => {
                 return new HtmlWebpackExternalsPlugin({
                     files: [`examples/${id}.html`],
                     publicPath: "../",
-                    externals: [
-                        {
-                            module: "gl-matrix",
-                            entry: "gl-matrix.js",
-                            global: "glMatrix",
-                        },
-                        {
-                            module: "ts-pbr-renderer",
-                            entry: "dist/iwo.js",
-                            global: "iwo",
-                        }
-                    ],
+                    externals: common.plugins_externals
                 });
-            })
+            }),
+            {
+                apply: compiler => {
+                    compiler.hooks.afterEmit.tap("AfterEmitPlugin", compilation => {
+                        console.log(compilation);
+                    });
+                },
+            },
         ],
         resolve: common.resolve,
         module: common.module,

@@ -7,5 +7,5 @@ module.exports = {
     preserveSymlinks: true,
     appIndex: 'demo/index.html',
     plugins: [],
-    moduleDirs: 'node_modules',
+    moduleDirs: ['node_modules', 'web-modules'],
 };

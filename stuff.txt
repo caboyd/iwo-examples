@@ -1,0 +1,3 @@
+rollup can't output js files into subfolders
+
+webpack can't use typescript alias without a plugin

@@ -1,6 +1,8 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ImageminPlugin = require("imagemin-webpack-plugin").default;
+const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
 
 const examples = {
     pbr_example: "PBR Example",
@@ -8,6 +10,7 @@ const examples = {
 };
 
 module.exports = {
+    examples: examples,
     entry: Object.keys(examples).reduce(function(accum, key) {
         return { ...accum, [`examples/${key}`]: `examples/${key}.ts` };
     }, {}),
@@ -42,12 +45,32 @@ module.exports = {
                 optimizationLevel: 3,
             },
         }),
+        new CopyPlugin({
+            patterns: [
+                { from: 'node_modules/gl-matrix/glmatrix.js', to: 'dest' },
+                { from: 'node_modules/gl-matrix/esm/*', to: 'dest' },
+            ],
+        }),
+    ],
+    plugins_externals: [
+        {
+            module: "gl-matrix",
+            entry: "gl-matrix.js",
+            global: "glMatrix",
+        },
+        // {
+        //     module: "ts-pbr-renderer",
+        //     entry: "dist/iwo.js",
+        //     global: "iwo",
+        // }
     ],
 
     resolve: {
         modules: [path.resolve(__dirname), "src", "node_modules"],
         // Add `.ts` and `.tsx` as a resolvable extension.
         extensions: [".webpack.js", ".web.js", ".ts", ".tsx", ".js", ".vert", ".frag"],
+
+        plugins: [new TsconfigPathsPlugin({ configFile: "./tsconfig.json" })]
     },
 
     module: {

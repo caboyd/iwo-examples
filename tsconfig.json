@@ -1,18 +1,23 @@
 {
   "compilerOptions": {
-    "target": "es2018",
+    "target": "esnext",
     "moduleResolution": "node",
     "module": "es6",
     "sourceMap": true,
+    "esModuleInterop": true,
     "declaration": false,
     "baseUrl": ".",
     "paths":{
       "*":[
-        "src/*",
-        "examples/*",
         "*",
-        "testlib/src/*"
-      ]
+        "examples/*",
+        "ts-pbr-renderer/*",
+        "ts-pbr-renderer/src/*"
+      ],
+      "@iwo/*": [
+        "ts-pbr-renderer/src/*"
+      ],
+
     },
     "outDir": "dist",
     "strict": true,
@@ -28,11 +33,15 @@
   "exclude": [
     "dist",
     "node_modules",
-    "rollup.config.js"
+    "rollup.config",
+    "ts-pbr-renderer/dist",
+    "ts-pbr-renderer/examples"
   ],
   "include": [
     "src/*",
-    "examples/*"
+    "examples/*",
+    "ts-pbr-renderer/src/*",
+    "ts-pbr-renderer/*"
   ]
 
 }
