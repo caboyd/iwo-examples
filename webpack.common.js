@@ -1,8 +1,8 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ImageminPlugin = require("imagemin-webpack-plugin").default;
-const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
-const CopyPlugin = require('copy-webpack-plugin');
+const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
+const CopyPlugin = require("copy-webpack-plugin");
 
 const examples = {
     pbr_example: "PBR Example",
@@ -14,9 +14,12 @@ module.exports = {
     entry: Object.keys(examples).reduce(function(accum, key) {
         return { ...accum, [`examples/${key}`]: `examples/${key}.ts` };
     }, {}),
+    output: Object.keys(examples).reduce(function(accum, key) {
+        return { ...accum, filename: "[name].js", sourceMapFilename: "[name].js.map", libraryTarget: '' };
+    }, {}),
     externals: {
         "gl-matrix": "glMatrix",
-        iwo:"iwo"
+        iwo: "iwo",
     },
     plugins: [
         new HtmlWebpackPlugin({
@@ -47,8 +50,8 @@ module.exports = {
         }),
         new CopyPlugin({
             patterns: [
-                { from: 'node_modules/gl-matrix/glmatrix.js', to: 'dest' },
-                { from: 'node_modules/gl-matrix/esm/*', to: 'dest' },
+                { from: "node_modules/gl-matrix/gl-matrix.js", to: "glmatrix", flatten: true },
+                { from: "node_modules/gl-matrix/esm/*", to: "glmatrix/esm", flatten: true },
             ],
         }),
     ],
@@ -70,7 +73,7 @@ module.exports = {
         // Add `.ts` and `.tsx` as a resolvable extension.
         extensions: [".webpack.js", ".web.js", ".ts", ".tsx", ".js", ".vert", ".frag"],
 
-        plugins: [new TsconfigPathsPlugin({ configFile: "./tsconfig.json" })]
+        plugins: [new TsconfigPathsPlugin({ configFile: "./tsconfig.json" })],
     },
 
     module: {

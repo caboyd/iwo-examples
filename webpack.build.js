@@ -18,7 +18,7 @@ const buildExamplesConfig = (env, argv) => {
             {
                 apply: compiler => {
                     compiler.hooks.afterEmit.tap("AfterEmitPlugin", compilation => {
-                        console.log(compilation);
+                        //console.log(compilation);
                     });
                 },
             },

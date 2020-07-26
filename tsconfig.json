@@ -7,14 +7,12 @@
     "esModuleInterop": true,
     "declaration": false,
     "baseUrl": ".",
+    "rootDir": ".",
     "paths":{
       "*":[
         "*",
         "examples/*",
         "ts-pbr-renderer/*",
-        "ts-pbr-renderer/src/*"
-      ],
-      "@iwo/*": [
         "ts-pbr-renderer/src/*"
       ],
 
@@ -34,11 +32,12 @@
     "dist",
     "node_modules",
     "rollup.config",
-    "ts-pbr-renderer/dist",
-    "ts-pbr-renderer/examples"
+//    "ts-pbr-renderer/dist",
+//    "ts-pbr-renderer/examples",
+  //  "ts-pbr-renderer"
   ],
   "include": [
-    "src/*",
+    //"src/*",
     "examples/*",
     "ts-pbr-renderer/src/*",
     "ts-pbr-renderer/*"
