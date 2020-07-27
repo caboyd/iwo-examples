@@ -124,7 +124,7 @@ function initGL() {
 function initScene() {
     let global_root = window.location.href.substr(0, window.location.href.lastIndexOf("/"));
     //Removes /examples subfolder off end of url so images are found in correct folder
-    global_root = global_root.replace(/examples/, "");
+    global_root = global_root.substring(0, global_root.lastIndexOf("/") + 1);
     let sky_tex = new Texture2D$1(gl);
     let irr_tex = new TextureCubeMap$1(gl);
     let env_tex = new TextureCubeMap$1(gl);
