@@ -1,3 +1,5 @@
+import { FileLoader as FileLoader$1 } from './FileLoader.js';
+
 /*
 File Format:
 http://paulbourke.net/dataformats/pic/
@@ -6,7 +8,6 @@ Sample Code:
 http://radsite.lbl.gov/radiance/refer/Notes/picture_format.html
 https://github.com/enkimute/hdrpng.js/blob/master/hdrpng.js
  */
-import { FileLoader } from "./FileLoader";
 const COLRFMT = "32-bit_rle_rgbe";
 const FMT = "FORMAT";
 const EXPOSURE = "EXPOSURE";
@@ -14,10 +15,10 @@ const XDECR = 1;
 const YDECR = 2;
 const YMAJOR = 4;
 //NOTE: Why is this necessary?  Why not instance of HDRBuffer?
-export function instanceOfHDRBuffer(object) {
+function instanceOfHDRBuffer(object) {
     return "data" in object && "width" in object && "height" in object;
 }
-export class HDRImageLoader extends FileLoader {
+class HDRImageLoader extends FileLoader$1 {
     static promise(file_name, base_url = this.Default_Base_URL) {
         return new Promise(resolve => {
             super.promise(file_name, base_url).then((response) => {
@@ -140,10 +141,10 @@ function getResolution(line) {
     if (res.x <= 0 || res.y <= 0)
         throw new Error("Invalid HDR Image Resolution in File");
     //Swap x and y if not Y major
-    if (res.orientation & YMAJOR) {
-    }
+    if (res.orientation & YMAJOR) ;
     else
         [res.x, res.y] = [res.y, res.x];
     return res;
 }
-//# sourceMappingURL=HDRImageLoader.js.map
+
+export { HDRImageLoader, instanceOfHDRBuffer };

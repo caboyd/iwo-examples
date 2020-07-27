@@ -1,15 +1,16 @@
-import { Shader } from "./shader/Shader";
-import { mat3, mat4 } from "gl-matrix";
-import { Texture2D } from "./Texture2D";
-import { UniformBuffer } from "./UniformBuffer";
-import { RendererStats } from "./RendererStats";
-import { TextureCubeMap } from "./TextureCubeMap";
-import { ShaderSource, ShaderSources } from "./shader/ShaderSources";
+import { mat4, mat3 } from 'https://unpkg.com/gl-matrix@3.3.0/esm/index.js';
+import { Shader as Shader$1 } from './shader/Shader.js';
+import { Texture2D as Texture2D$1 } from './Texture2D.js';
+import { UniformBuffer as UniformBuffer$1 } from './UniformBuffer.js';
+import { RendererStats as RendererStats$1 } from './RendererStats.js';
+import { ShaderSources as ShaderSources$1, ShaderSource } from './shader/ShaderSources.js';
+import { TextureCubeMap as TextureCubeMap$1 } from './TextureCubeMap.js';
+
 const temp = mat4.create();
 const modelview_matrix = mat4.create();
 let normalview_matrix = mat3.create();
 const mvp_matrix = mat4.create();
-export class ViewportDimensions {
+class ViewportDimensions {
     constructor() {
         this.x = 0;
         this.y = 0;
@@ -17,28 +18,28 @@ export class ViewportDimensions {
         this.height = 0;
     }
 }
-export class Renderer {
+class Renderer {
     constructor(gl) {
         this.PerFrameBinding = 0;
         this.PerModelBinding = 1;
         this.viewport = new ViewportDimensions();
         this.gl = gl;
-        this.stats = new RendererStats();
-        Renderer._EMPTY_TEXTURE = new Texture2D(gl).texture_id;
-        Renderer._EMPTY_CUBE_TEXTURE = new TextureCubeMap(gl).texture_id;
+        this.stats = new RendererStats$1();
+        Renderer._EMPTY_TEXTURE = new Texture2D$1(gl).texture_id;
+        Renderer._EMPTY_CUBE_TEXTURE = new TextureCubeMap$1(gl).texture_id;
         Renderer._Shaders = new Map();
-        for (const shader_source of ShaderSources) {
+        for (const shader_source of ShaderSources$1) {
             if (shader_source.subclass !== undefined) {
                 Renderer._Shaders.set(shader_source.name, new shader_source.subclass(gl, shader_source.vert, shader_source.frag));
             }
             else {
-                Renderer._Shaders.set(shader_source.name, new Shader(gl, shader_source.vert, shader_source.frag));
+                Renderer._Shaders.set(shader_source.name, new Shader$1(gl, shader_source.vert, shader_source.frag));
             }
         }
         const shader = Renderer.GetShader(ShaderSource.PBR.name);
         //Requires shader that has these uniform buffers present
-        this.uboPerFrameBlock = new UniformBuffer(shader, "ubo_per_frame");
-        this.uboPerModelBlock = new UniformBuffer(shader, "ubo_per_model");
+        this.uboPerFrameBlock = new UniformBuffer$1(shader, "ubo_per_frame");
+        this.uboPerModelBlock = new UniformBuffer$1(shader, "ubo_per_model");
         for (const shader of Renderer._Shaders.values()) {
             this.uboPerFrameBlock.bindShader(shader, this.PerFrameBinding);
             this.uboPerModelBlock.bindShader(shader, this.PerModelBinding);
@@ -132,4 +133,5 @@ export class Renderer {
         return this._Shaders.get(name);
     }
 }
-//# sourceMappingURL=Renderer.js.map
+
+export { Renderer, ViewportDimensions };

@@ -1,9 +1,10 @@
-import { mat3, mat4 } from "gl-matrix";
-import { Uniform } from "../Uniform";
+import { mat4, mat3 } from 'https://unpkg.com/gl-matrix@3.3.0/esm/index.js';
+import { Uniform as Uniform$1 } from '../Uniform.js';
+
 const modelview_matrix = mat4.create();
 const normalview_matrix = mat3.create();
 const mvp_matrix = mat4.create();
-export class Shader {
+class Shader {
     constructor(gl, vertexSourceCode, fragmentSourceCode) {
         this.gl = gl;
         const vertexShader = Shader.getCompiledShader(gl, vertexSourceCode, gl.VERTEX_SHADER);
@@ -25,7 +26,7 @@ export class Shader {
         const num_uniforms = gl.getProgramParameter(this.ID, gl.ACTIVE_UNIFORMS);
         for (let i = 0; i < num_uniforms; i++) {
             const info = gl.getActiveUniform(this.ID, i);
-            this.uniforms.set(info.name, new Uniform(gl, this.ID, info));
+            this.uniforms.set(info.name, new Uniform$1(gl, this.ID, info));
         }
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -84,4 +85,5 @@ export class Shader {
         return shader;
     }
 }
-//# sourceMappingURL=Shader.js.map
+
+export { Shader };

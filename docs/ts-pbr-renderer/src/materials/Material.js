@@ -1,7 +1,8 @@
-export class Material {
+class Material {
     constructor() { }
     static get Shader() {
         return {};
     }
 }
-//# sourceMappingURL=Material.js.map
+
+export { Material };

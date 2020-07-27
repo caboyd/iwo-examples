@@ -1,11 +1,12 @@
-import { AttributeType } from "./Geometry";
+import { AttributeType } from './Geometry.js';
+
 var Order;
 (function (Order) {
     Order[Order["x"] = 0] = "x";
     Order[Order["y"] = 1] = "y";
     Order[Order["z"] = 2] = "z";
 })(Order || (Order = {}));
-export class BoxGeometry {
+class BoxGeometry {
     //Bounding Sphere
     //Bounding Box (AABB)
     constructor(width = 1, height = 1, depth = 1, width_segments = 1, height_segments = 1, depth_segments = 1, stretch_texture = true) {
@@ -184,4 +185,5 @@ export class BoxGeometry {
         }
     }
 }
-//# sourceMappingURL=BoxGeometry.js.map
+
+export { BoxGeometry };

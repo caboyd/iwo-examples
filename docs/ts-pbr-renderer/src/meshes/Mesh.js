@@ -1,22 +1,23 @@
+import { IndexBuffer as IndexBuffer$1 } from '../graphics/IndexBuffer.js';
+import { VertexBuffer as VertexBuffer$1 } from '../graphics/VertexBuffer.js';
+import { SubMesh as SubMesh$1 } from './SubMesh.js';
+
 /*
     Base Mesh Class
     A Mesh Contains:
             
  */
-import { IndexBuffer } from "src/graphics/IndexBuffer";
-import { VertexBuffer } from "src/graphics/VertexBuffer";
-import { SubMesh } from "./SubMesh";
-export class Mesh {
+class Mesh {
     constructor(gl, geometry) {
         if (geometry.indices)
-            this.index_buffer = new IndexBuffer(gl, geometry);
-        this.vertex_buffer = new VertexBuffer(gl, geometry);
+            this.index_buffer = new IndexBuffer$1(gl, geometry);
+        this.vertex_buffer = new VertexBuffer$1(gl, geometry);
         this.sub_meshes = [];
         this.draw_mode = 4 /* TRIANGLES */;
         this.count = 0;
         for (const group of geometry.groups) {
             this.count += group.count;
-            this.sub_meshes.push(new SubMesh(group.material_index, group.offset, group.count, this.vertex_buffer, this.index_buffer));
+            this.sub_meshes.push(new SubMesh$1(group.material_index, group.offset, group.count, this.vertex_buffer, this.index_buffer));
         }
     }
     setDrawMode(mode) {
@@ -31,4 +32,5 @@ export class Mesh {
         this.vertex_buffer.destroy(gl);
     }
 }
-//# sourceMappingURL=Mesh.js.map
+
+export { Mesh };

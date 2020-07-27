@@ -1,7 +1,7 @@
 /**
  * Created by Chris on May, 2019
  */
-export var TextureHelper;
+var TextureHelper;
 (function (TextureHelper) {
     function texParameterBuffer(gl, texture_type, buffer, width, height, wrap_S, wrap_T, wrap_R, mag_filter, min_filter, internal_format, format, type, flip) {
         texParamHelperStart(gl, min_filter, format, flip);
@@ -85,4 +85,5 @@ export var TextureHelper;
     }
     TextureHelper.PINK_BLACK_CHECKERBOARD = new Uint8Array(arr);
 })(TextureHelper || (TextureHelper = {}));
-//# sourceMappingURL=TextureHelper.js.map
+
+export { TextureHelper };

@@ -1,7 +1,8 @@
-import { mat4, quat, vec3 } from "gl-matrix";
+import { vec3, quat, mat4 } from 'https://unpkg.com/gl-matrix@3.3.0/esm/index.js';
+
 const SPEED = 200.0;
 const SENSITIVITY = 0.005;
-export var Camera_Movement;
+var Camera_Movement;
 (function (Camera_Movement) {
     Camera_Movement[Camera_Movement["FORWARD"] = 0] = "FORWARD";
     Camera_Movement[Camera_Movement["BACKWARD"] = 1] = "BACKWARD";
@@ -14,7 +15,7 @@ let right = vec3.create();
 const temp_quat = quat.create();
 const temp = vec3.create();
 const FORWARD = vec3.fromValues(0, 0, -1);
-export class Camera {
+class Camera {
     constructor(pos, forward = FORWARD, up = vec3.fromValues(0, 1, 0)) {
         this.position = vec3.clone(pos);
         this.front = vec3.clone(forward);
@@ -115,4 +116,5 @@ export class Camera {
         //   console.log(this.getRight(vec3.create()));
     }
 }
-//# sourceMappingURL=Camera.js.map
+
+export { Camera, Camera_Movement };

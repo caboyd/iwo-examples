@@ -1,7 +1,8 @@
-import { Material } from "./Material";
-import { Renderer } from "src/graphics/Renderer";
-import { vec3 } from "gl-matrix";
-export class BasicMaterial extends Material {
+import { vec3 } from 'https://unpkg.com/gl-matrix@3.3.0/esm/index.js';
+import { Renderer as Renderer$1 } from '../graphics/Renderer.js';
+import { Material as Material$1 } from './Material.js';
+
+class BasicMaterial extends Material$1 {
     constructor(color) {
         super();
         this.equirectangular_albedo = false;
@@ -31,10 +32,11 @@ export class BasicMaterial extends Material {
         this.albedo_cube_texture = tex;
     }
     get shader() {
-        return Renderer.GetShader("BasicShader");
+        return Renderer$1.GetShader("BasicShader");
     }
     static get Shader() {
-        return Renderer.GetShader("BasicShader");
+        return Renderer$1.GetShader("BasicShader");
     }
 }
-//# sourceMappingURL=BasicMaterial.js.map
+
+export { BasicMaterial };

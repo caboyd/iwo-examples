@@ -1,6 +1,7 @@
-import { Material } from "./Material";
-import { Renderer } from "src/graphics/Renderer";
-export class GridMaterial extends Material {
+import { Renderer as Renderer$1 } from '../graphics/Renderer.js';
+import { Material as Material$1 } from './Material.js';
+
+class GridMaterial extends Material$1 {
     constructor(view_distance, frequency = 1) {
         super();
         this.distance = view_distance;
@@ -12,10 +13,11 @@ export class GridMaterial extends Material {
         shader.setUniform("frequency", this.frequency);
     }
     get shader() {
-        return Renderer.GetShader("GridShader");
+        return Renderer$1.GetShader("GridShader");
     }
     static get Shader() {
-        return Renderer.GetShader("GridShader");
+        return Renderer$1.GetShader("GridShader");
     }
 }
-//# sourceMappingURL=GridMaterial.js.map
+
+export { GridMaterial };

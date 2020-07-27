@@ -1,7 +1,8 @@
-import { Shader } from "./Shader";
-import { Renderer } from "../Renderer";
-import { ShaderSource } from "./ShaderSources";
-export class EquiToCubemapShader extends Shader {
+import { Shader as Shader$1 } from './Shader.js';
+import { ShaderSource } from './ShaderSources.js';
+import { Renderer as Renderer$1 } from '../Renderer.js';
+
+class EquiToCubemapShader extends Shader$1 {
     constructor(gl, vertexSourceCode = ShaderSource.EquiToCubemap.vert, fragmentSourceCode = ShaderSource.EquiToCubemap.frag) {
         super(gl, vertexSourceCode, fragmentSourceCode);
         this.use();
@@ -11,7 +12,8 @@ export class EquiToCubemapShader extends Shader {
         const gl = this.gl;
         gl.useProgram(this.ID);
         gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, Renderer.EMPTY_TEXTURE);
+        gl.bindTexture(gl.TEXTURE_2D, Renderer$1.EMPTY_TEXTURE);
     }
 }
-//# sourceMappingURL=EquiToCubemapShader.js.map
+
+export { EquiToCubemapShader };

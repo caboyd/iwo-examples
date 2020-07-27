@@ -34,7 +34,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-export class Uniform {
+class Uniform {
     constructor(gl, program, info) {
         const location = gl.getUniformLocation(program, info.name);
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -48,7 +48,7 @@ export class Uniform {
         }
     }
 }
-export class UniformBlock {
+class UniformBlock {
     constructor(buffer, type, offset, count, size) {
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
         const uniform_info = uniform_info_map[type];
@@ -245,4 +245,5 @@ function setMat4x3(gl, location) {
         gl.uniformMatrix4x3fv(location, false, value);
     };
 }
-//# sourceMappingURL=Uniform.js.map
+
+export { Uniform, UniformBlock };

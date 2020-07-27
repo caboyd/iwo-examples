@@ -1,20 +1,21 @@
-import { glMatrix, mat4, vec3 } from "gl-matrix";
-import { Camera, Camera_Movement } from "cameras/Camera";
-import { BoxGeometry } from "geometry/BoxGeometry";
-import { Mesh } from "meshes/Mesh";
-import { MeshInstance } from "meshes/MeshInstance";
-import { Renderer } from "graphics/Renderer";
-import { FileLoader } from "loader/FileLoader";
-import { SphereGeometry } from "geometry/SphereGeometry";
-import { PlaneGeometry } from "geometry/PlaneGeometry";
-import { GridMaterial } from "materials/GridMaterial";
-import { PBRMaterial } from "materials/PBRMaterial";
-import { BasicMaterial } from "materials/BasicMaterial";
-import { ImageLoader } from "loader/ImageLoader";
-import { Texture2D } from "graphics/Texture2D";
-import { HDRImageLoader } from "loader/HDRImageLoader";
-import { TextureCubeMap } from "graphics/TextureCubeMap";
-import { TextureLoader } from "loader/TextureLoader";
+import { mat4, vec3, glMatrix } from 'https://unpkg.com/gl-matrix@3.3.0/esm/index.js';
+import { Camera as Camera$1, Camera_Movement } from '../ts-pbr-renderer/src/cameras/Camera.js';
+import { BoxGeometry as BoxGeometry$1 } from '../ts-pbr-renderer/src/geometry/BoxGeometry.js';
+import { Mesh as Mesh$1 } from '../ts-pbr-renderer/src/meshes/Mesh.js';
+import { MeshInstance as MeshInstance$1 } from '../ts-pbr-renderer/src/meshes/MeshInstance.js';
+import { Texture2D as Texture2D$1 } from '../ts-pbr-renderer/src/graphics/Texture2D.js';
+import { FileLoader as FileLoader$1 } from '../ts-pbr-renderer/src/loader/FileLoader.js';
+import { HDRImageLoader as HDRImageLoader$1 } from '../ts-pbr-renderer/src/loader/HDRImageLoader.js';
+import { TextureCubeMap as TextureCubeMap$1 } from '../ts-pbr-renderer/src/graphics/TextureCubeMap.js';
+import { Renderer as Renderer$1 } from '../ts-pbr-renderer/src/graphics/Renderer.js';
+import { SphereGeometry as SphereGeometry$1 } from '../ts-pbr-renderer/src/geometry/SphereGeometry.js';
+import { PlaneGeometry as PlaneGeometry$1 } from '../ts-pbr-renderer/src/geometry/PlaneGeometry.js';
+import { GridMaterial as GridMaterial$1 } from '../ts-pbr-renderer/src/materials/GridMaterial.js';
+import { PBRMaterial as PBRMaterial$1 } from '../ts-pbr-renderer/src/materials/PBRMaterial.js';
+import { BasicMaterial as BasicMaterial$1 } from '../ts-pbr-renderer/src/materials/BasicMaterial.js';
+import { ImageLoader as ImageLoader$1 } from '../ts-pbr-renderer/src/loader/ImageLoader.js';
+import { TextureLoader as TextureLoader$1 } from '../ts-pbr-renderer/src/loader/TextureLoader.js';
+
 let canvas;
 let gl;
 let view_matrix = mat4.create();
@@ -66,12 +67,12 @@ const moveCallback = (e) => {
         script.src = '//rawgit.com/mrdoob/stats.js/master/build/stats.min.js';
         document.head.appendChild(script);
     })();
-    FileLoader.setOnProgress(onProgress);
-    FileLoader.setOnFileComplete(onFileComplete);
+    FileLoader$1.setOnProgress(onProgress);
+    FileLoader$1.setOnFileComplete(onFileComplete);
     canvas = document.getElementById("canvas");
     document.addEventListener("mousemove", moveCallback, false);
     gl = initGL();
-    renderer = new Renderer(gl);
+    renderer = new Renderer$1(gl);
     window.addEventListener('resize', resizeCanvas, false);
     function resizeCanvas() {
         canvas.width = window.innerWidth;
@@ -80,7 +81,7 @@ const moveCallback = (e) => {
         mat4.perspective(proj_matrix, glMatrix.toRadian(90), gl.drawingBufferWidth / gl.drawingBufferHeight, 0.1, 1000.0);
     }
     resizeCanvas();
-    camera = new Camera(cPos, cFront, cUp);
+    camera = new Camera$1(cPos, cFront, cUp);
     gl.clearColor(0.2, 0.3, 0.3, 1.0);
     gl.enable(gl.DEPTH_TEST);
     gl.enable(gl.CULL_FACE);
@@ -93,7 +94,7 @@ const moveCallback = (e) => {
     let sun_dir = sphereUVtoVec3(vec3.create(), 0.5 + 0.872, 1. - 0.456);
     let sun_intensity = 24;
     let sun_color = [sun_intensity * 254 / 255, sun_intensity * 238 / 255, sun_intensity * 224 / 255];
-    let pbrShader = PBRMaterial.Shader;
+    let pbrShader = PBRMaterial$1.Shader;
     pbrShader.use();
     pbrShader.setUniform("u_lights[0].position", [sun_dir[0], sun_dir[1], sun_dir[2], 0]);
     pbrShader.setUniform("u_lights[0].color", sun_color);
@@ -104,7 +105,7 @@ const moveCallback = (e) => {
     pbrShader.setUniform("u_lights[3].position", light_positions[2]);
     pbrShader.setUniform("u_lights[3].color", light_color);
     pbrShader.setUniform("u_light_count", 4);
-    onFileComplete("");
+    onFileComplete();
     initScene();
     requestAnimationFrame(update);
 })();
@@ -124,60 +125,60 @@ function initScene() {
     let global_root = window.location.href.substr(0, window.location.href.lastIndexOf("/"));
     //Removes /examples subfolder off end of url so images are found in correct folder
     global_root = global_root.replace(/examples/, "");
-    let sky_tex = new Texture2D(gl);
-    let irr_tex = new TextureCubeMap(gl);
-    let env_tex = new TextureCubeMap(gl);
-    let cube_tex = new TextureCubeMap(gl);
-    ImageLoader.promise("assets/cubemap/monvalley/MonValley_A_LookoutPoint_preview.jpg", global_root).then((image) => {
+    let sky_tex = new Texture2D$1(gl);
+    let irr_tex = new TextureCubeMap$1(gl);
+    let env_tex = new TextureCubeMap$1(gl);
+    let cube_tex = new TextureCubeMap$1(gl);
+    ImageLoader$1.promise("assets/cubemap/monvalley/MonValley_A_LookoutPoint_preview.jpg", global_root).then((image) => {
         sky_tex.setImage(gl, image, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.LINEAR, gl.LINEAR);
-        ImageLoader.promise("assets/cubemap/monvalley/MonValley_A_LookoutPoint_8k.jpg", global_root).then((image) => {
+        ImageLoader$1.promise("assets/cubemap/monvalley/MonValley_A_LookoutPoint_8k.jpg", global_root).then((image) => {
             sky_tex.setImage(gl, image, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.LINEAR, gl.LINEAR);
         });
     });
-    HDRImageLoader.promise("assets/cubemap/monvalley/MonValley_A_LookoutPoint_Env.hdr", global_root).then((data) => {
+    HDRImageLoader$1.promise("assets/cubemap/monvalley/MonValley_A_LookoutPoint_Env.hdr", global_root).then((data) => {
         cube_tex.setEquirectangularHDRBuffer(renderer, data);
-        irr_tex = TextureCubeMap.irradianceFromCubemap(irr_tex, renderer, cube_tex);
-        env_tex = TextureCubeMap.specularFromCubemap(env_tex, renderer, cube_tex);
-        HDRImageLoader.promise("assets/cubemap/monvalley/MonValley_A_LookoutPoint_2k.hdr", global_root).then((data) => {
+        irr_tex = TextureCubeMap$1.irradianceFromCubemap(irr_tex, renderer, cube_tex);
+        env_tex = TextureCubeMap$1.specularFromCubemap(env_tex, renderer, cube_tex);
+        HDRImageLoader$1.promise("assets/cubemap/monvalley/MonValley_A_LookoutPoint_2k.hdr", global_root).then((data) => {
             cube_tex.setEquirectangularHDRBuffer(renderer, data);
-            env_tex = TextureCubeMap.specularFromCubemap(env_tex, renderer, cube_tex, data.width);
+            env_tex = TextureCubeMap$1.specularFromCubemap(env_tex, renderer, cube_tex, data.width);
             cube_tex.destroy(gl);
         });
     });
-    let earth_tex = TextureLoader.load(gl, "assets/earth.jpg", global_root);
+    let earth_tex = TextureLoader$1.load(gl, "assets/earth.jpg", global_root);
     total_files = 0;
-    let box_geom = new BoxGeometry(3.0, 3.0, 3.0, 1, 1, 1, false);
-    let sphere_geom = new SphereGeometry(0.75, 16, 16);
-    let plane_geom = new PlaneGeometry(100, 100, 1, 1, true);
-    let sphere_mesh = new Mesh(gl, sphere_geom);
-    let plane_mesh = new Mesh(gl, plane_geom);
-    let box_mesh = new Mesh(gl, box_geom);
-    sphere_mat = new PBRMaterial(vec3.fromValues(1, 0, 0), 0.0, 0.0);
+    let box_geom = new BoxGeometry$1(3.0, 3.0, 3.0, 1, 1, 1, false);
+    let sphere_geom = new SphereGeometry$1(0.75, 16, 16);
+    let plane_geom = new PlaneGeometry$1(100, 100, 1, 1, true);
+    let sphere_mesh = new Mesh$1(gl, sphere_geom);
+    let plane_mesh = new Mesh$1(gl, plane_geom);
+    let box_mesh = new Mesh$1(gl, box_geom);
+    sphere_mat = new PBRMaterial$1(vec3.fromValues(1, 0, 0), 0.0, 0.0);
     sphere_mat.albedo_texture = earth_tex;
     //GRID
-    let grid_mat = new GridMaterial(50);
-    grid = new MeshInstance(plane_mesh, grid_mat);
+    let grid_mat = new GridMaterial$1(50);
+    grid = new MeshInstance$1(plane_mesh, grid_mat);
     //SKYBOX
-    let sky_geom = new SphereGeometry(1, 48, 48);
-    let sky_mesh = new Mesh(gl, sky_geom);
-    let sky_mat = new BasicMaterial([1, 1, 1]);
+    let sky_geom = new SphereGeometry$1(1, 48, 48);
+    let sky_mesh = new Mesh$1(gl, sky_geom);
+    let sky_mat = new BasicMaterial$1([1, 1, 1]);
     sky_mat.setAlbedoTexture(sky_tex);
-    skybox = new MeshInstance(sky_mesh, sky_mat);
+    skybox = new MeshInstance$1(sky_mesh, sky_mat);
     //LIGHTS
-    let light_geom = new BoxGeometry(1.0, 1.0, 1.0);
-    let light_mesh = new Mesh(gl, light_geom);
-    let light_mat = new PBRMaterial(vec3.fromValues(1000, 1000, 1000), 0.0, 1.0);
+    let light_geom = new BoxGeometry$1(1.0, 1.0, 1.0);
+    let light_mesh = new Mesh$1(gl, light_geom);
+    let light_mat = new PBRMaterial$1(vec3.fromValues(1000, 1000, 1000), 0.0, 1.0);
     light_boxes = [];
     for (let pos of light_positions) {
-        let lb = new MeshInstance(light_mesh, light_mat);
+        let lb = new MeshInstance$1(light_mesh, light_mat);
         mat4.translate(lb.model_matrix, lb.model_matrix, [pos[0], pos[1], pos[2]]);
         light_boxes.push(lb);
     }
     //BOX
-    let box_mat = new BasicMaterial(vec3.fromValues(1, 1, 1));
+    let box_mat = new BasicMaterial$1(vec3.fromValues(1, 1, 1));
     //box_mat.setAlbedoTexture(env_tex, true);
     box_mat.setAlbedoCubeTexture(cube_tex);
-    box = new MeshInstance(box_mesh, box_mat);
+    box = new MeshInstance$1(box_mesh, box_mat);
     mat4.translate(box.model_matrix, box.model_matrix, vec3.fromValues(-2, 5, 3));
     //SPHERES
     spheres = [];
@@ -185,11 +186,11 @@ function initScene() {
     let num_rows = 8;
     for (let i = 0; i <= num_cols; i++) {
         for (let k = 0; k <= num_rows; k++) {
-            let mat = new PBRMaterial(vec3.fromValues(1.0, 1, 1), k / num_rows, Math.min(1, Math.max(0.025, i / num_cols)), 1);
+            let mat = new PBRMaterial$1(vec3.fromValues(1.0, 1, 1), k / num_rows, Math.min(1, Math.max(0.025, i / num_cols)), 1);
             // mat.albedo_texture = sphere_mat.albedo_texture;
             mat.irradiance_texture = irr_tex;
             mat.specular_env = env_tex;
-            let s = new MeshInstance(sphere_mesh, mat);
+            let s = new MeshInstance$1(sphere_mesh, mat);
             spheres.push(s);
             let model = s.model_matrix;
             mat4.identity(model);
@@ -283,4 +284,3 @@ function sphereUVtoVec3(out, u, v) {
     vec3.set(out, x, y, z);
     return out;
 }
-//# sourceMappingURL=pbr_example.js.map

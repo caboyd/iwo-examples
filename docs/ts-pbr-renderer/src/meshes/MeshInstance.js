@@ -1,5 +1,6 @@
-import { mat4 } from "gl-matrix";
-export class MeshInstance {
+import { mat4 } from 'https://unpkg.com/gl-matrix@3.3.0/esm/index.js';
+
+class MeshInstance {
     constructor(mesh, materials) {
         this.mesh = mesh;
         this.materials = materials;
@@ -22,4 +23,5 @@ export class MeshInstance {
         }
     }
 }
-//# sourceMappingURL=MeshInstance.js.map
+
+export { MeshInstance };

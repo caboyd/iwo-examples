@@ -1,5 +1,6 @@
-import { FileLoader } from "./FileLoader";
-export class ImageLoader extends FileLoader {
+import { FileLoader as FileLoader$1 } from './FileLoader.js';
+
+class ImageLoader extends FileLoader$1 {
     static promise(file_name, base_url = this.Default_Base_URL) {
         return new Promise((resolve, reject) => {
             super.promise(file_name, base_url).then((response) => {
@@ -52,4 +53,5 @@ export class ImageLoader extends FileLoader {
         return img;
     }
 }
-//# sourceMappingURL=ImageLoader.js.map
+
+export { ImageLoader };

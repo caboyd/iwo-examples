@@ -1,4 +1,4 @@
-export class SubMesh {
+class SubMesh {
     constructor(material_index, offset, count, vertex_buffer, index_buffer) {
         this.index_buffer = index_buffer;
         this.vertex_buffer = vertex_buffer;
@@ -15,4 +15,5 @@ export class SubMesh {
             this.index_buffer.references.decrement();
     }
 }
-//# sourceMappingURL=SubMesh.js.map
+
+export { SubMesh };

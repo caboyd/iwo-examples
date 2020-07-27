@@ -1,4 +1,4 @@
-export class FileLoader {
+class FileLoader {
     static async promiseAll(files, base_url = this.Default_Base_URL) {
         const promises = [];
         for (const file of files) {
@@ -78,4 +78,5 @@ FileLoader.onProgress = () => {
 FileLoader.onFileComplete = () => {
     //no-op
 };
-//# sourceMappingURL=FileLoader.js.map
+
+export { FileLoader };

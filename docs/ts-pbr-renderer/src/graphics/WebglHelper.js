@@ -1,4 +1,4 @@
-export var WebGL;
+var WebGL;
 (function (WebGL) {
     function buildBuffer(gl, type, data) {
         const buffer = gl.createBuffer();
@@ -8,4 +8,5 @@ export var WebGL;
     }
     WebGL.buildBuffer = buildBuffer;
 })(WebGL || (WebGL = {}));
-//# sourceMappingURL=WebglHelper.js.map
+
+export { WebGL };

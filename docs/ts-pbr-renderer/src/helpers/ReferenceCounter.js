@@ -1,4 +1,4 @@
-export class ReferenceCounter {
+class ReferenceCounter {
     constructor() {
         this._count = 0;
     }
@@ -14,4 +14,5 @@ export class ReferenceCounter {
         return this._count;
     }
 }
-//# sourceMappingURL=ReferenceCounter.js.map
+
+export { ReferenceCounter };

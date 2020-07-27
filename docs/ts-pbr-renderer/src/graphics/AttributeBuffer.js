@@ -1,4 +1,4 @@
-export class AttributeBuffer {
+class AttributeBuffer {
     constructor(buffer, component_size, type, normalized) {
         this.buffer = buffer;
         this.component_size = component_size;
@@ -6,4 +6,5 @@ export class AttributeBuffer {
         this.normalized = normalized;
     }
 }
-//# sourceMappingURL=AttributeBuffer.js.map
+
+export { AttributeBuffer };

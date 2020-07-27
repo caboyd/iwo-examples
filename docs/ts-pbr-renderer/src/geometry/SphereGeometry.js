@@ -1,5 +1,6 @@
-import { AttributeType } from "./Geometry";
-export class SphereGeometry {
+import { AttributeType } from './Geometry.js';
+
+class SphereGeometry {
     //Bounding Sphere
     //Bounding Box (AABB)
     constructor(radius, horizontal_segments, vertical_segments, phi_start = 0, phi_length = 2 * Math.PI, theta_start = 0, theta_length = Math.PI) {
@@ -74,4 +75,5 @@ export class SphereGeometry {
         this.groups.push({ count: indices.length, offset: 0, material_index: 0 });
     }
 }
-//# sourceMappingURL=SphereGeometry.js.map
+
+export { SphereGeometry };

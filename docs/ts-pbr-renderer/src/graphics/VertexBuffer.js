@@ -1,14 +1,15 @@
-import { WebGL } from "./WebglHelper";
-import { AttributeType } from "src/geometry/Geometry";
-import { ReferenceCounter } from "src/helpers/ReferenceCounter";
-import { AttributeBuffer } from "./AttributeBuffer";
-export class VertexBuffer {
+import { AttributeType } from '../geometry/Geometry.js';
+import { ReferenceCounter as ReferenceCounter$1 } from '../helpers/ReferenceCounter.js';
+import { WebGL } from './WebglHelper.js';
+import { AttributeBuffer as AttributeBuffer$1 } from './AttributeBuffer.js';
+
+class VertexBuffer {
     constructor(gl, geometry) {
         this.attributes = geometry.attributes;
         this.attribute_buffers = new Map();
         this.attribute_flags = geometry.attribute_flags;
         this.interleaved = geometry.isInterleaved;
-        this.references = new ReferenceCounter();
+        this.references = new ReferenceCounter$1();
         this.stride = 0;
         if (this.interleaved && geometry.interleaved_attributes) {
             this.VBO = WebGL.buildBuffer(gl, gl.ARRAY_BUFFER, geometry.interleaved_attributes);
@@ -100,15 +101,16 @@ export class VertexBuffer {
     initSeparateBuffers(gl) {
         let data;
         if (this.attribute_flags & AttributeType.Vertex && (data = this.attributes.get(AttributeType.Vertex)) != null)
-            this.attribute_buffers.set(AttributeType.Vertex, new AttributeBuffer(WebGL.buildBuffer(gl, gl.ARRAY_BUFFER, data), 3, gl.FLOAT, false));
+            this.attribute_buffers.set(AttributeType.Vertex, new AttributeBuffer$1(WebGL.buildBuffer(gl, gl.ARRAY_BUFFER, data), 3, gl.FLOAT, false));
         if ((data = this.attributes.get(AttributeType.Tex_Coords)) != null)
-            this.attribute_buffers.set(AttributeType.Tex_Coords, new AttributeBuffer(WebGL.buildBuffer(gl, gl.ARRAY_BUFFER, data), 2, gl.FLOAT, false));
+            this.attribute_buffers.set(AttributeType.Tex_Coords, new AttributeBuffer$1(WebGL.buildBuffer(gl, gl.ARRAY_BUFFER, data), 2, gl.FLOAT, false));
         if ((data = this.attributes.get(AttributeType.Normals)) != null)
-            this.attribute_buffers.set(AttributeType.Normals, new AttributeBuffer(WebGL.buildBuffer(gl, gl.ARRAY_BUFFER, data), 3, gl.FLOAT, true));
+            this.attribute_buffers.set(AttributeType.Normals, new AttributeBuffer$1(WebGL.buildBuffer(gl, gl.ARRAY_BUFFER, data), 3, gl.FLOAT, true));
         if ((data = this.attributes.get(AttributeType.Tangents)) != null)
-            this.attribute_buffers.set(AttributeType.Tangents, new AttributeBuffer(WebGL.buildBuffer(gl, gl.ARRAY_BUFFER, data), 3, gl.FLOAT, true));
+            this.attribute_buffers.set(AttributeType.Tangents, new AttributeBuffer$1(WebGL.buildBuffer(gl, gl.ARRAY_BUFFER, data), 3, gl.FLOAT, true));
         if ((data = this.attributes.get(AttributeType.Bitangents)) != null)
-            this.attribute_buffers.set(AttributeType.Bitangents, new AttributeBuffer(WebGL.buildBuffer(gl, gl.ARRAY_BUFFER, data), 3, gl.FLOAT, true));
+            this.attribute_buffers.set(AttributeType.Bitangents, new AttributeBuffer$1(WebGL.buildBuffer(gl, gl.ARRAY_BUFFER, data), 3, gl.FLOAT, true));
     }
 }
-//# sourceMappingURL=VertexBuffer.js.map
+
+export { VertexBuffer };

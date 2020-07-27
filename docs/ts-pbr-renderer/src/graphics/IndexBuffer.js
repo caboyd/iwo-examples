@@ -1,12 +1,13 @@
-import { ReferenceCounter } from "src/helpers/ReferenceCounter";
-import { WebGL } from "./WebglHelper";
-export class IndexBuffer {
+import { ReferenceCounter as ReferenceCounter$1 } from '../helpers/ReferenceCounter.js';
+import { WebGL } from './WebglHelper.js';
+
+class IndexBuffer {
     constructor(gl, geometry) {
         if (geometry.indices === undefined)
             throw new Error("Geometry has no indices.");
         this.EBO = WebGL.buildBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, geometry.indices);
         this.indices = geometry.indices;
-        this.references = new ReferenceCounter();
+        this.references = new ReferenceCounter$1();
     }
     bind(gl) {
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.EBO);
@@ -21,4 +22,5 @@ export class IndexBuffer {
         }
     }
 }
-//# sourceMappingURL=IndexBuffer.js.map
+
+export { IndexBuffer };

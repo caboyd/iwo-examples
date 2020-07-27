@@ -1,6 +1,7 @@
-import { UniformBlock } from "./Uniform";
+import { UniformBlock } from './Uniform.js';
+
 const BAD_VALUE = 4294967295;
-export class UniformBuffer {
+class UniformBuffer {
     constructor(shader, uniform_block_name) {
         const gl = shader.gl;
         const program = shader.ID;
@@ -47,4 +48,5 @@ export class UniformBuffer {
             uniform_block.set(data);
     }
 }
-//# sourceMappingURL=UniformBuffer.js.map
+
+export { UniformBuffer };

@@ -1,4 +1,4 @@
-export class RendererStats {
+class RendererStats {
     constructor() {
         this.shader_bind_count = 0;
         this.material_bind_count = 0;
@@ -19,4 +19,5 @@ export class RendererStats {
         this.draw_calls = 0;
     }
 }
-//# sourceMappingURL=RendererStats.js.map
+
+export { RendererStats };
