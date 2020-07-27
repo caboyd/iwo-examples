@@ -1,5 +1,6 @@
 # Project exclude paths
-.idea/
+.idea/*
 node_modules/
 .git/
 dist/
+docs/_virtual/
