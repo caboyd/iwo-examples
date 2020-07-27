@@ -1,21 +1,21 @@
 import {glMatrix, mat4, vec3} from "gl-matrix";
-import {Camera, Camera_Movement} from "ts-pbr-renderer/src/cameras/Camera";
-import {BoxGeometry} from "ts-pbr-renderer/src/geometry/BoxGeometry";
-import {Mesh} from "ts-pbr-renderer/src/meshes/Mesh";
-import {MeshInstance} from "ts-pbr-renderer/src/meshes/MeshInstance";
-import {Renderer} from "ts-pbr-renderer/src/graphics/Renderer";
-import {FileLoader} from "ts-pbr-renderer/src/loader/FileLoader";
-import {SphereGeometry} from "ts-pbr-renderer/src/geometry/SphereGeometry";
-import {PlaneGeometry} from "ts-pbr-renderer/src/geometry/PlaneGeometry";
-import {GridMaterial} from "ts-pbr-renderer/src/materials/GridMaterial";
-import {PBRMaterial} from "ts-pbr-renderer/src/materials/PBRMaterial";
-import {BasicMaterial} from "ts-pbr-renderer/src/materials/BasicMaterial";
-import {ImageLoader} from "ts-pbr-renderer/src/loader/ImageLoader";
-import {Texture2D} from "ts-pbr-renderer/src/graphics/Texture2D";
-import {HDRImageLoader} from "ts-pbr-renderer/src/loader/HDRImageLoader";
-import {TextureCubeMap} from "ts-pbr-renderer/src/graphics/TextureCubeMap";
-import {TextureLoader} from "ts-pbr-renderer/src/loader/TextureLoader";
-import {HDRBuffer} from "ts-pbr-renderer/src/loader/HDRImageLoader";
+import {Camera, Camera_Movement} from "cameras/Camera";
+import {BoxGeometry} from "geometry/BoxGeometry";
+import {Mesh} from "meshes/Mesh";
+import {MeshInstance} from "meshes/MeshInstance";
+import {Renderer} from "graphics/Renderer";
+import {FileLoader} from "loader/FileLoader";
+import {SphereGeometry} from "geometry/SphereGeometry";
+import {PlaneGeometry} from "geometry/PlaneGeometry";
+import {GridMaterial} from "materials/GridMaterial";
+import {PBRMaterial} from "materials/PBRMaterial";
+import {BasicMaterial} from "materials/BasicMaterial";
+import {ImageLoader} from "loader/ImageLoader";
+import {Texture2D} from "graphics/Texture2D";
+import {HDRImageLoader} from "loader/HDRImageLoader";
+import {TextureCubeMap} from "graphics/TextureCubeMap";
+import {TextureLoader} from "loader/TextureLoader";
+import {HDRBuffer} from "loader/HDRImageLoader";
 
 let canvas: HTMLCanvasElement;
 
