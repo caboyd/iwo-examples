@@ -14,10 +14,9 @@
         "examples/*",
         "ts-pbr-renderer/*",
         "ts-pbr-renderer/src/*"
-      ],
-
+      ]
     },
-    "outDir": "dist",
+    "outDir": "docs",
     "strict": true,
     "noImplicitReturns": true,
     "strictNullChecks": true,
@@ -29,18 +28,13 @@
     "property-declaration"
   ],
   "exclude": [
-    "dist",
+    "docs",
     "node_modules",
-    "rollup.config",
-//    "ts-pbr-renderer/dist",
-//    "ts-pbr-renderer/examples",
-  //  "ts-pbr-renderer"
+    "rollup.config"
   ],
   "include": [
-    //"src/*",
     "examples/*",
-    "ts-pbr-renderer/src/*",
-    "ts-pbr-renderer/*"
+    "ts-pbr-renderer/src/*"
   ]
 
 }
