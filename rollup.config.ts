@@ -2,6 +2,8 @@ import copy from "rollup-plugin-copy";
 import { readFileSync } from "fs-extra";
 import { nodeResolve } from "@rollup/plugin-node-resolve";
 // @ts-ignore
+import sourceMaps from 'rollup-plugin-sourcemaps'
+// @ts-ignore
 import esmImportToUrl from "rollup-plugin-esm-import-to-url";
 // @ts-ignore
 import html from "@open-wc/rollup-plugin-html";
@@ -36,6 +38,7 @@ export default {
     output: {
         dir: output_dir,
         format: "es",
+        sourcemap: true
     },
     plugins: [
 
@@ -50,16 +53,7 @@ export default {
 
         //NOTE: Breaks when:
         //  - Using subst on windows to shortcut directories
-        nodeResolve({
-            browser: true,
-            //modulesOnly: true,
-            //extensions: [".mjs", ".js", ".ts", ".tsx ", ".frag", ".vert", ".json"],
-            customResolveOptions: {
-                //Tries to resolve from examples folder unless this is set
-                // basedir: process.cwd(),
-                //extensions: [".mjs", ".js", ".ts", ".tsx ", ".frag", ".vert", ".json"],
-            },
-        }),
+        nodeResolve(),
         typescript(),
         //TODO: This is using a modified package and I need to fork it and publish the changes
         // This allows me to output html templates without the plugin thinking the module scripts are rollup entrypoints
@@ -104,6 +98,7 @@ export default {
             // set flatten to false to preserve folder structure
             flatten: false,
         }),
+        sourceMaps()
     ],
 };
 

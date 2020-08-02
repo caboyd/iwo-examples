@@ -5,11 +5,9 @@
   "description": "iwo examples",
   "main": "dist/index.html",
   "scripts": {
-    "prebuild": "rimraf dist",
-    "watch": "webpack --config webpack.build.js --progress --colors --watch --mode=development",
-    "build": "webpack --config webpack.build.js --progress --colors --mode=development",
-    "rollup": "rollup -c rollup.config.ts",
-    "start": "start tsc --watch && start es-dev-server --open /docs/"
+    "prebuild": "rimraf docs",
+    "build": "rollup -c rollup.config.ts",
+    "start": "start rollup -w -c rollup.config.ts && start es-dev-server --open /docs/"
   },
   "author": "caboyd",
   "license": "MIT",
@@ -45,7 +43,7 @@
     "rollup-plugin-copy": "^3.3.0",
     "rollup-plugin-esm-import-to-url": "^2.1.0",
     "rollup-plugin-glslify": "^1.2.0",
-    "rollup-plugin-string": "^3.0.0",
+    "rollup-plugin-sourcemaps": "^0.6.2",
     "rollup-plugin-typescript2": "^0.27.1",
     "typescript": "^3.9.7"
   }

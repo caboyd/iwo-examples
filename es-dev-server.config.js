@@ -5,6 +5,7 @@ const fs = require('fs');
 module.exports = {
     port: 8080,
     watch: true,
+    compress: true,
     nodeResolve: {
         browser: true,
         //modulesOnly: true,
@@ -19,8 +20,6 @@ module.exports = {
     },
     preserveSymlinks: true,
     appIndex: "demo/index.html",
-    plugins: [
-
-    ],
+    plugins: [],
     moduleDirs: ["node_modules", "web-modules", "dist", "dist/ts-pbr-renderer", "dist/ts-pbr-renderer/src"],
 };
