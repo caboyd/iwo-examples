@@ -1,7 +1,3 @@
-const path = require("path");
-const   nodeResolve = require("@rollup/plugin-node-resolve");
-const fs = require('fs');
-
 module.exports = {
     port: 8080,
     watch: true,
@@ -19,7 +15,7 @@ module.exports = {
         },
     },
     preserveSymlinks: true,
-    appIndex: "demo/index.html",
+    appIndex: "docs/index.html",
     plugins: [],
     moduleDirs: ["node_modules", "web-modules", "dist", "dist/ts-pbr-renderer", "dist/ts-pbr-renderer/src"],
 };

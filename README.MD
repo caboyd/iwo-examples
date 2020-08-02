@@ -1,4 +1,4 @@
-# Examples repository for [iwo Renderer](https://github.com/caboyd/ts-pbr-renderer)
+# Examples repository for [iwo Renderer](https://github.com/caboyd/iwo)
 
 [https://caboyd.github.io/iwo-examples/index.html](https://caboyd.github.io/iwo-examples/index.html)
 
@@ -23,23 +23,20 @@ installations of node and npm
 Download repository locally
 
 install node modules
-
 ```
 npm install
 ```
 
 Run development environment  
-- Required to run rollup to generate html example pages
 ```
-npm run rollup
 npm run start
 ```
 
 ## Built With
-* Rollup
-* es-dev-server
-* Typescript
-* gl-matrix
+* [es-dev-server](https://open-wc.org/developing/es-dev-server.html) - A web server for development without bundling.
+* [gl-matrix](http://glmatrix.net/) - Math library
+* [Typescript](https://www.typescriptlang.org/)
+* [Rollup](https://rollupjs.org) - Bundler
 
 ## License
 

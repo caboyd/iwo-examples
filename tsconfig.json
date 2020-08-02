@@ -12,8 +12,8 @@
       "*":[
         "*",
         "examples/*",
-        "ts-pbr-renderer/*",
-        "ts-pbr-renderer/src/*"
+        "iwo/*",
+        "iwo/src/*"
       ]
     },
     "outDir": "docs",
@@ -34,7 +34,7 @@
   ],
   "include": [
     "examples/*",
-    "ts-pbr-renderer/src/*"
+    "iwo/src/*"
   ]
 
 }
