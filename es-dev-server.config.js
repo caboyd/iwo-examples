@@ -15,7 +15,7 @@ module.exports = {
         },
     },
     preserveSymlinks: true,
-    appIndex: "dist/index.html",
+    appIndex: "docs/index.html",
     plugins: [],
     moduleDirs: ["node_modules", "web-modules"],
 };

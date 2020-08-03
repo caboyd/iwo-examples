@@ -25,7 +25,7 @@ const examples = {
 
 const template = readFileSync("examples/template.html", "utf-8");
 
-const output_dir = "dist";
+const output_dir = "docs";
 
 export default {
     //NOTE: Enable node_modules and src imports to keep in original files and location

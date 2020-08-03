@@ -1,0 +1,4 @@
+var brdfVert = "#version 300 es\n#define GLSLIFY 1\n\nlayout (location = 0) in vec3 a_vertex;\nlayout (location = 1) in vec2 a_tex_coord;\n\nout vec2 tex_coord;\n\nlayout (std140) uniform ubo_per_frame{\n// base alignment   // aligned offset\n    mat4 view;            // 64               // 0\n    mat4 view_inverse;    // 64               // 64\n    mat4 projection;      // 64               // 128\n    mat4 view_projection; // 64               // 192\n\n};\nlayout (std140) uniform ubo_per_model{\n// base alignment   // aligned offset\n    mat4 model_view;      // 64               // 0\n    mat3 normal_view;     // 48               // 64\n    mat4 mvp;             // 64               // 112\n};\n\nvoid main()\n{\n    tex_coord = a_tex_coord;\n    gl_Position = vec4(a_vertex, 1.0);\n}"; // eslint-disable-line
+
+export default brdfVert;
+//# sourceMappingURL=brdf.vert.js.map
