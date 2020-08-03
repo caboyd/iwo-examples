@@ -2,12 +2,12 @@
 import copy from "rollup-plugin-copy";
 import { readFileSync } from "fs-extra";
 import { nodeResolve } from "@rollup/plugin-node-resolve";
-import sourceMaps from 'rollup-plugin-sourcemaps'
+import sourceMaps from "rollup-plugin-sourcemaps";
 import esmImportToUrl from "rollup-plugin-esm-import-to-url";
 // /import html from "@open-wc/rollup-plugin-html";
 import glslify from "rollup-plugin-glslify";
 
-import html from '@rollup/plugin-html';
+import html from "@rollup/plugin-html";
 
 //Note: Do not use @rollup/plugin-typescript
 // Breaks when:
@@ -20,12 +20,12 @@ const pkg = require("./package.json");
 const examples = {
     pbr_example: "PBR Example",
     sphere_geometry_example: "Sphere Geometry Example",
-    obj_example: "OBJ Model Example"
+    obj_example: "OBJ Model Example",
 };
 
 const template = readFileSync("examples/template.html", "utf-8");
 
-const output_dir = "docs"
+const output_dir = "dist";
 
 export default {
     //NOTE: Enable node_modules and src imports to keep in original files and location
@@ -38,10 +38,9 @@ export default {
     output: {
         dir: output_dir,
         format: "es",
-        sourcemap: true
+        sourcemap: true,
     },
     plugins: [
-
         esmImportToUrl({
             imports: {
                 "gl-matrix": `https://unpkg.com/gl-matrix@${pkg.dependencies["gl-matrix"].replace(
@@ -56,15 +55,15 @@ export default {
         nodeResolve(),
         typescript(),
         ...Object.keys(examples).map(key => {
-           return html({
-               fileName: `examples/${key}.html`,
-               template: ({ attributes, bundle, files, publicPath, title }) => {
-                   const html = template
-                       .replace("</body>", `<script type="module" src="./${key}.js"></script></body>`)
-                       .replace("</title>", `${examples[key]}</title>`);
-                   return html
-               }
-            })
+            return html({
+                fileName: `examples/${key}.html`,
+                template: ({ attributes, bundle, files, publicPath, title }) => {
+                    const html = template
+                        .replace("</body>", `<script type="module" src="./${key}.js"></script></body>`)
+                        .replace("</title>", `${examples[key]}</title>`);
+                    return html;
+                },
+            });
         }),
         glslify({
             //compress removes spaces and new line breaks after keywords like 'else' breaking shaders with braces
@@ -79,7 +78,6 @@ export default {
             // set flatten to false to preserve folder structure
             flatten: false,
         }),
-        sourceMaps()
+        sourceMaps(),
     ],
 };
-

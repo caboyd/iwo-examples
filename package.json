@@ -5,9 +5,9 @@
   "description": "iwo examples",
   "main": "dist/index.html",
   "scripts": {
-    "prebuild": "rimraf docs",
+    "prebuild": "rimraf dist",
     "build": "rollup -c rollup.config.ts",
-    "start": "start rollup -w -c rollup.config.ts && start es-dev-server --open /docs/index.html"
+    "start": "start rollup -w -c rollup.config.ts && start es-dev-server --open /dist/index.html"
   },
   "author": "caboyd",
   "license": "MIT",

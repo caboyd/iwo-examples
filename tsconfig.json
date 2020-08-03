@@ -16,7 +16,7 @@
         "iwo/src/*"
       ]
     },
-    "outDir": "docs",
+    "outDir": "dist",
     "strict": true,
     "noImplicitReturns": true,
     "strictNullChecks": true,
@@ -28,7 +28,7 @@
     "property-declaration"
   ],
   "exclude": [
-    "docs",
+    "dist",
     "node_modules",
     "rollup.config"
   ],

@@ -15,7 +15,7 @@ module.exports = {
         },
     },
     preserveSymlinks: true,
-    appIndex: "docs/index.html",
+    appIndex: "dist/index.html",
     plugins: [],
-    moduleDirs: ["node_modules", "web-modules", "dist", "dist/ts-pbr-renderer", "dist/ts-pbr-renderer/src"],
+    moduleDirs: ["node_modules", "web-modules"],
 };
