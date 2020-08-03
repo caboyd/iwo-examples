@@ -48,11 +48,7 @@ let sphere_mat: PBRMaterial;
 let grid: MeshInstance;
 let renderer: Renderer;
 
-const loading_text = document.getElementById("loading-text")!;
-const loading_subtext = document.getElementById("loading-subtext")!;
-
-let files_completed: number = 0;
-let total_files: number = 0;
+//document.getElementById("loading-text-wrapper")!.remove();
 
 const moveCallback = (e: MouseEvent): void => {
     const movementX = e.movementX || 0;
@@ -80,9 +76,6 @@ const stats = (): void => {
 
 (function main(): void {
     stats();
-
-    FileLoader.setOnProgress(onProgress);
-    FileLoader.setOnFileComplete(onFileComplete);
 
     canvas = <HTMLCanvasElement>document.getElementById("canvas");
     document.addEventListener("mousemove", moveCallback, false);
@@ -118,8 +111,6 @@ const stats = (): void => {
     renderer.setViewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
     mat4.perspective(proj_matrix, glMatrix.toRadian(90), gl.drawingBufferWidth / gl.drawingBufferHeight, 0.1, 1000.0);
 
-    loading_text.innerText = files_completed + "/" + total_files + " files completed.";
-
     //0.5-u because we scaled x by -1 to invert sphere
     //1-v because we flipped the image
     const sun_dir = sphereUVtoVec3(vec3.create(), 0.5 + 0.872, 1 - 0.456);
@@ -141,8 +132,6 @@ const stats = (): void => {
     pbrShader.setUniform("u_lights[3].color", light_color);
 
     pbrShader.setUniform("u_light_count", 4);
-
-    onFileComplete("");
 
     initScene();
 
@@ -199,7 +188,6 @@ function initScene(): void {
     );
 
     const earth_tex = TextureLoader.load(gl, "assets/earth.jpg", global_root);
-    total_files = 0;
 
     const box_geom = new BoxGeometry(3.0, 3.0, 3.0, 1, 1, 1, false);
     const sphere_geom = new SphereGeometry(0.75, 16, 16);
@@ -320,26 +308,6 @@ function drawScene(): void {
     grid.render(renderer, view_matrix, proj_matrix);
 
     gl.disable(gl.BLEND);
-}
-
-function onProgress(loaded_bytes: number, total_bytes: number, file_name: string): void {
-    let name = file_name;
-    const reg = /[^/]*$/.exec(file_name);
-    if (reg) name = reg[0];
-
-    loading_subtext.innerText = name + " - " + ((loaded_bytes / total_bytes) * 100).toFixed(2) + "% complete";
-}
-
-function onFileComplete(file_name: string): void {
-    // console.log(file_name + " download complete. ");
-    // console.log(num_complete + "/" + total + " files completed.");
-    files_completed++;
-    loading_text.innerText = files_completed + "/" + total_files + " files completed.";
-
-    if (files_completed >= total_files) {
-        const a = document.getElementById("loading-text-wrapper")!;
-        if (a) a.remove();
-    }
 }
 
 window.onkeydown = function(e: KeyboardEvent): void {
