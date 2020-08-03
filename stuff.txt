@@ -1,7 +1,0 @@
-rollup can't output js files into subfolders
-
-webpack can't use typescript alias without a plugin
-
-todo
-test rollup watch with source maps and es-dev-server to see if debugging is good
-otherwise gotta use webpack or change shader import to js files or fetch them

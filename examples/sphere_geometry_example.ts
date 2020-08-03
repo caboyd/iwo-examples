@@ -1,18 +1,18 @@
-import {glMatrix, mat4, vec3} from "gl-matrix";
-import * as IWO from 'iwo';
+import { glMatrix, mat4, vec3 } from "gl-matrix";
+import * as IWO from "iwo";
 
 let canvas: HTMLCanvasElement;
 let gl: WebGL2RenderingContext;
 
-let view_matrix: mat4 = mat4.create();
-let proj_matrix: mat4 = mat4.create();
+const view_matrix: mat4 = mat4.create();
+const proj_matrix: mat4 = mat4.create();
 
-let cPos: vec3 = vec3.fromValues(0.5, 8, 9.0);
+const cPos: vec3 = vec3.fromValues(0.5, 8, 9.0);
 let camera: IWO.Camera;
 
 let mouse_x_total = 0;
 let mouse_y_total = 0;
-let keys: Array<boolean> = [];
+const keys: Array<boolean> = [];
 
 let spheres: IWO.MeshInstance[];
 let sphere_mat: IWO.Material;
@@ -23,31 +23,32 @@ document.getElementById("loading-text-wrapper")!.remove();
 
 const moveCallback = (e: MouseEvent): void => {
     //@ts-ignore
-    let movementX = e.movementX || e.mozMovementX || e.webkitMovementX || 0;
+    const movementX = e.movementX || e.mozMovementX || e.webkitMovementX || 0;
     //@ts-ignore
-    let movementY = e.movementY || e.mozMovementY || e.webkitMovementY || 0;
+    const movementY = e.movementY || e.mozMovementY || e.webkitMovementY || 0;
     if (e.which == 1) {
         mouse_x_total += movementX;
         mouse_y_total += movementY;
     }
 };
 
-(function loadWebGL(): void {
+const stats = (): void => {
+    const script = document.createElement("script");
+    script.onload = (): void => {
+        //@ts-ignore
+        const stats = new Stats();
+        document.body.appendChild(stats.dom);
+        requestAnimationFrame(function loop() {
+            stats.update();
+            requestAnimationFrame(loop);
+        });
+    };
+    script.src = "//rawgit.com/mrdoob/stats.js/master/build/stats.min.js";
+    document.head.appendChild(script);
+};
 
-    (function () {
-        let script = document.createElement('script');
-        script.onload = function () {
-            // @ts-ignore
-            let stats = new Stats();
-            document.body.appendChild(stats.dom);
-            requestAnimationFrame(function loop() {
-                stats.update();
-                requestAnimationFrame(loop)
-            });
-        };
-        script.src = '//rawgit.com/mrdoob/stats.js/master/build/stats.min.js';
-        document.head.appendChild(script);
-    })();
+(function main(): void {
+    stats();
 
     canvas = <HTMLCanvasElement>document.getElementById("canvas");
     document.addEventListener("mousemove", moveCallback, false);
@@ -56,21 +57,26 @@ const moveCallback = (e: MouseEvent): void => {
 
     renderer = new IWO.Renderer(gl);
 
-    window.addEventListener('resize', resizeCanvas, false);
+    window.addEventListener("resize", resizeCanvas, false);
 
-    function resizeCanvas() {
+    function resizeCanvas(): void {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         renderer.setViewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-        mat4.perspective(proj_matrix, glMatrix.toRadian(90), gl.drawingBufferWidth / gl.drawingBufferHeight, 0.1,
-            1000.0);
+        mat4.perspective(
+            proj_matrix,
+            glMatrix.toRadian(90),
+            gl.drawingBufferWidth / gl.drawingBufferHeight,
+            0.1,
+            1000.0
+        );
     }
 
     resizeCanvas();
 
     camera = new IWO.Camera(cPos);
 
-    gl.clearColor(173/255, 196/255, 221/255, 1.0);
+    gl.clearColor(173 / 255, 196 / 255, 221 / 255, 1.0);
     gl.enable(gl.DEPTH_TEST);
     gl.enable(gl.CULL_FACE);
     gl.cullFace(gl.BACK);
@@ -78,12 +84,11 @@ const moveCallback = (e: MouseEvent): void => {
     renderer.setViewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
     mat4.perspective(proj_matrix, glMatrix.toRadian(90), gl.drawingBufferWidth / gl.drawingBufferHeight, 0.1, 1000.0);
 
+    const sun_dir = [-0.3, 0, 1];
+    const sun_intensity = 9;
+    const sun_color = [(sun_intensity * 254) / 255, (sun_intensity * 238) / 255, (sun_intensity * 224) / 255];
 
-    let sun_dir = [-0.3, 0, 1];
-    let sun_intensity = 9;
-    let sun_color = [sun_intensity * 254 / 255, sun_intensity * 238 / 255, sun_intensity * 224 / 255];
-
-    let pbrShader = IWO.PBRMaterial.Shader;
+    const pbrShader = IWO.PBRMaterial.Shader;
     pbrShader.use();
     pbrShader.setUniform("u_lights[0].position", [sun_dir[0], sun_dir[1], sun_dir[2], 0]);
     pbrShader.setUniform("u_lights[0].color", sun_color);
@@ -107,33 +112,31 @@ function initGL(): WebGL2RenderingContext {
     return gl;
 }
 
-
 function initScene(): void {
-    let plane_geom = new IWO.PlaneGeometry(100, 100, 1, 1, true);
-    let plane_mesh = new IWO.Mesh(gl, plane_geom);
+    const plane_geom = new IWO.PlaneGeometry(100, 100, 1, 1, true);
+    const plane_mesh = new IWO.Mesh(gl, plane_geom);
 
-    sphere_mat = new IWO.PBRMaterial(vec3.fromValues(1, 1, 1), 0,0, 2);
+    sphere_mat = new IWO.PBRMaterial(vec3.fromValues(1, 1, 1), 0, 0, 2);
 
     //GRID
-    let grid_mat = new IWO.GridMaterial(50);
+    const grid_mat = new IWO.GridMaterial(50);
     grid = new IWO.MeshInstance(plane_mesh, grid_mat);
 
     //SPHERES
     spheres = [];
-    let num_cols = 8;
-    let num_rows = 8;
+    const num_cols = 8;
+    const num_rows = 8;
     for (let i = 0; i <= num_cols; i++) {
         for (let k = 0; k <= num_rows; k++) {
-            let sphere_geom = new IWO.SphereGeometry(0.75, 3+i*2, 2+k*2);
-            let sphere_mesh = new IWO.Mesh(gl, sphere_geom);
-            let s = new IWO.MeshInstance(sphere_mesh, sphere_mat);
+            const sphere_geom = new IWO.SphereGeometry(0.75, 3 + i * 2, 2 + k * 2);
+            const sphere_mesh = new IWO.Mesh(gl, sphere_geom);
+            const s = new IWO.MeshInstance(sphere_mesh, sphere_mat);
             spheres.push(s);
-            let model = s.model_matrix;
+            const model = s.model_matrix;
             mat4.identity(model);
             mat4.translate(model, model, vec3.fromValues((i - num_cols / 2) * 2, 2 * num_rows - k * 2, 0));
         }
     }
-
 }
 
 function update(): void {
@@ -158,7 +161,7 @@ function drawScene(): void {
     camera.getViewMatrix(view_matrix);
     renderer.setPerFrameUniforms(view_matrix, proj_matrix);
 
-    for (let sphere of spheres) {
+    for (const sphere of spheres) {
         sphere.render(renderer, view_matrix, proj_matrix);
     }
 
@@ -168,11 +171,10 @@ function drawScene(): void {
     gl.disable(gl.BLEND);
 }
 
-window.onkeydown = function (e:KeyboardEvent) {
+window.onkeydown = function(e: KeyboardEvent): void {
     keys[e.keyCode] = true;
 };
 
-window.onkeyup = function (e:KeyboardEvent) {
+window.onkeyup = function(e: KeyboardEvent): void {
     keys[e.keyCode] = false;
 };
-
