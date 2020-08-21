@@ -7,6 +7,8 @@
   "scripts": {
     "prebuild": "rimraf docs",
     "build": "rollup -c rollup.config.ts",
+    "watch": "rollup -w -c rollup.config.ts",
+    "dev": "es-dev-server --open /docs/index.html",
     "start": "start rollup -w -c rollup.config.ts && start es-dev-server --open /docs/index.html",
     "gh-publish": "npm run build&&cd dist&&git add --all&&git commit -m \"Deploy to gh-pages\"&&git push origin gh-pages&&cd.."
   },

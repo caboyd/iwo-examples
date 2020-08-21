@@ -20,7 +20,7 @@ const pkg = require("./package.json");
 const examples = {
     pbr_example: "PBR Example",
     sphere_geometry_example: "Sphere Geometry Example",
-    obj_example: "OBJ Model Example",
+    gltf_example: "glTF Model Example",
 };
 
 const template = readFileSync("examples/template.html", "utf-8");
