@@ -1,5 +1,6 @@
 import { glMatrix, mat4, vec3 } from "gl-matrix";
 import * as IWO from "iwo";
+import { glTFLoader } from "loader/glTFLoader";
 
 let canvas: HTMLCanvasElement;
 let gl: WebGL2RenderingContext;
@@ -14,8 +15,6 @@ let mouse_x_total = 0;
 let mouse_y_total = 0;
 const keys: Array<boolean> = [];
 
-let spheres: IWO.MeshInstance[];
-let sphere_mat: IWO.Material;
 let grid: IWO.MeshInstance;
 let renderer: IWO.Renderer;
 
@@ -116,27 +115,12 @@ function initScene(): void {
     const plane_geom = new IWO.PlaneGeometry(100, 100, 1, 1, true);
     const plane_mesh = new IWO.Mesh(gl, plane_geom);
 
-    sphere_mat = new IWO.PBRMaterial(vec3.fromValues(1, 1, 1), 0, 0, 2);
+    //Init Helmet
+    const helmet = glTFLoader.promise(gl, "DamagedHelmet.gltf", "../assets/damaged-helmet/");
 
     //GRID
     const grid_mat = new IWO.GridMaterial(50);
     grid = new IWO.MeshInstance(plane_mesh, grid_mat);
-
-    //SPHERES
-    spheres = [];
-    const num_cols = 8;
-    const num_rows = 8;
-    for (let i = 0; i <= num_cols; i++) {
-        for (let k = 0; k <= num_rows; k++) {
-            const sphere_geom = new IWO.SphereGeometry(0.75, 3 + i * 2, 2 + k * 2).getBufferedGeometry();
-            const sphere_mesh = new IWO.Mesh(gl, sphere_geom);
-            const s = new IWO.MeshInstance(sphere_mesh, sphere_mat);
-            spheres.push(s);
-            const model = s.model_matrix;
-            mat4.identity(model);
-            mat4.translate(model, model, vec3.fromValues((i - num_cols / 2) * 2, 2 * num_rows - k * 2, 0));
-        }
-    }
 }
 
 function update(): void {
@@ -161,13 +145,14 @@ function drawScene(): void {
     camera.getViewMatrix(view_matrix);
     renderer.setPerFrameUniforms(view_matrix, proj_matrix);
 
-    for (const sphere of spheres) {
-        sphere.render(renderer, view_matrix, proj_matrix);
-    }
+    //Draw Helmet
 
     gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    gl.disable(gl.CULL_FACE);
+    //gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+    gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     grid.render(renderer, view_matrix, proj_matrix);
+    gl.enable(gl.CULL_FACE);
     gl.disable(gl.BLEND);
 }
 
