@@ -113,7 +113,7 @@ function initGL(): WebGL2RenderingContext {
 }
 
 function initScene(): void {
-    const plane_geom = new IWO.PlaneGeometry(100, 100, 1, 1, true);
+    const plane_geom = new IWO.PlaneGeometry(100, 100, 1, 1, true).getBufferedGeometry();
     const plane_mesh = new IWO.Mesh(gl, plane_geom);
 
     sphere_mat = new IWO.PBRMaterial(vec3.fromValues(1, 1, 1), 0, 0, 2);
@@ -128,7 +128,7 @@ function initScene(): void {
     const num_rows = 8;
     for (let i = 0; i <= num_cols; i++) {
         for (let k = 0; k <= num_rows; k++) {
-            const sphere_geom = new IWO.SphereGeometry(0.75, 3 + i * 2, 2 + k * 2).getBufferedGeometry();
+            const sphere_geom = new IWO.BufferedGeometry(new IWO.SphereGeometry(0.75, 3 + i * 2, 2 + k * 2));
             const sphere_mesh = new IWO.Mesh(gl, sphere_geom);
             const s = new IWO.MeshInstance(sphere_mesh, sphere_mat);
             spheres.push(s);
@@ -167,6 +167,7 @@ function drawScene(): void {
 
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     grid.render(renderer, view_matrix, proj_matrix);
     gl.disable(gl.BLEND);
 }

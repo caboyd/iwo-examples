@@ -304,7 +304,7 @@ function drawScene(): void {
 
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
+    gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     grid.render(renderer, view_matrix, proj_matrix);
 
     gl.disable(gl.BLEND);
