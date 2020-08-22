@@ -1,7 +1,7 @@
 module.exports = {
     port: 8080,
     watch: true,
-    compress: true,
+    compress: false,
     nodeResolve: {
         browser: true,
         //modulesOnly: true,
