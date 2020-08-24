@@ -122,17 +122,18 @@ function initScene() {
     let irr_tex = new TextureCubeMap$1(gl);
     let env_tex = new TextureCubeMap$1(gl);
     const cube_tex = new TextureCubeMap$1(gl);
-    ImageLoader$1.promise("assets/cubemap/monvalley/MonValley_A_LookoutPoint_preview.jpg", global_root).then((image) => {
+    const file_prefix = "../assets/cubemap/monvalley/MonValley_A_LookoutPoint";
+    ImageLoader$1.promise(file_prefix + "_preview.jpg").then((image) => {
         sky_tex.setImage(gl, image, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.LINEAR, gl.LINEAR);
-        ImageLoader$1.promise("assets/cubemap/monvalley/MonValley_A_LookoutPoint_8k.jpg", global_root).then((image) => {
+        ImageLoader$1.promise(file_prefix + "_8k.jpg").then((image) => {
             sky_tex.setImage(gl, image, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.LINEAR, gl.LINEAR);
         });
     });
-    HDRImageLoader$1.promise("assets/cubemap/monvalley/MonValley_A_LookoutPoint_Env.hdr", global_root).then((data) => {
+    HDRImageLoader$1.promise(file_prefix + "_Env.hdr").then((data) => {
         cube_tex.setEquirectangularHDRBuffer(renderer, data);
         irr_tex = TextureCubeMap$1.irradianceFromCubemap(irr_tex, renderer, cube_tex);
         env_tex = TextureCubeMap$1.specularFromCubemap(env_tex, renderer, cube_tex);
-        HDRImageLoader$1.promise("assets/cubemap/monvalley/MonValley_A_LookoutPoint_2k.hdr", global_root).then((data) => {
+        HDRImageLoader$1.promise(file_prefix + "_2k.hdr").then((data) => {
             cube_tex.setEquirectangularHDRBuffer(renderer, data);
             env_tex = TextureCubeMap$1.specularFromCubemap(env_tex, renderer, cube_tex, data.width);
             cube_tex.destroy(gl);
@@ -178,7 +179,7 @@ function initScene() {
     const num_rows = 8;
     for (let i = 0; i <= num_cols; i++) {
         for (let k = 0; k <= num_rows; k++) {
-            const mat = new PBRMaterial$1(vec3.fromValues(1.0, 1, 1), k / num_rows, Math.min(1, Math.max(0.025, i / num_cols)), 1);
+            const mat = new PBRMaterial$1([1, 1, 1], k / num_rows, Math.min(1, Math.max(0.025, i / num_cols)), 1);
             // mat.albedo_texture = sphere_mat.albedo_texture;
             mat.irradiance_texture = irr_tex;
             mat.specular_env = env_tex;
@@ -234,6 +235,7 @@ function drawScene() {
     }
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     grid.render(renderer, view_matrix, proj_matrix);
     gl.disable(gl.BLEND);
 }

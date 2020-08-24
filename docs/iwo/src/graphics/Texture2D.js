@@ -1,7 +1,7 @@
 import { TextureHelper as TextureHelper$1 } from './TextureHelper.js';
 
 class Texture2D {
-    constructor(gl, source = undefined, width = 0, height = 0, wrap_S = gl.REPEAT, wrap_T = gl.REPEAT, mag_filter = gl.LINEAR, min_filter = gl.LINEAR_MIPMAP_LINEAR, internal_format = gl.RGBA, format = gl.RGBA, type = gl.UNSIGNED_BYTE, flip = true) {
+    constructor(gl, source = undefined, width = 0, height = 0, wrap_S = gl.REPEAT, wrap_T = gl.REPEAT, mag_filter = gl.LINEAR, min_filter = gl.LINEAR_MIPMAP_LINEAR, internal_format = gl.RGBA, format = gl.RGBA, type = gl.UNSIGNED_BYTE, flip = false) {
         this.texture_id = gl.createTexture();
         if (source instanceof HTMLImageElement && source) {
             if (source.complete && source.src)

@@ -20,7 +20,7 @@ class ImageLoader extends FileLoader$1 {
             });
         });
     }
-    static async promiseAll(files, base_url = window.location.href.substr(0, window.location.href.lastIndexOf("/"))) {
+    static async promiseAll(files, base_url = FileLoader$1.Default_Base_URL) {
         const imgs = Array.from({ length: files.length }, u => new Image());
         const promises = [];
         return super.promiseAll(files, base_url).then((responses) => {

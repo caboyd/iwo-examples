@@ -1,14 +1,9 @@
-import { AttributeType } from './Geometry.js';
+import { Geometry as Geometry$1, AttributeType } from './Geometry.js';
+import { DefaultAttribute } from './BufferedGeometry.js';
 
-class SphereGeometry {
-    //Bounding Sphere
-    //Bounding Box (AABB)
+class SphereGeometry extends Geometry$1 {
     constructor(radius, horizontal_segments, vertical_segments, phi_start = 0, phi_length = 2 * Math.PI, theta_start = 0, theta_length = Math.PI) {
-        this.attribute_flags = AttributeType.Vertex | AttributeType.Normals | AttributeType.Tex_Coords;
-        this.attributes = new Map();
-        this.groups = [];
-        this.isInterleaved = false;
-        this.interleaved_attributes = new Float32Array(1);
+        super();
         const flip_u = horizontal_segments < 0;
         const flip_v = vertical_segments < 0;
         let v_segments = Math.floor(Math.abs(vertical_segments));
@@ -64,15 +59,31 @@ class SphereGeometry {
             }
             index += 2;
         }
-        this.attributes.set(AttributeType.Vertex, new Float32Array(verts));
-        this.attributes.set(AttributeType.Normals, new Float32Array(verts));
-        this.attributes.set(AttributeType.Tex_Coords, new Float32Array(tex_coords));
-        if (verts.length >= 65536) {
+        const vert_buff = new Float32Array(verts);
+        this.attributes.set(AttributeType.Vertex, vert_buff);
+        this.attributes.set(AttributeType.Normal, vert_buff);
+        this.attributes.set(AttributeType.Tex_Coord, new Float32Array(tex_coords));
+        if (verts.length >= 65536)
             this.indices = new Uint32Array(indices);
-        }
         else
             this.indices = new Uint16Array(indices);
-        this.groups.push({ count: indices.length, offset: 0, material_index: 0 });
+        //this.groups?.push({ count: indices.length, offset: 0, material_index: 0 } as Group);
+    }
+    getBufferedGeometry() {
+        const attrib = DefaultAttribute.SingleBufferApproach();
+        const verts = this.attributes.get(AttributeType.Vertex);
+        const tex_coords = this.attributes.get(AttributeType.Tex_Coord);
+        const index_buffer = { buffer: this.indices, target: 34963 };
+        const v_buf = new Float32Array(verts.length + tex_coords.length);
+        v_buf.set(verts);
+        v_buf.set(tex_coords, verts.length);
+        attrib[1].byte_offset = verts.length * 4;
+        return {
+            attributes: attrib,
+            index_buffer: index_buffer,
+            buffers: [{ buffer: v_buf, target: 34962 }],
+            groups: this.groups,
+        };
     }
 }
 

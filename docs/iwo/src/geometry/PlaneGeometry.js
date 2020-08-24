@@ -1,4 +1,5 @@
-import { AttributeType } from './Geometry.js';
+import { Geometry as Geometry$1, AttributeType } from './Geometry.js';
+import { DefaultAttribute } from './BufferedGeometry.js';
 
 var Order;
 (function (Order) {
@@ -6,28 +7,24 @@ var Order;
     Order[Order["y"] = 1] = "y";
     Order[Order["z"] = 2] = "z";
 })(Order || (Order = {}));
-class PlaneGeometry {
-    //Bounding Sphere
-    //Bounding Box (AABB)
+class PlaneGeometry extends Geometry$1 {
     constructor(width = 1, depth = 1, width_segments = 1, depth_segments = 1, stretch_texture = true) {
-        this.attributes = new Map();
+        super();
         const width_segs = Math.floor(width_segments) || 1;
         const depth_segs = Math.floor(depth_segments) || 1;
         let top = depth > 0 && width > 0 ? (depth_segs + 1) * (width_segs + 1) : 0;
         const total_verts = top;
         top = depth_segs * width_segs;
         const total_indices = 6 * top;
-        let index_size = 2;
         if (total_verts >= 65536) {
             this.indices = new Uint32Array(total_indices);
-            index_size = 4;
         }
         else
             this.indices = new Uint16Array(total_indices);
         const indices = this.indices;
         const verts = new Float32Array(total_verts * 3);
-        const normals = new Float32Array(total_verts * 3);
         const tex_coords = new Float32Array(total_verts * 2);
+        const normals = new Float32Array(total_verts * 3);
         const tangents = new Float32Array(total_verts * 3);
         const bitangents = new Float32Array(total_verts * 3);
         const interleaved = new Float32Array(total_verts * 14);
@@ -41,18 +38,11 @@ class PlaneGeometry {
             //Build Top Side
             buildSide(Order.x, Order.z, Order.y, width, width_segs, depth, depth_segs, 0, 1, -1, 0);
         }
-        this.isInterleaved = true;
-        this.attribute_flags =
-            AttributeType.Vertex |
-                AttributeType.Normals |
-                AttributeType.Tex_Coords |
-                AttributeType.Tangents |
-                AttributeType.Bitangents;
         this.attributes.set(AttributeType.Vertex, verts);
-        this.attributes.set(AttributeType.Normals, normals);
-        this.attributes.set(AttributeType.Tex_Coords, tex_coords);
-        this.attributes.set(AttributeType.Tangents, tangents);
-        this.attributes.set(AttributeType.Bitangents, bitangents);
+        this.attributes.set(AttributeType.Normal, normals);
+        this.attributes.set(AttributeType.Tex_Coord, tex_coords);
+        this.attributes.set(AttributeType.Tangent, tangents);
+        this.attributes.set(AttributeType.Bitangent, bitangents);
         this.interleaved_attributes = interleaved;
         this.groups = groups;
         /**
@@ -130,8 +120,6 @@ class PlaneGeometry {
                     vertex_count++;
                 }
             }
-            //INDICES
-            let index_count = 0;
             for (let i = 0; i < horizontal_steps; i++) {
                 for (let j = 0; j < vertical_steps; j++) {
                     //The Vertex indices of the 4 corners we need for this quad
@@ -150,17 +138,32 @@ class PlaneGeometry {
                     indices[i_ptr++] = upper_left;
                     indices[i_ptr++] = lower_right;
                     indices[i_ptr++] = upper_right;
-                    //number of indices for a quad
-                    index_count += 6;
                 }
             }
             //Each side is a seperate group so they can be rendered with different materials
-            groups.push({
-                count: index_count,
-                offset: (i_ptr - index_count) * index_size,
-                material_index: mat_index,
-            });
+            // groups.push({
+            //     count: index_count,
+            //     offset: (i_ptr - index_count) * index_size,
+            //     material_index: mat_index,
+            // } as Group);
         }
+    }
+    getBufferedGeometry() {
+        const attrib = DefaultAttribute.SingleBufferApproach();
+        const index_buffer = { buffer: this.indices, target: 34963 };
+        for (const a of attrib)
+            a.byte_stride = 56; //12 + 8 + 12 + 12 + 12;
+        attrib[0].byte_offset = 0;
+        attrib[1].byte_offset = 12;
+        attrib[2].byte_offset = 20;
+        attrib[3].byte_offset = 32;
+        attrib[4].byte_offset = 44;
+        return {
+            attributes: attrib,
+            index_buffer: index_buffer,
+            buffers: [{ buffer: this.interleaved_attributes, target: 34962 }],
+            groups: this.groups,
+        };
     }
 }
 

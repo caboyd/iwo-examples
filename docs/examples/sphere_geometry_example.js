@@ -3,6 +3,7 @@ import { Camera as Camera$1, Camera_Movement } from '../iwo/src/cameras/Camera.j
 import '../iwo/src/geometry/Geometry.js';
 import '../iwo/src/geometry/BoxGeometry.js';
 import '../iwo/src/graphics/WebglHelper.js';
+import { BufferedGeometry as BufferedGeometry$1 } from '../iwo/src/geometry/BufferedGeometry.js';
 import { Mesh as Mesh$1 } from '../iwo/src/meshes/Mesh.js';
 import { MeshInstance as MeshInstance$1 } from '../iwo/src/meshes/MeshInstance.js';
 import '../iwo/src/graphics/TextureHelper.js';
@@ -74,7 +75,7 @@ const stats = () => {
     renderer.setViewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
     mat4.perspective(proj_matrix, glMatrix.toRadian(90), gl.drawingBufferWidth / gl.drawingBufferHeight, 0.1, 1000.0);
     const sun_dir = [-0.3, 0, 1];
-    const sun_intensity = 9;
+    const sun_intensity = 4;
     const sun_color = [(sun_intensity * 254) / 255, (sun_intensity * 238) / 255, (sun_intensity * 224) / 255];
     const pbrShader = PBRMaterial$1.Shader;
     pbrShader.use();
@@ -97,7 +98,7 @@ function initGL() {
     return gl;
 }
 function initScene() {
-    const plane_geom = new PlaneGeometry$1(100, 100, 1, 1, true);
+    const plane_geom = new PlaneGeometry$1(100, 100, 1, 1, true).getBufferedGeometry();
     const plane_mesh = new Mesh$1(gl, plane_geom);
     sphere_mat = new PBRMaterial$1(vec3.fromValues(1, 1, 1), 0, 0, 2);
     //GRID
@@ -109,7 +110,7 @@ function initScene() {
     const num_rows = 8;
     for (let i = 0; i <= num_cols; i++) {
         for (let k = 0; k <= num_rows; k++) {
-            const sphere_geom = new SphereGeometry$1(0.75, 3 + i * 2, 2 + k * 2);
+            const sphere_geom = BufferedGeometry$1.fromGeometry(new SphereGeometry$1(0.75, 3 + i * 2, 2 + k * 2));
             const sphere_mesh = new Mesh$1(gl, sphere_geom);
             const s = new MeshInstance$1(sphere_mesh, sphere_mat);
             spheres.push(s);
@@ -147,6 +148,7 @@ function drawScene() {
     }
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     grid.render(renderer, view_matrix, proj_matrix);
     gl.disable(gl.BLEND);
 }

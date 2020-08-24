@@ -15,6 +15,7 @@ const XDECR = 1;
 const YDECR = 2;
 const YMAJOR = 4;
 //NOTE: Why is this necessary?  Why not instance of HDRBuffer?
+//  ...you are dumb, you can't do instanceof for interfaces
 function instanceOfHDRBuffer(object) {
     return "data" in object && "width" in object && "height" in object;
 }

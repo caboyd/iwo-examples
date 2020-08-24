@@ -8,6 +8,7 @@ class MeshInstance {
     }
     render(renderer, view_matrix, proj_matrix) {
         renderer.setPerModelUniforms(this.model_matrix, view_matrix, proj_matrix);
+        //TODO: Fix this cause you may have submeshes with only one material
         if (Array.isArray(this.materials)) {
             for (const i of this.materials.keys()) {
                 const mat = this.materials[i];
