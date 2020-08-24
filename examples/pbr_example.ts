@@ -161,31 +161,24 @@ function initScene(): void {
     let env_tex = new TextureCubeMap(gl);
     const cube_tex = new TextureCubeMap(gl);
 
-    ImageLoader.promise("assets/cubemap/monvalley/MonValley_A_LookoutPoint_preview.jpg", global_root).then(
-        (image: HTMLImageElement) => {
+    const file_prefix = "../assets/cubemap/monvalley/MonValley_A_LookoutPoint";
+    ImageLoader.promise(file_prefix + "_preview.jpg").then((image: HTMLImageElement) => {
+        sky_tex.setImage(gl, image, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.LINEAR, gl.LINEAR);
+        ImageLoader.promise(file_prefix + "_8k.jpg").then((image: HTMLImageElement) => {
             sky_tex.setImage(gl, image, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.LINEAR, gl.LINEAR);
-            ImageLoader.promise("assets/cubemap/monvalley/MonValley_A_LookoutPoint_8k.jpg", global_root).then(
-                (image: HTMLImageElement) => {
-                    sky_tex.setImage(gl, image, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.LINEAR, gl.LINEAR);
-                }
-            );
-        }
-    );
+        });
+    });
 
-    HDRImageLoader.promise("assets/cubemap/monvalley/MonValley_A_LookoutPoint_Env.hdr", global_root).then(
-        (data: HDRBuffer) => {
+    HDRImageLoader.promise(file_prefix + "_Env.hdr").then((data: HDRBuffer) => {
+        cube_tex.setEquirectangularHDRBuffer(renderer, data);
+        irr_tex = TextureCubeMap.irradianceFromCubemap(irr_tex, renderer, cube_tex);
+        env_tex = TextureCubeMap.specularFromCubemap(env_tex, renderer, cube_tex);
+        HDRImageLoader.promise(file_prefix + "_2k.hdr").then((data: HDRBuffer) => {
             cube_tex.setEquirectangularHDRBuffer(renderer, data);
-            irr_tex = TextureCubeMap.irradianceFromCubemap(irr_tex, renderer, cube_tex);
-            env_tex = TextureCubeMap.specularFromCubemap(env_tex, renderer, cube_tex);
-            HDRImageLoader.promise("assets/cubemap/monvalley/MonValley_A_LookoutPoint_2k.hdr", global_root).then(
-                (data: HDRBuffer) => {
-                    cube_tex.setEquirectangularHDRBuffer(renderer, data);
-                    env_tex = TextureCubeMap.specularFromCubemap(env_tex, renderer, cube_tex, data.width);
-                    cube_tex.destroy(gl);
-                }
-            );
-        }
-    );
+            env_tex = TextureCubeMap.specularFromCubemap(env_tex, renderer, cube_tex, data.width);
+            cube_tex.destroy(gl);
+        });
+    });
 
     const earth_tex = TextureLoader.load(gl, "assets/earth.jpg", global_root);
 
@@ -236,12 +229,7 @@ function initScene(): void {
     const num_rows = 8;
     for (let i = 0; i <= num_cols; i++) {
         for (let k = 0; k <= num_rows; k++) {
-            const mat = new PBRMaterial(
-                vec3.fromValues(1.0, 1, 1),
-                k / num_rows,
-                Math.min(1, Math.max(0.025, i / num_cols)),
-                1
-            );
+            const mat = new PBRMaterial([1, 1, 1], k / num_rows, Math.min(1, Math.max(0.025, i / num_cols)), 1);
             // mat.albedo_texture = sphere_mat.albedo_texture;
             mat.irradiance_texture = irr_tex;
             mat.specular_env = env_tex;
