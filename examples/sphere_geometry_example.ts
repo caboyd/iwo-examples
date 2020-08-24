@@ -85,7 +85,7 @@ const stats = (): void => {
     mat4.perspective(proj_matrix, glMatrix.toRadian(90), gl.drawingBufferWidth / gl.drawingBufferHeight, 0.1, 1000.0);
 
     const sun_dir = [-0.3, 0, 1];
-    const sun_intensity = 9;
+    const sun_intensity = 4;
     const sun_color = [(sun_intensity * 254) / 255, (sun_intensity * 238) / 255, (sun_intensity * 224) / 255];
 
     const pbrShader = IWO.PBRMaterial.Shader;
@@ -128,7 +128,7 @@ function initScene(): void {
     const num_rows = 8;
     for (let i = 0; i <= num_cols; i++) {
         for (let k = 0; k <= num_rows; k++) {
-            const sphere_geom = new IWO.BufferedGeometry(new IWO.SphereGeometry(0.75, 3 + i * 2, 2 + k * 2));
+            const sphere_geom = IWO.BufferedGeometry.fromGeometry(new IWO.SphereGeometry(0.75, 3 + i * 2, 2 + k * 2));
             const sphere_mesh = new IWO.Mesh(gl, sphere_geom);
             const s = new IWO.MeshInstance(sphere_mesh, sphere_mat);
             spheres.push(s);

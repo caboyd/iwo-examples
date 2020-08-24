@@ -9,7 +9,7 @@ class GridMaterial extends Material$1 {
         this.highlight_frequency = highlight_frequency;
     }
     activate(gl) {
-        let shader = this.shader;
+        const shader = this.shader;
         shader.setUniform("distance", this.distance);
         shader.setUniform("frequency", this.frequency);
         shader.setUniform("highlight_frequency", this.highlight_frequency);

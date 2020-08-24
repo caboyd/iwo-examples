@@ -1,4 +1,4 @@
-import { AttributeType } from './Geometry.js';
+import { Geometry as Geometry$1, AttributeType } from './Geometry.js';
 
 var Order;
 (function (Order) {
@@ -6,11 +6,9 @@ var Order;
     Order[Order["y"] = 1] = "y";
     Order[Order["z"] = 2] = "z";
 })(Order || (Order = {}));
-class BoxGeometry {
-    //Bounding Sphere
-    //Bounding Box (AABB)
+class BoxGeometry extends Geometry$1 {
     constructor(width = 1, height = 1, depth = 1, width_segments = 1, height_segments = 1, depth_segments = 1, stretch_texture = true) {
-        this.attributes = new Map();
+        super();
         const width_segs = Math.floor(width_segments) || 1;
         const height_segs = Math.floor(height_segments) || 1;
         const depth_segs = Math.floor(depth_segments) || 1;
@@ -63,18 +61,11 @@ class BoxGeometry {
             //Build Bottom Side
             buildSide(Order.x, Order.z, Order.y, width, width_segs, depth, depth_segs, -half_height, 1, 1, 5);
         }
-        this.isInterleaved = true;
-        this.attribute_flags =
-            AttributeType.Vertex |
-                AttributeType.Normals |
-                AttributeType.Tex_Coords |
-                AttributeType.Tangents |
-                AttributeType.Bitangents;
         this.attributes.set(AttributeType.Vertex, verts);
-        this.attributes.set(AttributeType.Normals, normals);
-        this.attributes.set(AttributeType.Tex_Coords, tex_coords);
-        this.attributes.set(AttributeType.Tangents, tangents);
-        this.attributes.set(AttributeType.Bitangents, bitangents);
+        this.attributes.set(AttributeType.Normal, normals);
+        this.attributes.set(AttributeType.Tex_Coord, tex_coords);
+        this.attributes.set(AttributeType.Tangent, tangents);
+        this.attributes.set(AttributeType.Bitangent, bitangents);
         this.interleaved_attributes = interleaved;
         this.groups = groups;
         /**

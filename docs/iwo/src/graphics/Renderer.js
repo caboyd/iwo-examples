@@ -75,6 +75,12 @@ class Renderer {
     resetViewport() {
         this.gl.viewport(this.viewport.x, this.viewport.y, this.viewport.width, this.viewport.height);
     }
+    resetSaveBindings() {
+        this.current_vertex_buffer = undefined;
+        this.current_index_buffer = undefined;
+        this.current_material = undefined;
+        this.current_shader = undefined;
+    }
     draw(draw_mode, count, offset, index_buffer, vertex_buffer, mat = undefined) {
         if (mat && mat.shader != this.current_shader) {
             this.current_shader = mat.shader;

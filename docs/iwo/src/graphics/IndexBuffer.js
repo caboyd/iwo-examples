@@ -2,11 +2,12 @@ import { ReferenceCounter as ReferenceCounter$1 } from '../helpers/ReferenceCoun
 import { WebGL } from './WebglHelper.js';
 
 class IndexBuffer {
-    constructor(gl, geometry) {
-        if (geometry.indices === undefined)
-            throw new Error("Geometry has no indices.");
-        this.EBO = WebGL.buildBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, geometry.indices);
-        this.indices = geometry.indices;
+    constructor(gl, geometry, stop) {
+        if (geometry.index_buffer === undefined)
+            throw new Error("Cannot create IndexBuffer. Geometry.index_buffer is undefined.");
+        const b = geometry.index_buffer.buffer;
+        this.indices = b.BYTES_PER_ELEMENT == 2 ? b : b;
+        this.EBO = stop ? gl.createBuffer() : WebGL.buildBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, b);
         this.references = new ReferenceCounter$1();
     }
     bind(gl) {

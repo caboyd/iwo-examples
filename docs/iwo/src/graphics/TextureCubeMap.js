@@ -1,5 +1,5 @@
 import { mat4 } from 'https://unpkg.com/gl-matrix@3.3.0/esm/index.js';
-import { AttributeType } from '../geometry/Geometry.js';
+import { AttributeType, Geometry as Geometry$1 } from '../geometry/Geometry.js';
 import { BoxGeometry as BoxGeometry$1 } from '../geometry/BoxGeometry.js';
 import { Mesh as Mesh$1 } from '../meshes/Mesh.js';
 import { TextureHelper as TextureHelper$1 } from './TextureHelper.js';
@@ -20,8 +20,10 @@ class TextureCubeMap {
             else {
                 source.addEventListener("load", () => {
                     gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture_id);
-                    //prettier-ignore
-                    TextureHelper$1.texParameterImage(gl, gl.TEXTURE_CUBE_MAP, source, wrap_S, wrap_T, wrap_R, mag_filter, min_filter, internal_format, format, type, flip);
+                    // eslint-disable-next-line prettier/prettier
+                    TextureHelper$1.texParameterImage(gl, gl.TEXTURE_CUBE_MAP, source, wrap_S, wrap_T, wrap_R, 
+                    // eslint-disable-next-line prettier/prettier
+                    mag_filter, min_filter, internal_format, format, type, flip);
                 }, { once: true });
             }
         }
@@ -35,7 +37,7 @@ class TextureCubeMap {
             TextureHelper$1.texParameterImage(gl, gl.TEXTURE_CUBE_MAP, source, wrap_S, wrap_T, wrap_R, mag_filter, min_filter, internal_format, format, type, flip);
         }
         else if (width !== 0 && height !== 0) {
-            //I have no idea why this code path exists.
+            // This code path exists for rendering to empty textures
             //prettier-ignore
             TextureHelper$1.texParameterBuffer(gl, gl.TEXTURE_CUBE_MAP, null, width, height, wrap_S, wrap_T, wrap_R, mag_filter, min_filter, internal_format, format, type, flip);
         }
@@ -226,23 +228,15 @@ class TextureCubeMap {
     static genBRDFLut(gl, captureFBO, captureRBO, renderer) {
         if (Renderer$1.BRDF_LUT_TEXTURE === undefined) {
             //Generate brdf LUT if it doesnt exist as its required for IBL
-            const quad_geom = {
-                attribute_flags: AttributeType.Vertex | AttributeType.Tex_Coords,
-                isInterleaved: true,
-                //prettier-ignore
-                interleaved_attributes: new Float32Array([
-                    // positions        // texture Coords
-                    -1.0, 1.0, 0.0, 0.0, 1.0,
-                    -1.0, -1.0, 0.0, 0.0, 0.0,
-                    1.0, 1.0, 0.0, 1.0, 1.0,
-                    1.0, -1.0, 0.0, 1.0, 0.0,
-                ]),
-                groups: [{ count: 4, offset: 0, material_index: 0 }],
-            };
+            const quad_geom = new Geometry$1();
+            quad_geom.attributes = new Map()
+                .set(AttributeType.Vertex, new Float32Array([-1.0, 1.0, 0.0, -1.0, -1.0, 0.0, 1.0, 1.0, 0.0, 1.0, -1.0, 0.0]))
+                .set(AttributeType.Tex_Coord, new Float32Array([0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0]));
+            quad_geom.groups = [];
             const quad_mesh = new Mesh$1(gl, quad_geom);
             quad_mesh.draw_mode = gl.TRIANGLE_STRIP;
             //prettier-ignore
-            const lut_tex = new Texture2D$1(gl, undefined, 512, 512, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.LINEAR, gl.LINEAR, gl.RG16F, gl.RG, gl.HALF_FLOAT, true);
+            const lut_tex = new Texture2D$1(gl, undefined, 512, 512, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.LINEAR, gl.LINEAR, gl.RG16F, gl.RG, gl.HALF_FLOAT, false);
             gl.bindFramebuffer(gl.FRAMEBUFFER, captureFBO);
             gl.bindRenderbuffer(gl.RENDERBUFFER, captureRBO);
             gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT24, 512, 512);
