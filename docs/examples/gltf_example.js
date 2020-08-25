@@ -18,14 +18,16 @@ import { GridMaterial as GridMaterial$1 } from '../iwo/src/materials/GridMateria
 import { PBRMaterial as PBRMaterial$1 } from '../iwo/src/materials/PBRMaterial.js';
 import { BasicMaterial as BasicMaterial$1 } from '../iwo/src/materials/BasicMaterial.js';
 import { ImageLoader as ImageLoader$1 } from '../iwo/src/loader/ImageLoader.js';
+import { OrbitControl as OrbitControl$1 } from '../iwo/src/cameras/OrbitControl.js';
 import { glTFLoader as glTFLoader$1 } from '../iwo/src/loader/glTFLoader.js';
 
 let canvas;
 let gl;
 const view_matrix = mat4.create();
 const proj_matrix = mat4.create();
-const cPos = vec3.fromValues(0.5, 8, 9.0);
+const cPos = vec3.fromValues(2.5, 0, 6.0);
 let camera;
+let orbit;
 let mouse_x_total = 0;
 let mouse_y_total = 0;
 const keys = [];
@@ -77,6 +79,7 @@ const stats = () => {
     }
     resizeCanvas();
     camera = new Camera$1(cPos);
+    orbit = new OrbitControl$1(camera, { minimum_distance: 5.5 });
     gl.clearColor(173 / 255, 196 / 255, 221 / 255, 1.0);
     gl.enable(gl.DEPTH_TEST);
     gl.enable(gl.CULL_FACE);
@@ -84,8 +87,8 @@ const stats = () => {
     renderer.setViewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
     mat4.perspective(proj_matrix, glMatrix.toRadian(90), gl.drawingBufferWidth / gl.drawingBufferHeight, 0.1, 1000.0);
     const sun_dir = [1, 1, 1];
-    const sun_intensity = 0.5;
-    const sun_color = [(sun_intensity * 254) / 255, (sun_intensity * 238) / 255, (sun_intensity * 224) / 255];
+    //const sun_color = [(sun_intensity * 254) / 255, (sun_intensity * 238) / 255, (sun_intensity * 224) / 255];
+    const sun_color = [1, 1, 1];
     const pbrShader = PBRMaterial$1.Shader;
     pbrShader.use();
     pbrShader.setUniform("gamma", 1.0);
@@ -141,7 +144,7 @@ function initScene() {
         pbr.irradiance_texture = irr_tex;
         pbr.specular_env = env_tex;
         const rot = mat4.fromQuat(mat4.create(), [0.7071068286895752, 0.0, -0.0, 0.7071068286895752]);
-        mat4.translate(helmet.model_matrix, helmet.model_matrix, [0, 5, 0]);
+        //mat4.translate(helmet.model_matrix, helmet.model_matrix, [0, 5, 0]);
         mat4.multiply(helmet.model_matrix, helmet.model_matrix, rot);
         mat4.scale(helmet.model_matrix, helmet.model_matrix, [4, 4, 4]);
     });
@@ -168,7 +171,7 @@ function update() {
         camera.lookAt(vec3.fromValues(0, 0, 0));
     if (keys[32])
         camera.processKeyboard(Camera_Movement.UP, 0.001);
-    camera.processMouseMovement(-mouse_x_total, -mouse_y_total, true);
+    orbit.processMouseMovement(-mouse_x_total, -mouse_y_total, true);
     mouse_x_total = 0;
     mouse_y_total = 0;
     drawScene();
@@ -205,4 +208,8 @@ window.onkeydown = function (e) {
 window.onkeyup = function (e) {
     keys[e.keyCode] = false;
 };
+window.addEventListener("wheel", function (e) {
+    e.stopPropagation();
+    orbit.scroll(e.deltaY > 0);
+});
 //# sourceMappingURL=gltf_example.js.map
