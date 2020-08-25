@@ -14,6 +14,7 @@ import {
 } from "iwo";
 import { glTFData, glTFLoader } from "loader/glTFLoader";
 import { HDRBuffer } from "loader/HDRImageLoader";
+import { OrbitControl } from "cameras/OrbitControl";
 
 let canvas: HTMLCanvasElement;
 let gl: WebGL2RenderingContext;
@@ -21,8 +22,9 @@ let gl: WebGL2RenderingContext;
 const view_matrix: mat4 = mat4.create();
 const proj_matrix: mat4 = mat4.create();
 
-const cPos: vec3 = vec3.fromValues(0.5, 8, 9.0);
+const cPos: vec3 = vec3.fromValues(2.5, 0, 6.0);
 let camera: IWO.Camera;
+let orbit: IWO.OrbitControl;
 
 let mouse_x_total = 0;
 let mouse_y_total = 0;
@@ -93,6 +95,7 @@ const stats = (): void => {
     resizeCanvas();
 
     camera = new IWO.Camera(cPos);
+    orbit = new OrbitControl(camera, { minimum_distance: 5.5 });
 
     gl.clearColor(173 / 255, 196 / 255, 221 / 255, 1.0);
     gl.enable(gl.DEPTH_TEST);
@@ -104,7 +107,8 @@ const stats = (): void => {
 
     const sun_dir = [1, 1, 1];
     const sun_intensity = 0.5;
-    const sun_color = [(sun_intensity * 254) / 255, (sun_intensity * 238) / 255, (sun_intensity * 224) / 255];
+    //const sun_color = [(sun_intensity * 254) / 255, (sun_intensity * 238) / 255, (sun_intensity * 224) / 255];
+    const sun_color = [1, 1, 1];
 
     const pbrShader = IWO.PBRMaterial.Shader;
     pbrShader.use();
@@ -169,7 +173,7 @@ function initScene(): void {
         pbr.irradiance_texture = irr_tex;
         pbr.specular_env = env_tex;
         const rot = mat4.fromQuat(mat4.create(), [0.7071068286895752, 0.0, -0.0, 0.7071068286895752]);
-        mat4.translate(helmet.model_matrix, helmet.model_matrix, [0, 5, 0]);
+        //mat4.translate(helmet.model_matrix, helmet.model_matrix, [0, 5, 0]);
         mat4.multiply(helmet.model_matrix, helmet.model_matrix, rot);
         mat4.scale(helmet.model_matrix, helmet.model_matrix, [4, 4, 4]);
     });
@@ -194,7 +198,7 @@ function update(): void {
     if (keys[82]) camera.lookAt(vec3.fromValues(0, 0, 0));
     if (keys[32]) camera.processKeyboard(IWO.Camera_Movement.UP, 0.001);
 
-    camera.processMouseMovement(-mouse_x_total, -mouse_y_total, true);
+    orbit.processMouseMovement(-mouse_x_total, -mouse_y_total, true);
     mouse_x_total = 0;
     mouse_y_total = 0;
 
@@ -239,3 +243,8 @@ window.onkeydown = function(e: KeyboardEvent): void {
 window.onkeyup = function(e: KeyboardEvent): void {
     keys[e.keyCode] = false;
 };
+
+window.addEventListener("wheel", function(e: WheelEvent) {
+    e.stopPropagation();
+    orbit.scroll(e.deltaY > 0);
+});
