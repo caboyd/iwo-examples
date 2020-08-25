@@ -7,6 +7,9 @@
 
 #### [PBR Example](https://caboyd.github.io/iwo-examples/examples/pbr_example.html)
 - PBR Lit spheres with HDR irradiance and specular reflective environment cube maps
+
+#### [glTF Example](https://caboyd.github.io/iwo-examples/examples/gltf_example.html)
+- Loading and rendering glTF files
    
 #### More examples to come!
    
