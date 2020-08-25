@@ -117,6 +117,20 @@ function initScene() {
     let irr_tex = new TextureCubeMap$1(gl);
     let env_tex = new TextureCubeMap$1(gl);
     const cube_tex = new TextureCubeMap$1(gl);
+    //Init Helmet
+    glTFLoader$1.promise("DamagedHelmet.gltf", "../assets/damaged-helmet/").then((value) => {
+        helmet_loaded = true;
+        const m = new Mesh$1(gl, value.buffered_geometries[0]);
+        renderer.resetSaveBindings();
+        helmet = new MeshInstance$1(m, value.materials);
+        const pbr = helmet.materials[0];
+        pbr.irradiance_texture = irr_tex;
+        pbr.specular_env = env_tex;
+        const rot = mat4.fromQuat(mat4.create(), [0.7071068286895752, 0.0, -0.0, 0.7071068286895752]);
+        //mat4.translate(helmet.model_matrix, helmet.model_matrix, [0, 5, 0]);
+        mat4.multiply(helmet.model_matrix, helmet.model_matrix, rot);
+        mat4.scale(helmet.model_matrix, helmet.model_matrix, [4, 4, 4]);
+    });
     const file_prefix = "../assets/cubemap/royal_esplanade/royal_esplanade";
     ImageLoader$1.promise(file_prefix + "_preview.jpg").then((image) => {
         sky_tex.setImage(gl, image, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.LINEAR, gl.LINEAR);
@@ -133,20 +147,6 @@ function initScene() {
             env_tex = TextureCubeMap$1.specularFromCubemap(env_tex, renderer, cube_tex, data.width);
             cube_tex.destroy(gl);
         });
-    });
-    //Init Helmet
-    glTFLoader$1.promise("DamagedHelmet.gltf", "../assets/damaged-helmet/").then((value) => {
-        helmet_loaded = true;
-        const m = new Mesh$1(gl, value.buffered_geometries[0]);
-        renderer.resetSaveBindings();
-        helmet = new MeshInstance$1(m, value.materials);
-        const pbr = helmet.materials[0];
-        pbr.irradiance_texture = irr_tex;
-        pbr.specular_env = env_tex;
-        const rot = mat4.fromQuat(mat4.create(), [0.7071068286895752, 0.0, -0.0, 0.7071068286895752]);
-        //mat4.translate(helmet.model_matrix, helmet.model_matrix, [0, 5, 0]);
-        mat4.multiply(helmet.model_matrix, helmet.model_matrix, rot);
-        mat4.scale(helmet.model_matrix, helmet.model_matrix, [4, 4, 4]);
     });
     //GRID
     const grid_mat = new GridMaterial$1(50);
