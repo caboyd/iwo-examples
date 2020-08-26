@@ -9,6 +9,7 @@ var Camera_Movement;
     Camera_Movement[Camera_Movement["LEFT"] = 2] = "LEFT";
     Camera_Movement[Camera_Movement["RIGHT"] = 3] = "RIGHT";
     Camera_Movement[Camera_Movement["UP"] = 4] = "UP";
+    Camera_Movement[Camera_Movement["DOWN"] = 5] = "DOWN";
 })(Camera_Movement || (Camera_Movement = {}));
 let forward = vec3.create();
 let right = vec3.create();
