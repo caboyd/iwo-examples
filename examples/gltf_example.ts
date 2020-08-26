@@ -236,15 +236,3 @@ function drawScene(): void {
     // gl.disable(gl.BLEND);
 }
 
-window.onkeydown = function(e: KeyboardEvent): void {
-    keys[e.keyCode] = true;
-};
-
-window.onkeyup = function(e: KeyboardEvent): void {
-    keys[e.keyCode] = false;
-};
-
-window.addEventListener("wheel", function(e: WheelEvent) {
-    e.stopPropagation();
-    orbit.scroll(e.deltaY > 0);
-});

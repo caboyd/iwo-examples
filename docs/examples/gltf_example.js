@@ -202,14 +202,4 @@ function drawScene() {
     // gl.enable(gl.CULL_FACE);
     // gl.disable(gl.BLEND);
 }
-window.onkeydown = function (e) {
-    keys[e.keyCode] = true;
-};
-window.onkeyup = function (e) {
-    keys[e.keyCode] = false;
-};
-window.addEventListener("wheel", function (e) {
-    e.stopPropagation();
-    orbit.scroll(e.deltaY > 0);
-});
 //# sourceMappingURL=gltf_example.js.map
