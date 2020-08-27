@@ -188,7 +188,7 @@ function initScene() {
     for (let i = 0; i <= num_cols; i++) {
         for (let k = 0; k <= num_rows; k++) {
             const mat = new PBRMaterial$1([1, 1, 1], k / num_rows, Math.min(1, Math.max(0.025, i / num_cols)), 1);
-            mat.albedo_texture = sphere_mat.albedo_texture;
+            //mat.albedo_texture = sphere_mat.albedo_texture;
             mat.irradiance_texture = irr_tex;
             mat.specular_env = env_tex;
             const s = new MeshInstance$1(sphere_mesh, mat);

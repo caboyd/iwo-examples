@@ -105,10 +105,11 @@ const stats = (): void => {
     renderer.setViewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
     mat4.perspective(proj_matrix, glMatrix.toRadian(90), gl.drawingBufferWidth / gl.drawingBufferHeight, 0.1, 1000.0);
 
-    const sun_dir = [1, 1, 1];
-    const sun_intensity = 0.5;
+    //const sun_dir = sphereUVtoVec3(vec3.create(), 0.5 + 0.872, 1 - 0.456);
+    const sun_dir = [0, 1, 0];
+    const sun_intensity = 5;
     //const sun_color = [(sun_intensity * 254) / 255, (sun_intensity * 238) / 255, (sun_intensity * 224) / 255];
-    const sun_color = [1, 1, 1];
+    const sun_color = [sun_intensity, sun_intensity, sun_intensity];
 
     const pbrShader = IWO.PBRMaterial.Shader;
     pbrShader.use();
@@ -153,9 +154,10 @@ function initScene(): void {
         const pbr = (helmet.materials as Material[])[0] as PBRMaterial;
         pbr.irradiance_texture = irr_tex;
         pbr.specular_env = env_tex;
-        const rot = mat4.fromQuat(mat4.create(), [0.7071068286895752, 0.0, -0.0, 0.7071068286895752]);
+        const helmet_rot = mat4.fromQuat(mat4.create(), [0.7071068286895752, 0.0, -0.0, 0.7071068286895752]);
+        //const boom_rot = mat4.fromRotation(mat4.create(), Math.PI/2 , [0, 1, 0]);
         //mat4.translate(helmet.model_matrix, helmet.model_matrix, [0, 5, 0]);
-        mat4.multiply(helmet.model_matrix, helmet.model_matrix, rot);
+        mat4.multiply(helmet.model_matrix, helmet.model_matrix, helmet_rot);
         mat4.scale(helmet.model_matrix, helmet.model_matrix, [4, 4, 4]);
     });
 
@@ -167,6 +169,24 @@ function initScene(): void {
         flip: true,
     };
 
+    // const file_prefix = "../assets/cubemap/monvalley/MonValley_A_LookoutPoint";
+    // ImageLoader.promise(file_prefix + "_preview.jpg").then((image: HTMLImageElement) => {
+    //     sky_tex.setImage(gl, image, tex2D_opts);
+    //     ImageLoader.promise(file_prefix + "_8k.jpg").then((image: HTMLImageElement) => {
+    //         sky_tex.setImage(gl, image, tex2D_opts);
+    //     });
+    // });
+    //
+    // HDRImageLoader.promise(file_prefix + "_Env.hdr").then((data: HDRBuffer) => {
+    //     cube_tex.setEquirectangularHDRBuffer(renderer, data);
+    //     irr_tex = TextureCubeMap.irradianceFromCubemap(irr_tex, renderer, cube_tex);
+    //     env_tex = TextureCubeMap.specularFromCubemap(env_tex, renderer, cube_tex);
+    //     HDRImageLoader.promise(file_prefix + "_2k.hdr").then((data: HDRBuffer) => {
+    //         cube_tex.setEquirectangularHDRBuffer(renderer, data);
+    //         env_tex = TextureCubeMap.specularFromCubemap(env_tex, renderer, cube_tex, data.width);
+    //         cube_tex.destroy(gl);
+    //     });
+    // });
     const file_prefix = "../assets/cubemap/royal_esplanade/royal_esplanade";
     ImageLoader.promise(file_prefix + "_preview.jpg").then((image: HTMLImageElement) => {
         sky_tex.setImage(gl, image, tex2D_opts);
@@ -179,11 +199,11 @@ function initScene(): void {
         cube_tex.setEquirectangularHDRBuffer(renderer, data);
         irr_tex = TextureCubeMap.irradianceFromCubemap(irr_tex, renderer, cube_tex);
         env_tex = TextureCubeMap.specularFromCubemap(env_tex, renderer, cube_tex);
-        HDRImageLoader.promise(file_prefix + "_2k.hdr").then((data: HDRBuffer) => {
-            cube_tex.setEquirectangularHDRBuffer(renderer, data);
-            env_tex = TextureCubeMap.specularFromCubemap(env_tex, renderer, cube_tex, data.width);
-            cube_tex.destroy(gl);
-        });
+        // HDRImageLoader.promise(file_prefix + "_2k.hdr").then((data: HDRBuffer) => {
+        //     cube_tex.setEquirectangularHDRBuffer(renderer, data);
+        //     env_tex = TextureCubeMap.specularFromCubemap(env_tex, renderer, cube_tex, data.width);
+        //     cube_tex.destroy(gl);
+        // });
     });
 
     //GRID
@@ -242,4 +262,16 @@ function drawScene(): void {
     // grid.render(renderer, view_matrix, proj_matrix);
     // gl.enable(gl.CULL_FACE);
     // gl.disable(gl.BLEND);
+}
+
+function sphereUVtoVec3(out: vec3, u: number, v: number): vec3 {
+    const theta = (v - 0.5) * Math.PI;
+    const phi = u * 2 * Math.PI;
+
+    const x = Math.cos(phi) * Math.cos(theta);
+    const y = Math.sin(theta);
+    const z = Math.sin(phi) * Math.cos(theta);
+
+    vec3.set(out, x, y, z);
+    return out;
 }
