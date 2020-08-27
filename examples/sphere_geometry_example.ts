@@ -1,5 +1,7 @@
 import { glMatrix, mat4, vec3 } from "gl-matrix";
 import * as IWO from "iwo";
+import { DefaultTextureOptions, TextureOptions } from "graphics/Texture2D";
+import { Texture2D } from "iwo";
 
 let canvas: HTMLCanvasElement;
 let gl: WebGL2RenderingContext;
@@ -22,8 +24,10 @@ let renderer: IWO.Renderer;
 document.getElementById("loading-text-wrapper")!.remove();
 
 const moveCallback = (e: MouseEvent): void => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-ignore
     const movementX = e.movementX || e.mozMovementX || e.webkitMovementX || 0;
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-ignore
     const movementY = e.movementY || e.mozMovementY || e.webkitMovementY || 0;
     if (e.which == 1) {
@@ -35,6 +39,7 @@ const moveCallback = (e: MouseEvent): void => {
 const stats = (): void => {
     const script = document.createElement("script");
     script.onload = (): void => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         //@ts-ignore
         const stats = new Stats();
         document.body.appendChild(stats.dom);
@@ -111,6 +116,8 @@ function initGL(): WebGL2RenderingContext {
     }
     return gl;
 }
+
+const a = { } as TextureOptions
 
 function initScene(): void {
     const plane_geom = new IWO.PlaneGeometry(100, 100, 1, 1, true).getBufferedGeometry();
