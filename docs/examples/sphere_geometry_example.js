@@ -7,6 +7,8 @@ import { BufferedGeometry as BufferedGeometry$1 } from '../iwo/src/geometry/Buff
 import { Mesh as Mesh$1 } from '../iwo/src/meshes/Mesh.js';
 import { MeshInstance as MeshInstance$1 } from '../iwo/src/meshes/MeshInstance.js';
 import '../iwo/src/graphics/TextureHelper.js';
+import '../iwo/src/graphics/WebglConstants.js';
+import '../iwo/src/graphics/Texture2D.js';
 import '../iwo/src/loader/FileLoader.js';
 import '../iwo/src/graphics/shader/ShaderSources.js';
 import { Renderer as Renderer$1 } from '../iwo/src/graphics/Renderer.js';
@@ -30,8 +32,10 @@ let grid;
 let renderer;
 document.getElementById("loading-text-wrapper").remove();
 const moveCallback = (e) => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-ignore
     const movementX = e.movementX || e.mozMovementX || e.webkitMovementX || 0;
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-ignore
     const movementY = e.movementY || e.mozMovementY || e.webkitMovementY || 0;
     if (e.which == 1) {
@@ -42,6 +46,7 @@ const moveCallback = (e) => {
 const stats = () => {
     const script = document.createElement("script");
     script.onload = () => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         //@ts-ignore
         const stats = new Stats();
         document.body.appendChild(stats.dom);

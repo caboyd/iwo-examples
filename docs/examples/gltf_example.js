@@ -7,6 +7,7 @@ import '../iwo/src/geometry/BufferedGeometry.js';
 import { Mesh as Mesh$1 } from '../iwo/src/meshes/Mesh.js';
 import { MeshInstance as MeshInstance$1 } from '../iwo/src/meshes/MeshInstance.js';
 import '../iwo/src/graphics/TextureHelper.js';
+import '../iwo/src/graphics/WebglConstants.js';
 import { Texture2D as Texture2D$1 } from '../iwo/src/graphics/Texture2D.js';
 import '../iwo/src/loader/FileLoader.js';
 import { HDRImageLoader as HDRImageLoader$1 } from '../iwo/src/loader/HDRImageLoader.js';
@@ -131,11 +132,18 @@ function initScene() {
         mat4.multiply(helmet.model_matrix, helmet.model_matrix, rot);
         mat4.scale(helmet.model_matrix, helmet.model_matrix, [4, 4, 4]);
     });
+    const tex2D_opts = {
+        wrap_S: gl.CLAMP_TO_EDGE,
+        wrap_T: gl.CLAMP_TO_EDGE,
+        mag_filter: gl.LINEAR,
+        min_filter: gl.LINEAR,
+        flip: true,
+    };
     const file_prefix = "../assets/cubemap/royal_esplanade/royal_esplanade";
     ImageLoader$1.promise(file_prefix + "_preview.jpg").then((image) => {
-        sky_tex.setImage(gl, image, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.LINEAR, gl.LINEAR);
+        sky_tex.setImage(gl, image, tex2D_opts);
         ImageLoader$1.promise(file_prefix + ".jpg").then((image) => {
-            sky_tex.setImage(gl, image, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.LINEAR, gl.LINEAR);
+            sky_tex.setImage(gl, image, tex2D_opts);
         });
     });
     HDRImageLoader$1.promise(file_prefix + "_1k.hdr").then((data) => {

@@ -62,6 +62,7 @@ const moveCallback = (e: MouseEvent): void => {
 const stats = (): void => {
     const script = document.createElement("script");
     script.onload = (): void => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         //@ts-ignore
         const stats = new Stats();
         document.body.appendChild(stats.dom);
@@ -161,11 +162,19 @@ function initScene(): void {
     let env_tex = new TextureCubeMap(gl);
     const cube_tex = new TextureCubeMap(gl);
 
+    const tex2D_opts = {
+        wrap_S: gl.CLAMP_TO_EDGE,
+        wrap_T: gl.CLAMP_TO_EDGE,
+        mag_filter: gl.LINEAR,
+        min_filter: gl.LINEAR,
+        flip: true,
+    };
+
     const file_prefix = "../assets/cubemap/monvalley/MonValley_A_LookoutPoint";
     ImageLoader.promise(file_prefix + "_preview.jpg").then((image: HTMLImageElement) => {
-        sky_tex.setImage(gl, image, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.LINEAR, gl.LINEAR);
+        sky_tex.setImage(gl, image, tex2D_opts);
         ImageLoader.promise(file_prefix + "_8k.jpg").then((image: HTMLImageElement) => {
-            sky_tex.setImage(gl, image, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.LINEAR, gl.LINEAR);
+            sky_tex.setImage(gl, image, tex2D_opts);
         });
     });
 
@@ -180,7 +189,7 @@ function initScene(): void {
         });
     });
 
-    const earth_tex = TextureLoader.load(gl, "assets/earth.jpg", global_root);
+    const earth_tex = TextureLoader.load(gl, "../assets/earth.jpg");
 
     const box_geom = new BoxGeometry(3.0, 3.0, 3.0, 1, 1, 1, false);
     const sphere_geom = new SphereGeometry(0.75, 16, 16);
@@ -230,7 +239,7 @@ function initScene(): void {
     for (let i = 0; i <= num_cols; i++) {
         for (let k = 0; k <= num_rows; k++) {
             const mat = new PBRMaterial([1, 1, 1], k / num_rows, Math.min(1, Math.max(0.025, i / num_cols)), 1);
-            // mat.albedo_texture = sphere_mat.albedo_texture;
+            mat.albedo_texture = sphere_mat.albedo_texture;
             mat.irradiance_texture = irr_tex;
             mat.specular_env = env_tex;
             const s = new MeshInstance(sphere_mesh, mat);

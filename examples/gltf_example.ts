@@ -159,11 +159,19 @@ function initScene(): void {
         mat4.scale(helmet.model_matrix, helmet.model_matrix, [4, 4, 4]);
     });
 
+    const tex2D_opts = {
+        wrap_S: gl.CLAMP_TO_EDGE,
+        wrap_T: gl.CLAMP_TO_EDGE,
+        mag_filter: gl.LINEAR,
+        min_filter: gl.LINEAR,
+        flip: true,
+    };
+
     const file_prefix = "../assets/cubemap/royal_esplanade/royal_esplanade";
     ImageLoader.promise(file_prefix + "_preview.jpg").then((image: HTMLImageElement) => {
-        sky_tex.setImage(gl, image, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.LINEAR, gl.LINEAR);
+        sky_tex.setImage(gl, image, tex2D_opts);
         ImageLoader.promise(file_prefix + ".jpg").then((image: HTMLImageElement) => {
-            sky_tex.setImage(gl, image, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.LINEAR, gl.LINEAR);
+            sky_tex.setImage(gl, image, tex2D_opts);
         });
     });
 
@@ -235,4 +243,3 @@ function drawScene(): void {
     // gl.enable(gl.CULL_FACE);
     // gl.disable(gl.BLEND);
 }
-
