@@ -13,12 +13,14 @@ class OrbitControl {
         this.mouse_sensitivity = 0.005;
         this.step_size = 0.5;
         this.minimum_distance = 5.0;
+        this.maximum_distance = 5.0;
         this.orbit_control_binds = DefaultOrbitControlBinds;
         this.orbit_point = [0, 0, 0];
         this.camera = camera;
         this.mouse_sensitivity = options?.mouse_sensitivity ?? this.mouse_sensitivity;
         this.orbit_point = options?.orbit_point ?? this.orbit_point;
         this.minimum_distance = options?.minimum_distance ?? this.minimum_distance;
+        this.maximum_distance = options?.maximum_distance ?? this.maximum_distance;
         this.orbit_control_binds = options?.orbit_control_binds ?? this.orbit_control_binds;
         this.camera.lookAt(this.orbit_point);
         window.addEventListener("keydown", (e) => {
@@ -55,6 +57,7 @@ class OrbitControl {
         const dist = vec3.len(target_to_camera);
         let step_scaled_dist = dist + this.step_size * (scroll_direction_forward ? 1 : -1);
         step_scaled_dist = Math.max(this.minimum_distance, step_scaled_dist);
+        step_scaled_dist = Math.min(this.maximum_distance, step_scaled_dist);
         //Rescale vector
         target_to_camera = vec3.normalize(target_to_camera, target_to_camera);
         target_to_camera = vec3.scale(target_to_camera, target_to_camera, step_scaled_dist);
