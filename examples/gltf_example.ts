@@ -85,10 +85,10 @@ const stats = (): void => {
         renderer.setViewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
         mat4.perspective(
             proj_matrix,
-            glMatrix.toRadian(90),
+            glMatrix.toRadian(45),
             gl.drawingBufferWidth / gl.drawingBufferHeight,
-            0.1,
-            1000.0
+            0.25,
+            20.0
         );
     }
 
@@ -102,21 +102,19 @@ const stats = (): void => {
     gl.enable(gl.CULL_FACE);
     gl.cullFace(gl.BACK);
 
-    renderer.setViewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-    mat4.perspective(proj_matrix, glMatrix.toRadian(90), gl.drawingBufferWidth / gl.drawingBufferHeight, 0.1, 1000.0);
-
     //const sun_dir = sphereUVtoVec3(vec3.create(), 0.5 + 0.872, 1 - 0.456);
-    const sun_dir = [0, 1, 0];
-    const sun_intensity = 5;
+    const sun_dir = [1, 1, 1];
+    const sun_intensity = 1;
     //const sun_color = [(sun_intensity * 254) / 255, (sun_intensity * 238) / 255, (sun_intensity * 224) / 255];
     const sun_color = [sun_intensity, sun_intensity, sun_intensity];
 
     const pbrShader = IWO.PBRMaterial.Shader;
     pbrShader.use();
     pbrShader.setUniform("gamma", 1.0);
-    pbrShader.setUniform("u_lights[0].position", [sun_dir[0], sun_dir[1], sun_dir[2], 0]);
-    pbrShader.setUniform("u_lights[0].color", sun_color);
-    pbrShader.setUniform("u_light_count", 1);
+    // pbrShader.setUniform("u_lights[0].position", [sun_dir[0], sun_dir[1], sun_dir[2], 0]);
+    // pbrShader.setUniform("u_lights[0].color", sun_color);
+    // pbrShader.setUniform("u_light_count", 1);
+    pbrShader.setUniform("light_ambient", [0.25, 0.25, 0.25]);
 
     initScene();
 
@@ -154,6 +152,7 @@ function initScene(): void {
         const pbr = (helmet.materials as Material[])[0] as PBRMaterial;
         pbr.irradiance_texture = irr_tex;
         pbr.specular_env = env_tex;
+
         const helmet_rot = mat4.fromQuat(mat4.create(), [0.7071068286895752, 0.0, -0.0, 0.7071068286895752]);
         //const boom_rot = mat4.fromRotation(mat4.create(), Math.PI/2 , [0, 1, 0]);
         //mat4.translate(helmet.model_matrix, helmet.model_matrix, [0, 5, 0]);
@@ -197,8 +196,8 @@ function initScene(): void {
 
     HDRImageLoader.promise(file_prefix + "_1k.hdr").then((data: HDRBuffer) => {
         cube_tex.setEquirectangularHDRBuffer(renderer, data);
-        irr_tex = TextureCubeMap.irradianceFromCubemap(irr_tex, renderer, cube_tex);
-        env_tex = TextureCubeMap.specularFromCubemap(env_tex, renderer, cube_tex);
+        irr_tex = TextureCubeMap.irradianceFromCubemap(irr_tex, renderer, cube_tex, 16);
+        env_tex = TextureCubeMap.specularFromCubemap(env_tex, renderer, cube_tex, 256);
         // HDRImageLoader.promise(file_prefix + "_2k.hdr").then((data: HDRBuffer) => {
         //     cube_tex.setEquirectangularHDRBuffer(renderer, data);
         //     env_tex = TextureCubeMap.specularFromCubemap(env_tex, renderer, cube_tex, data.width);
