@@ -20,9 +20,13 @@ class ImageLoader extends FileLoader$1 {
             });
         });
     }
-    static async promiseAll(files, base_url = FileLoader$1.Default_Base_URL) {
-        const imgs = Array.from({ length: files.length }, u => new Image());
+    static loadAllBackground(files, base_url = FileLoader$1.Default_Base_URL) {
+        const imgs = Array.from({ length: files.length }, () => new Image());
         const promises = [];
+        this.promiseImages(files, base_url, imgs, promises);
+        return imgs;
+    }
+    static promiseImages(files, base_url, imgs, promises) {
         return super.promiseAll(files, base_url).then((responses) => {
             for (let i = 0; i < responses.length; i++) {
                 const img = imgs[i];
@@ -44,6 +48,11 @@ class ImageLoader extends FileLoader$1 {
             }
             return Promise.all(promises);
         });
+    }
+    static async promiseAll(files, base_url = FileLoader$1.Default_Base_URL) {
+        const imgs = Array.from({ length: files.length }, () => new Image());
+        const promises = [];
+        return this.promiseImages(files, base_url, imgs, promises);
     }
     static load(file_name, base_url = "") {
         const img = new Image();

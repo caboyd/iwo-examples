@@ -13,7 +13,7 @@ class OrbitControl {
         this.mouse_sensitivity = 0.005;
         this.step_size = 0.5;
         this.minimum_distance = 5.0;
-        this.maximum_distance = 5.0;
+        this.maximum_distance = 10.0;
         this.orbit_control_binds = DefaultOrbitControlBinds;
         this.orbit_point = [0, 0, 0];
         this.camera = camera;

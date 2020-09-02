@@ -76,7 +76,7 @@ const stats = () => {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         renderer.setViewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-        mat4.perspective(proj_matrix, glMatrix.toRadian(90), gl.drawingBufferWidth / gl.drawingBufferHeight, 0.1, 1000.0);
+        mat4.perspective(proj_matrix, glMatrix.toRadian(45), gl.drawingBufferWidth / gl.drawingBufferHeight, 0.25, 20.0);
     }
     resizeCanvas();
     camera = new Camera$1(cPos);
@@ -85,19 +85,13 @@ const stats = () => {
     gl.enable(gl.DEPTH_TEST);
     gl.enable(gl.CULL_FACE);
     gl.cullFace(gl.BACK);
-    renderer.setViewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-    mat4.perspective(proj_matrix, glMatrix.toRadian(90), gl.drawingBufferWidth / gl.drawingBufferHeight, 0.1, 1000.0);
-    //const sun_dir = sphereUVtoVec3(vec3.create(), 0.5 + 0.872, 1 - 0.456);
-    const sun_dir = [0, 1, 0];
-    const sun_intensity = 5;
-    //const sun_color = [(sun_intensity * 254) / 255, (sun_intensity * 238) / 255, (sun_intensity * 224) / 255];
-    const sun_color = [sun_intensity, sun_intensity, sun_intensity];
     const pbrShader = PBRMaterial$1.Shader;
     pbrShader.use();
     pbrShader.setUniform("gamma", 1.0);
-    pbrShader.setUniform("u_lights[0].position", [sun_dir[0], sun_dir[1], sun_dir[2], 0]);
-    pbrShader.setUniform("u_lights[0].color", sun_color);
-    pbrShader.setUniform("u_light_count", 1);
+    // pbrShader.setUniform("u_lights[0].position", [sun_dir[0], sun_dir[1], sun_dir[2], 0]);
+    // pbrShader.setUniform("u_lights[0].color", sun_color);
+    // pbrShader.setUniform("u_light_count", 1);
+    pbrShader.setUniform("light_ambient", [0.25, 0.25, 0.25]);
     initScene();
     requestAnimationFrame(update);
 })();
@@ -169,8 +163,8 @@ function initScene() {
     });
     HDRImageLoader$1.promise(file_prefix + "_1k.hdr").then((data) => {
         cube_tex.setEquirectangularHDRBuffer(renderer, data);
-        irr_tex = TextureCubeMap$1.irradianceFromCubemap(irr_tex, renderer, cube_tex);
-        env_tex = TextureCubeMap$1.specularFromCubemap(env_tex, renderer, cube_tex);
+        irr_tex = TextureCubeMap$1.irradianceFromCubemap(irr_tex, renderer, cube_tex, 16);
+        env_tex = TextureCubeMap$1.specularFromCubemap(env_tex, renderer, cube_tex, 256);
         // HDRImageLoader.promise(file_prefix + "_2k.hdr").then((data: HDRBuffer) => {
         //     cube_tex.setEquirectangularHDRBuffer(renderer, data);
         //     env_tex = TextureCubeMap.specularFromCubemap(env_tex, renderer, cube_tex, data.width);

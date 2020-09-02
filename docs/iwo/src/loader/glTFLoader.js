@@ -57,8 +57,9 @@ class glTFLoader {
                     // console.log(array_buffers);
                     // console.log(geom_buffers);
                     let images = [];
-                    if (o.images)
-                        images = await ImageLoader$1.promiseAll(o.images.map(v => v.uri), base_url);
+                    if (o.images) {
+                        images = ImageLoader$1.loadAllBackground(o.images.map(v => v.uri), base_url);
+                    }
                     const buffered_geometries = [];
                     for (const mesh of o.meshes) {
                         const x = new BufferedGeometry$1();
