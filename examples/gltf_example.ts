@@ -1,20 +1,6 @@
 import { glMatrix, mat4, vec3 } from "gl-matrix";
-import * as IWO from "iwo";
-import {
-    BasicMaterial,
-    HDRImageLoader,
-    ImageLoader,
-    Material,
-    Mesh,
-    MeshInstance,
-    PBRMaterial,
-    SphereGeometry,
-    Texture2D,
-    TextureCubeMap,
-} from "iwo";
-import { glTFData, glTFLoader } from "loader/glTFLoader";
-import { HDRBuffer } from "loader/HDRImageLoader";
-import { OrbitControl } from "cameras/OrbitControl";
+import * as IWO from "iwo/src/iwo";
+import { PBRMaterial } from "iwo/src/materials/PBRMaterial";
 
 let canvas: HTMLCanvasElement;
 let gl: WebGL2RenderingContext;
@@ -32,7 +18,7 @@ const keys: Array<boolean> = [];
 
 let grid: IWO.MeshInstance;
 let renderer: IWO.Renderer;
-let skybox: MeshInstance;
+let skybox: IWO.MeshInstance;
 let helmet: IWO.MeshInstance;
 let helmet_loaded = false;
 
@@ -95,7 +81,7 @@ const stats = (): void => {
     resizeCanvas();
 
     camera = new IWO.Camera(cPos);
-    orbit = new OrbitControl(camera, { minimum_distance: 5.5 });
+    orbit = new IWO.OrbitControl(camera, { minimum_distance: 5.5 });
 
     gl.clearColor(173 / 255, 196 / 255, 221 / 255, 1.0);
     gl.enable(gl.DEPTH_TEST);
@@ -114,7 +100,7 @@ const stats = (): void => {
     // pbrShader.setUniform("u_lights[0].position", [sun_dir[0], sun_dir[1], sun_dir[2], 0]);
     // pbrShader.setUniform("u_lights[0].color", sun_color);
     // pbrShader.setUniform("u_light_count", 1);
-    pbrShader.setUniform("light_ambient", [0.25, 0.25, 0.25]);
+    pbrShader.setUniform("light_ambient", [1.25, 1.25, 1.25]);
 
     initScene();
 
@@ -138,18 +124,18 @@ function initScene(): void {
     const plane_geom = new IWO.PlaneGeometry(100, 100, 1, 1, true);
     const plane_mesh = new IWO.Mesh(gl, plane_geom);
 
-    const sky_tex = new Texture2D(gl);
-    let irr_tex = new TextureCubeMap(gl);
-    let env_tex = new TextureCubeMap(gl);
-    const cube_tex = new TextureCubeMap(gl);
+    const sky_tex = new IWO.Texture2D(gl);
+    let irr_tex = new IWO.TextureCubeMap(gl);
+    let env_tex = new IWO.TextureCubeMap(gl);
+    const cube_tex = new IWO.TextureCubeMap(gl);
 
     //Init Helmet
-    glTFLoader.promise("DamagedHelmet.gltf", "../assets/damaged-helmet/").then((value: glTFData) => {
+    IWO.glTFLoader.promise("DamagedHelmet.gltf", "../assets/damaged-helmet/").then((value: IWO.glTFData) => {
         helmet_loaded = true;
-        const m = new Mesh(gl, value.buffered_geometries[0]);
+        const m = new IWO.Mesh(gl, value.buffered_geometries[0]);
         renderer.resetSaveBindings();
-        helmet = new MeshInstance(m, value.materials);
-        const pbr = (helmet.materials as Material[])[0] as PBRMaterial;
+        helmet = new IWO.MeshInstance(m, value.materials);
+        const pbr = (helmet.materials as IWO.Material[])[0] as IWO.PBRMaterial;
         pbr.irradiance_texture = irr_tex;
         pbr.specular_env = env_tex;
 
@@ -186,18 +172,18 @@ function initScene(): void {
     //         cube_tex.destroy(gl);
     //     });
     // });
-    const file_prefix = "../assets/cubemap/royal_esplanade/royal_esplanade";
-    ImageLoader.promise(file_prefix + "_preview.jpg").then((image: HTMLImageElement) => {
+    const file_prefix = "../assets/cubemap/monvalley/MonValley_A_LookoutPoint";
+    IWO.ImageLoader.promise(file_prefix + "_preview.jpg").then((image: HTMLImageElement) => {
         sky_tex.setImage(gl, image, tex2D_opts);
-        ImageLoader.promise(file_prefix + ".jpg").then((image: HTMLImageElement) => {
+        IWO.ImageLoader.promise(file_prefix + "_8k.jpg").then((image: HTMLImageElement) => {
             sky_tex.setImage(gl, image, tex2D_opts);
         });
     });
 
-    HDRImageLoader.promise(file_prefix + "_1k.hdr").then((data: HDRBuffer) => {
+    IWO.HDRImageLoader.promise(file_prefix + "_2k.hdr").then((data: IWO.HDRBuffer) => {
         cube_tex.setEquirectangularHDRBuffer(renderer, data);
-        irr_tex = TextureCubeMap.irradianceFromCubemap(irr_tex, renderer, cube_tex, 16);
-        env_tex = TextureCubeMap.specularFromCubemap(env_tex, renderer, cube_tex, 256);
+        irr_tex = IWO.TextureCubeMap.irradianceFromCubemap(irr_tex, renderer, cube_tex, 16);
+        env_tex = IWO.TextureCubeMap.specularFromCubemap(env_tex, renderer, cube_tex, 512);
         // HDRImageLoader.promise(file_prefix + "_2k.hdr").then((data: HDRBuffer) => {
         //     cube_tex.setEquirectangularHDRBuffer(renderer, data);
         //     env_tex = TextureCubeMap.specularFromCubemap(env_tex, renderer, cube_tex, data.width);
@@ -210,11 +196,11 @@ function initScene(): void {
     grid = new IWO.MeshInstance(plane_mesh, grid_mat);
 
     //SKYBOX
-    const sky_geom = new SphereGeometry(1, 48, 48);
-    const sky_mesh = new Mesh(gl, sky_geom);
-    const sky_mat = new BasicMaterial([1, 1, 1]);
+    const sky_geom = new IWO.SphereGeometry(1, 48, 48);
+    const sky_mesh = new IWO.Mesh(gl, sky_geom);
+    const sky_mat = new IWO.BasicMaterial([1, 1, 1]);
     sky_mat.setAlbedoTexture(sky_tex);
-    skybox = new MeshInstance(sky_mesh, sky_mat);
+    skybox = new IWO.MeshInstance(sky_mesh, sky_mat);
 }
 
 function update(): void {

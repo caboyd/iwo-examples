@@ -37,28 +37,38 @@ class PBRMaterial extends Material$1 {
             active_textures[2] = true;
         }
         if (this.normal_texture === undefined && this.normal_image?.complete) {
-            this.normal_texture = new Texture2D$1(gl, this.normal_image, { flip: false, min_filter: gl.NEAREST });
+            this.normal_texture = new Texture2D$1(gl, this.normal_image, {
+                flip: false,
+            });
         }
         if (this.normal_texture) {
             this.normal_texture.bind(gl, 3);
             active_textures[3] = true;
         }
         if (this.occlusion_texture === undefined && this.occlusion_image?.complete) {
-            this.occlusion_texture = new Texture2D$1(gl, this.occlusion_image, { flip: false });
+            this.occlusion_texture = new Texture2D$1(gl, this.occlusion_image, {
+                flip: false,
+            });
         }
         if (this.occlusion_texture) {
             this.occlusion_texture.bind(gl, 4);
             active_textures[4] = true;
         }
         if (this.metal_roughness_texture === undefined && this.metal_roughness_image?.complete) {
-            this.metal_roughness_texture = new Texture2D$1(gl, this.metal_roughness_image, { flip: false });
+            this.metal_roughness_texture = new Texture2D$1(gl, this.metal_roughness_image, {
+                flip: false,
+            });
         }
         if (this.metal_roughness_texture) {
             this.metal_roughness_texture.bind(gl, 5);
             active_textures[5] = true;
         }
         if (this.emissive_texture === undefined && this.emissive_image?.complete) {
-            this.emissive_texture = new Texture2D$1(gl, this.emissive_image, { flip: false });
+            this.emissive_texture = new Texture2D$1(gl, this.emissive_image, {
+                flip: false,
+                internal_format: gl.SRGB8_ALPHA8,
+                format: gl.RGBA,
+            });
         }
         if (this.emissive_texture) {
             this.emissive_texture.bind(gl, 6);

@@ -27,7 +27,8 @@
     "printWidth": 120,
     "parser": "typescript",
     "semi": true,
-    "trailingComma": "es5"
+    "trailingComma": "es5",
+    "endOfLine": "auto"
   },
   "dependencies": {
     "gl-matrix": "^3.3.0"
