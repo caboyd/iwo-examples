@@ -2,6 +2,11 @@ import { UniformBlock } from './Uniform.js';
 
 const BAD_VALUE = 4294967295;
 class UniformBuffer {
+    id;
+    data;
+    view;
+    map;
+    name;
     constructor(shader, uniform_block_name) {
         const gl = shader.gl;
         const program = shader.ID;

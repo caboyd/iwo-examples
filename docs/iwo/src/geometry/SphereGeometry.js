@@ -1,7 +1,7 @@
-import { Geometry as Geometry$1, AttributeType } from './Geometry.js';
+import { Geometry, AttributeType } from './Geometry.js';
 import { DefaultAttribute } from './BufferedGeometry.js';
 
-class SphereGeometry extends Geometry$1 {
+class SphereGeometry extends Geometry {
     constructor(radius, horizontal_segments, vertical_segments, phi_start = 0, phi_length = 2 * Math.PI, theta_start = 0, theta_length = Math.PI) {
         super();
         const flip_u = horizontal_segments < 0;

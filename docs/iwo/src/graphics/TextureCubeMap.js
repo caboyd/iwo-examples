@@ -1,15 +1,16 @@
-import { mat4 } from 'https://unpkg.com/gl-matrix@3.3.0/esm/index.js';
-import { AttributeType, Geometry as Geometry$1 } from '../geometry/Geometry.js';
-import { BoxGeometry as BoxGeometry$1 } from '../geometry/BoxGeometry.js';
-import { Mesh as Mesh$1 } from '../meshes/Mesh.js';
-import { TextureHelper as TextureHelper$1 } from './TextureHelper.js';
-import { DefaultTextureOptions, Texture2D as Texture2D$1 } from './Texture2D.js';
+import { Renderer } from './Renderer.js';
+import { mat4 } from 'https://unpkg.com/gl-matrix@3.4.3/esm/index.js';
+import { DefaultTextureOptions, Texture2D } from './Texture2D.js';
 import { instanceOfHDRBuffer } from '../loader/HDRImageLoader.js';
+import { BoxGeometry } from '../geometry/BoxGeometry.js';
+import { Mesh } from '../meshes/Mesh.js';
 import { ShaderSource } from './shader/ShaderSources.js';
-import { CubeCamera as CubeCamera$1 } from '../cameras/CubeCamera.js';
-import { Renderer as Renderer$1 } from './Renderer.js';
+import { CubeCamera } from '../cameras/CubeCamera.js';
+import { TextureHelper } from './TextureHelper.js';
+import { AttributeType, Geometry } from '../geometry/Geometry.js';
 
 class TextureCubeMap {
+    texture_id;
     constructor(gl, source = undefined, options) {
         const o = { ...DefaultTextureOptions, ...options };
         this.texture_id = gl.createTexture();
@@ -17,25 +18,25 @@ class TextureCubeMap {
         if (source && source instanceof HTMLImageElement) {
             if (source.complete && source.src)
                 //prettier-ignore
-                TextureHelper$1.texParameterImage(gl, gl.TEXTURE_CUBE_MAP, source, o);
+                TextureHelper.texParameterImage(gl, gl.TEXTURE_CUBE_MAP, source, o);
             else {
                 source.addEventListener("load", () => {
                     gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture_id);
                     // eslint-disable-next-line prettier/prettier
-                    TextureHelper$1.texParameterImage(gl, gl.TEXTURE_CUBE_MAP, source, o);
+                    TextureHelper.texParameterImage(gl, gl.TEXTURE_CUBE_MAP, source, o);
                 }, { once: true });
             }
         }
-        else if (source && TextureHelper$1.isArrayBufferView(source)) {
-            TextureHelper$1.texParameterBuffer(gl, gl.TEXTURE_CUBE_MAP, source, o);
+        else if (source && TextureHelper.isArrayBufferView(source)) {
+            TextureHelper.texParameterBuffer(gl, gl.TEXTURE_CUBE_MAP, source, o);
         }
         else if (source) {
             //source is TexImageSource
-            TextureHelper$1.texParameterImage(gl, gl.TEXTURE_CUBE_MAP, source, o);
+            TextureHelper.texParameterImage(gl, gl.TEXTURE_CUBE_MAP, source, o);
         }
         else if (o.width !== 0 && o.height !== 0) {
             // This code path exists for rendering to empty textures
-            TextureHelper$1.texParameterBuffer(gl, gl.TEXTURE_CUBE_MAP, null, o);
+            TextureHelper.texParameterBuffer(gl, gl.TEXTURE_CUBE_MAP, null, o);
         }
         else {
             //No image or buffer sets texture to pink black checkerboard
@@ -49,7 +50,7 @@ class TextureCubeMap {
                     min_filter: gl.NEAREST,
                 },
             };
-            TextureHelper$1.texParameterBuffer(gl, gl.TEXTURE_CUBE_MAP, TextureHelper$1.PINK_BLACK_CHECKERBOARD, o2);
+            TextureHelper.texParameterBuffer(gl, gl.TEXTURE_CUBE_MAP, TextureHelper.PINK_BLACK_CHECKERBOARD, o2);
         }
     }
     bind(gl, location) {
@@ -71,7 +72,7 @@ class TextureCubeMap {
     }
     static specularFromCubemap(dest_cubemap, renderer, env_cubemap, resolution = 128) {
         const gl = renderer.gl;
-        const ext = gl.getExtension("EXT_color_buffer_float");
+        gl.getExtension("EXT_color_buffer_float");
         const max_res = gl.getParameter(gl.MAX_CUBE_MAP_TEXTURE_SIZE);
         const res = Math.min(resolution, max_res);
         const options = {
@@ -89,20 +90,20 @@ class TextureCubeMap {
             },
         };
         const specular_cubemap = dest_cubemap || { texture_id: gl.createTexture() };
-        const box_geom = new BoxGeometry$1(2.0, 2.0, 2.0, 1, 1, 1, false);
-        const box_mesh = new Mesh$1(gl, box_geom);
+        const box_geom = new BoxGeometry(2.0, 2.0, 2.0, 1, 1, 1, false);
+        const box_mesh = new Mesh(gl, box_geom);
         gl.bindTexture(gl.TEXTURE_CUBE_MAP, specular_cubemap.texture_id);
         //prettier-ignore
-        TextureHelper$1.texParameterBuffer(gl, gl.TEXTURE_CUBE_MAP, null, options);
+        TextureHelper.texParameterBuffer(gl, gl.TEXTURE_CUBE_MAP, null, options);
         const captureFBO = gl.createFramebuffer();
         const captureRBO = gl.createRenderbuffer();
         gl.bindFramebuffer(gl.FRAMEBUFFER, captureFBO);
         gl.bindRenderbuffer(gl.RENDERBUFFER, captureRBO);
         gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT24, res, res);
         gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, captureRBO);
-        const cam = new CubeCamera$1();
+        const cam = new CubeCamera();
         // convert Environment cubemap to irradiance cubemap
-        const shader = Renderer$1.GetShader(ShaderSource.CubemapSpecularPrefilter.name);
+        const shader = Renderer.GetShader(ShaderSource.CubemapSpecularPrefilter.name);
         shader.use();
         env_cubemap.bind(gl, 0);
         gl.bindFramebuffer(gl.FRAMEBUFFER, captureFBO);
@@ -139,7 +140,7 @@ class TextureCubeMap {
     }
     static irradianceFromCubemap(dest_cubemap, renderer, env_cubemap, resolution = 32) {
         const gl = renderer.gl;
-        const ext = gl.getExtension("EXT_color_buffer_float");
+        gl.getExtension("EXT_color_buffer_float");
         const max_res = gl.getParameter(gl.MAX_CUBE_MAP_TEXTURE_SIZE);
         const res = Math.min(resolution, max_res);
         const options = {
@@ -156,21 +157,21 @@ class TextureCubeMap {
                 type: gl.HALF_FLOAT,
             },
         };
-        const box_geom = new BoxGeometry$1(2.0, 2.0, 2.0, 1, 1, 1, false);
-        const box_mesh = new Mesh$1(gl, box_geom);
+        const box_geom = new BoxGeometry(2.0, 2.0, 2.0, 1, 1, 1, false);
+        const box_mesh = new Mesh(gl, box_geom);
         const irr_cubemap = dest_cubemap || { texture_id: gl.createTexture() };
         gl.bindTexture(gl.TEXTURE_CUBE_MAP, irr_cubemap.texture_id);
         //prettier-ignore
-        TextureHelper$1.texParameterBuffer(gl, gl.TEXTURE_CUBE_MAP, null, options);
+        TextureHelper.texParameterBuffer(gl, gl.TEXTURE_CUBE_MAP, null, options);
         const captureFBO = gl.createFramebuffer();
         const captureRBO = gl.createRenderbuffer();
         gl.bindFramebuffer(gl.FRAMEBUFFER, captureFBO);
         gl.bindRenderbuffer(gl.RENDERBUFFER, captureRBO);
         gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT24, res, res);
         gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, captureRBO);
-        const cam = new CubeCamera$1();
+        const cam = new CubeCamera();
         // convert Environment cubemap to irradiance cubemap
-        const shader = Renderer$1.GetShader(ShaderSource.CubemapToIrradiance.name);
+        const shader = Renderer.GetShader(ShaderSource.CubemapToIrradiance.name);
         shader.use();
         env_cubemap.bind(gl, 0);
         gl.viewport(0, 0, res, res);
@@ -204,7 +205,7 @@ class TextureCubeMap {
     }
     setEquirectangular(renderer, image_source, resolution) {
         const gl = renderer.gl;
-        const ext = gl.getExtension("EXT_color_buffer_float");
+        gl.getExtension("EXT_color_buffer_float");
         const max_res = gl.getParameter(gl.MAX_CUBE_MAP_TEXTURE_SIZE);
         const res = Math.min(resolution, max_res);
         const options = {
@@ -221,14 +222,14 @@ class TextureCubeMap {
                 flip: true,
             },
         };
-        const box_geom = new BoxGeometry$1(2.0, 2.0, 2.0, 1, 1, 1, false);
-        const box_mesh = new Mesh$1(gl, box_geom);
+        const box_geom = new BoxGeometry(2.0, 2.0, 2.0, 1, 1, 1, false);
+        const box_mesh = new Mesh(gl, box_geom);
         let texture;
         if (instanceOfHDRBuffer(image_source)) {
-            texture = new Texture2D$1(gl, image_source.data, options);
+            texture = new Texture2D(gl, image_source.data, options);
         }
         else {
-            texture = new Texture2D$1(gl, image_source, options);
+            texture = new Texture2D(gl, image_source, options);
         }
         const captureFBO = gl.createFramebuffer();
         const captureRBO = gl.createRenderbuffer();
@@ -251,14 +252,14 @@ class TextureCubeMap {
         };
         gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture_id);
         //prettier-ignore
-        TextureHelper$1.texParameterBuffer(gl, gl.TEXTURE_CUBE_MAP, null, options2);
-        const cam = new CubeCamera$1();
+        TextureHelper.texParameterBuffer(gl, gl.TEXTURE_CUBE_MAP, null, options2);
+        const cam = new CubeCamera();
         // convert HDR equirectangular environment map to cubemap equivalent
-        const shader = Renderer$1.GetShader("EquiToCubemapShader");
+        const shader = Renderer.GetShader("EquiToCubemapShader");
         shader.use();
         texture.bind(gl, 0);
         gl.activeTexture(gl.TEXTURE1);
-        gl.bindTexture(gl.TEXTURE_CUBE_MAP, Renderer$1.EMPTY_CUBE_TEXTURE);
+        gl.bindTexture(gl.TEXTURE_CUBE_MAP, Renderer.EMPTY_CUBE_TEXTURE);
         gl.viewport(0, 0, res, res);
         gl.bindFramebuffer(gl.FRAMEBUFFER, captureFBO);
         const is_old_cull_face = gl.isEnabled(gl.CULL_FACE);
@@ -284,14 +285,14 @@ class TextureCubeMap {
         box_mesh.destroy(gl);
     }
     static genBRDFLut(gl, captureFBO, captureRBO, renderer) {
-        if (Renderer$1.BRDF_LUT_TEXTURE === undefined) {
+        if (Renderer.BRDF_LUT_TEXTURE === undefined) {
             //Generate brdf LUT if it doesnt exist as its required for IBL
-            const quad_geom = new Geometry$1();
+            const quad_geom = new Geometry();
             quad_geom.attributes = new Map()
                 .set(AttributeType.Vertex, new Float32Array([-1.0, 1.0, 0.0, -1.0, -1.0, 0.0, 1.0, 1.0, 0.0, 1.0, -1.0, 0.0]))
                 .set(AttributeType.Tex_Coord, new Float32Array([0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0]));
             quad_geom.groups = [];
-            const quad_mesh = new Mesh$1(gl, quad_geom);
+            const quad_mesh = new Mesh(gl, quad_geom);
             quad_mesh.draw_mode = gl.TRIANGLE_STRIP;
             const options = {
                 ...DefaultTextureOptions,
@@ -307,17 +308,17 @@ class TextureCubeMap {
                 },
             };
             //prettier-ignore
-            const lut_tex = new Texture2D$1(gl, undefined, options);
+            const lut_tex = new Texture2D(gl, undefined, options);
             gl.bindFramebuffer(gl.FRAMEBUFFER, captureFBO);
             gl.bindRenderbuffer(gl.RENDERBUFFER, captureRBO);
             gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT24, 512, 512);
             gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, lut_tex.texture_id, 0);
             gl.viewport(0, 0, 512, 512);
-            const shader = Renderer$1.GetShader(ShaderSource.BRDF.name);
+            const shader = Renderer.GetShader(ShaderSource.BRDF.name);
             shader.use();
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
             renderer.draw(quad_mesh.draw_mode, quad_mesh.count, 0, quad_mesh.index_buffer, quad_mesh.vertex_buffer);
-            Renderer$1.BRDF_LUT_TEXTURE = lut_tex.texture_id;
+            Renderer.BRDF_LUT_TEXTURE = lut_tex.texture_id;
             quad_mesh.destroy(gl);
         }
     }

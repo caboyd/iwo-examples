@@ -1,7 +1,12 @@
-import { Renderer as Renderer$1 } from '../graphics/Renderer.js';
-import { Material as Material$1 } from './Material.js';
+import { Material } from './Material.js';
+import { Renderer } from '../graphics/Renderer.js';
 
-class GridMaterial extends Material$1 {
+class GridMaterial extends Material {
+    distance;
+    //Units between grey lines
+    frequency;
+    //Unit between colored highlight lines
+    highlight_frequency;
     constructor(view_distance, frequency = 1, highlight_frequency = 10) {
         super();
         this.distance = view_distance;
@@ -15,10 +20,10 @@ class GridMaterial extends Material$1 {
         shader.setUniform("highlight_frequency", this.highlight_frequency);
     }
     get shader() {
-        return Renderer$1.GetShader("GridShader");
+        return Renderer.GetShader("GridShader");
     }
     static get Shader() {
-        return Renderer$1.GetShader("GridShader");
+        return Renderer.GetShader("GridShader");
     }
 }
 

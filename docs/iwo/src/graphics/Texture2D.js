@@ -1,4 +1,4 @@
-import { TextureHelper as TextureHelper$1 } from './TextureHelper.js';
+import { TextureHelper } from './TextureHelper.js';
 import { GL } from './WebglConstants.js';
 
 const DefaultTextureOptions = {
@@ -15,6 +15,7 @@ const DefaultTextureOptions = {
     flip: false,
 };
 class Texture2D {
+    texture_id;
     constructor(gl, source = undefined, options) {
         const o = { ...DefaultTextureOptions, ...options };
         this.texture_id = gl.createTexture();
@@ -28,7 +29,7 @@ class Texture2D {
                 }, { once: true });
             }
         }
-        else if (source && TextureHelper$1.isArrayBufferView(source)) {
+        else if (source && TextureHelper.isArrayBufferView(source)) {
             //prettier-ignore
             this.setImageByBuffer(gl, source, o);
         }
@@ -55,7 +56,7 @@ class Texture2D {
                     min_filter: gl.NEAREST,
                 },
             };
-            this.setImageByBuffer(gl, TextureHelper$1.PINK_BLACK_CHECKERBOARD, o2);
+            this.setImageByBuffer(gl, TextureHelper.PINK_BLACK_CHECKERBOARD, o2);
         }
     }
     bind(gl, location) {
@@ -66,13 +67,13 @@ class Texture2D {
         const o = { ...DefaultTextureOptions, ...options };
         gl.bindTexture(gl.TEXTURE_2D, this.texture_id);
         //prettier-ignore
-        TextureHelper$1.texParameterImage(gl, gl.TEXTURE_2D, image, o);
+        TextureHelper.texParameterImage(gl, gl.TEXTURE_2D, image, o);
     }
     setImageByBuffer(gl, buffer, options) {
         const o = { ...DefaultTextureOptions, ...options };
         gl.bindTexture(gl.TEXTURE_2D, this.texture_id);
         //prettier-ignore
-        TextureHelper$1.texParameterBuffer(gl, gl.TEXTURE_2D, buffer, o);
+        TextureHelper.texParameterBuffer(gl, gl.TEXTURE_2D, buffer, o);
     }
     destroy(gl) {
         gl.deleteTexture(this.texture_id);

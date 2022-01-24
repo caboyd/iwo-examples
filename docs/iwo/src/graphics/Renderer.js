@@ -1,45 +1,55 @@
-import { mat4, mat3 } from 'https://unpkg.com/gl-matrix@3.3.0/esm/index.js';
-import { Shader as Shader$1 } from './shader/Shader.js';
-import { Texture2D as Texture2D$1 } from './Texture2D.js';
-import { UniformBuffer as UniformBuffer$1 } from './UniformBuffer.js';
-import { RendererStats as RendererStats$1 } from './RendererStats.js';
-import { ShaderSources as ShaderSources$1, ShaderSource } from './shader/ShaderSources.js';
-import { TextureCubeMap as TextureCubeMap$1 } from './TextureCubeMap.js';
+import { Shader } from './shader/Shader.js';
+import { mat4, mat3 } from 'https://unpkg.com/gl-matrix@3.4.3/esm/index.js';
+import { Texture2D } from './Texture2D.js';
+import { UniformBuffer } from './UniformBuffer.js';
+import { RendererStats } from './RendererStats.js';
+import { TextureCubeMap } from './TextureCubeMap.js';
+import { ShaderSources, ShaderSource } from './shader/ShaderSources.js';
 
 const temp = mat4.create();
 const modelview_matrix = mat4.create();
 let normalview_matrix = mat3.create();
 const mvp_matrix = mat4.create();
 class ViewportDimensions {
-    constructor() {
-        this.x = 0;
-        this.y = 0;
-        this.width = 0;
-        this.height = 0;
-    }
+    x = 0;
+    y = 0;
+    width = 0;
+    height = 0;
 }
 class Renderer {
+    gl;
+    current_vertex_buffer;
+    current_index_buffer;
+    current_material;
+    current_shader;
+    static _EMPTY_TEXTURE;
+    static _EMPTY_CUBE_TEXTURE;
+    static _BRDF_LUT_TEXTURE;
+    static _Shaders;
+    PerFrameBinding = 0;
+    PerModelBinding = 1;
+    uboPerFrameBlock;
+    uboPerModelBlock;
+    stats;
+    viewport = new ViewportDimensions();
     constructor(gl) {
-        this.PerFrameBinding = 0;
-        this.PerModelBinding = 1;
-        this.viewport = new ViewportDimensions();
         this.gl = gl;
-        this.stats = new RendererStats$1();
-        Renderer._EMPTY_TEXTURE = new Texture2D$1(gl).texture_id;
-        Renderer._EMPTY_CUBE_TEXTURE = new TextureCubeMap$1(gl).texture_id;
+        this.stats = new RendererStats();
+        Renderer._EMPTY_TEXTURE = new Texture2D(gl).texture_id;
+        Renderer._EMPTY_CUBE_TEXTURE = new TextureCubeMap(gl).texture_id;
         Renderer._Shaders = new Map();
-        for (const shader_source of ShaderSources$1) {
+        for (const shader_source of ShaderSources) {
             if (shader_source.subclass !== undefined) {
                 Renderer._Shaders.set(shader_source.name, new shader_source.subclass(gl, shader_source.vert, shader_source.frag));
             }
             else {
-                Renderer._Shaders.set(shader_source.name, new Shader$1(gl, shader_source.vert, shader_source.frag));
+                Renderer._Shaders.set(shader_source.name, new Shader(gl, shader_source.vert, shader_source.frag));
             }
         }
         const shader = Renderer.GetShader(ShaderSource.PBR.name);
         //Requires shader that has these uniform buffers present
-        this.uboPerFrameBlock = new UniformBuffer$1(shader, "ubo_per_frame");
-        this.uboPerModelBlock = new UniformBuffer$1(shader, "ubo_per_model");
+        this.uboPerFrameBlock = new UniformBuffer(shader, "ubo_per_frame");
+        this.uboPerModelBlock = new UniformBuffer(shader, "ubo_per_model");
         for (const shader of Renderer._Shaders.values()) {
             this.uboPerFrameBlock.bindShader(shader, this.PerFrameBinding);
             this.uboPerModelBlock.bindShader(shader, this.PerModelBinding);

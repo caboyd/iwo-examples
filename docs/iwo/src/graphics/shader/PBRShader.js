@@ -1,8 +1,8 @@
-import { Shader as Shader$1 } from './Shader.js';
+import { Shader } from './Shader.js';
+import { Renderer } from '../Renderer.js';
 import { ShaderSource } from './ShaderSources.js';
-import { Renderer as Renderer$1 } from '../Renderer.js';
 
-class PBRShader extends Shader$1 {
+class PBRShader extends Shader {
     constructor(gl, vertexSourceCode = ShaderSource.PBR.vert, fragmentSourceCode = ShaderSource.PBR.frag) {
         super(gl, vertexSourceCode, fragmentSourceCode);
         this.use();
@@ -20,21 +20,21 @@ class PBRShader extends Shader$1 {
         const gl = this.gl;
         gl.useProgram(this.ID);
         gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, Renderer$1.EMPTY_TEXTURE);
+        gl.bindTexture(gl.TEXTURE_2D, Renderer.EMPTY_TEXTURE);
         gl.activeTexture(gl.TEXTURE1);
-        gl.bindTexture(gl.TEXTURE_CUBE_MAP, Renderer$1.EMPTY_CUBE_TEXTURE);
+        gl.bindTexture(gl.TEXTURE_CUBE_MAP, Renderer.EMPTY_CUBE_TEXTURE);
         gl.activeTexture(gl.TEXTURE2);
-        gl.bindTexture(gl.TEXTURE_CUBE_MAP, Renderer$1.EMPTY_CUBE_TEXTURE);
+        gl.bindTexture(gl.TEXTURE_CUBE_MAP, Renderer.EMPTY_CUBE_TEXTURE);
         gl.activeTexture(gl.TEXTURE3);
-        gl.bindTexture(gl.TEXTURE_2D, Renderer$1.EMPTY_TEXTURE);
+        gl.bindTexture(gl.TEXTURE_2D, Renderer.EMPTY_TEXTURE);
         gl.activeTexture(gl.TEXTURE4);
-        gl.bindTexture(gl.TEXTURE_2D, Renderer$1.EMPTY_TEXTURE);
+        gl.bindTexture(gl.TEXTURE_2D, Renderer.EMPTY_TEXTURE);
         gl.activeTexture(gl.TEXTURE5);
-        gl.bindTexture(gl.TEXTURE_2D, Renderer$1.EMPTY_TEXTURE);
+        gl.bindTexture(gl.TEXTURE_2D, Renderer.EMPTY_TEXTURE);
         gl.activeTexture(gl.TEXTURE6);
-        gl.bindTexture(gl.TEXTURE_2D, Renderer$1.EMPTY_TEXTURE);
+        gl.bindTexture(gl.TEXTURE_2D, Renderer.EMPTY_TEXTURE);
         gl.activeTexture(gl.TEXTURE7);
-        gl.bindTexture(gl.TEXTURE_2D, Renderer$1.EMPTY_TEXTURE);
+        gl.bindTexture(gl.TEXTURE_2D, Renderer.EMPTY_TEXTURE);
     }
 }
 

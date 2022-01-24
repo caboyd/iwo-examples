@@ -1,4 +1,4 @@
-import { Geometry as Geometry$1, AttributeType } from './Geometry.js';
+import { Geometry, AttributeType } from './Geometry.js';
 
 var Order;
 (function (Order) {
@@ -6,7 +6,7 @@ var Order;
     Order[Order["y"] = 1] = "y";
     Order[Order["z"] = 2] = "z";
 })(Order || (Order = {}));
-class BoxGeometry extends Geometry$1 {
+class BoxGeometry extends Geometry {
     constructor(width = 1, height = 1, depth = 1, width_segments = 1, height_segments = 1, depth_segments = 1, stretch_texture = true) {
         super();
         const width_segs = Math.floor(width_segments) || 1;

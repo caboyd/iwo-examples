@@ -1,4 +1,11 @@
 class FileLoader {
+    static Default_Base_URL = window.location.href.substr(0, window.location.href.lastIndexOf("/"));
+    static onProgress = () => {
+        //no-op
+    };
+    static onFileComplete = () => {
+        //no-op
+    };
     static async promiseAll(files, base_url = this.Default_Base_URL) {
         const promises = [];
         for (const file of files) {
@@ -60,8 +67,6 @@ class FileLoader {
                         break;
                     }
                     loaded += value.byteLength;
-                    //Notify caller of progress
-                    FileLoader.onProgress(loaded, total_size, file_name);
                     controller.enqueue(value);
                 }
                 controller.close();
@@ -71,13 +76,6 @@ class FileLoader {
         return new Response(stream, {});
     }
 }
-FileLoader.Default_Base_URL = window.location.href.substr(0, window.location.href.lastIndexOf("/"));
-FileLoader.onProgress = () => {
-    //no-op
-};
-FileLoader.onFileComplete = () => {
-    //no-op
-};
 
 export { FileLoader };
 //# sourceMappingURL=FileLoader.js.map

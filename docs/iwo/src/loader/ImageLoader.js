@@ -1,6 +1,6 @@
-import { FileLoader as FileLoader$1 } from './FileLoader.js';
+import { FileLoader } from './FileLoader.js';
 
-class ImageLoader extends FileLoader$1 {
+class ImageLoader extends FileLoader {
     static async promise(file_name, base_url = window.location.href.substr(0, window.location.href.lastIndexOf("/"))) {
         return new Promise((resolve, reject) => {
             super.promise(file_name, base_url).then((response) => {
@@ -20,7 +20,7 @@ class ImageLoader extends FileLoader$1 {
             });
         });
     }
-    static loadAllBackground(files, base_url = FileLoader$1.Default_Base_URL) {
+    static loadAllBackground(files, base_url = FileLoader.Default_Base_URL) {
         const imgs = Array.from({ length: files.length }, () => new Image());
         const promises = [];
         this.promiseImages(files, base_url, imgs, promises);
@@ -49,7 +49,7 @@ class ImageLoader extends FileLoader$1 {
             return Promise.all(promises);
         });
     }
-    static async promiseAll(files, base_url = FileLoader$1.Default_Base_URL) {
+    static async promiseAll(files, base_url = FileLoader.Default_Base_URL) {
         const imgs = Array.from({ length: files.length }, () => new Image());
         const promises = [];
         return this.promiseImages(files, base_url, imgs, promises);

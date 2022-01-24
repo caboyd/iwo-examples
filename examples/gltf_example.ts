@@ -88,19 +88,16 @@ const stats = (): void => {
     gl.enable(gl.CULL_FACE);
     gl.cullFace(gl.BACK);
 
-    //const sun_dir = sphereUVtoVec3(vec3.create(), 0.5 + 0.872, 1 - 0.456);
-    const sun_dir = [1, 1, 1];
-    const sun_intensity = 1;
-    //const sun_color = [(sun_intensity * 254) / 255, (sun_intensity * 238) / 255, (sun_intensity * 224) / 255];
-    const sun_color = [sun_intensity, sun_intensity, sun_intensity];
+    const sun_dir = sphereUVtoVec3(vec3.create(), 0.5 + 0.872, 1 - 0.456);
+    const sun_intensity = 24;
+    const sun_color = [(sun_intensity * 254) / 255, (sun_intensity * 238) / 255, (sun_intensity * 224) / 255];
 
     const pbrShader = IWO.PBRMaterial.Shader;
     pbrShader.use();
-    pbrShader.setUniform("gamma", 1.0);
-    // pbrShader.setUniform("u_lights[0].position", [sun_dir[0], sun_dir[1], sun_dir[2], 0]);
-    // pbrShader.setUniform("u_lights[0].color", sun_color);
-    // pbrShader.setUniform("u_light_count", 1);
-    pbrShader.setUniform("light_ambient", [1.25, 1.25, 1.25]);
+    pbrShader.setUniform("u_lights[0].position", [sun_dir[0], sun_dir[1], sun_dir[2], 0]);
+    pbrShader.setUniform("u_lights[0].color", sun_color);
+    pbrShader.setUniform("u_light_count", 1);
+   // pbrShader.setUniform("light_ambient", [1.25, 1.25, 1.25]);
 
     initScene();
 

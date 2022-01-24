@@ -1,4 +1,4 @@
-import { vec3, quat, mat4 } from 'https://unpkg.com/gl-matrix@3.3.0/esm/index.js';
+import { vec3, quat, mat4 } from 'https://unpkg.com/gl-matrix@3.4.3/esm/index.js';
 
 const SPEED = 200.0;
 const SENSITIVITY = 0.005;
@@ -17,6 +17,16 @@ const temp_quat = quat.create();
 const temp = vec3.create();
 const FORWARD = vec3.fromValues(0, 0, -1);
 class Camera {
+    position;
+    front;
+    up;
+    worldUp;
+    worldRight;
+    movementSpeed;
+    mouseSensitivity;
+    pitch;
+    heading;
+    orientation;
     constructor(pos, forward = FORWARD, up = vec3.fromValues(0, 1, 0)) {
         this.position = vec3.clone(pos);
         this.front = vec3.clone(forward);
