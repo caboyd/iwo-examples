@@ -14,7 +14,7 @@ import '../iwo/src/graphics/TextureHelper.js';
 import '../iwo/src/graphics/WebglConstants.js';
 import '../iwo/src/loader/FileLoader.js';
 import { HDRImageLoader } from '../iwo/src/loader/HDRImageLoader.js';
-import { glTFLoader } from '../iwo/src/loader/gltfLoader.js';
+import { glTFLoader } from '../iwo/src/loader/glTFLoader.js';
 import { ImageLoader } from '../iwo/src/loader/ImageLoader.js';
 import { BasicMaterial } from '../iwo/src/materials/BasicMaterial.js';
 import { GridMaterial } from '../iwo/src/materials/GridMaterial.js';

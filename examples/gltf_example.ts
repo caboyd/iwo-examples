@@ -1,6 +1,5 @@
 import { glMatrix, mat4, vec3 } from "gl-matrix";
 import * as IWO from "iwo/src/iwo";
-import { PBRMaterial } from "iwo/src/materials/PBRMaterial";
 
 let canvas: HTMLCanvasElement;
 let gl: WebGL2RenderingContext;
