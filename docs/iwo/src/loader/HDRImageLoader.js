@@ -1,4 +1,4 @@
-import { FileLoader as FileLoader$1 } from './FileLoader.js';
+import { FileLoader } from './FileLoader.js';
 
 /*
 File Format:
@@ -19,7 +19,7 @@ const YMAJOR = 4;
 function instanceOfHDRBuffer(object) {
     return "data" in object && "width" in object && "height" in object;
 }
-class HDRImageLoader extends FileLoader$1 {
+class HDRImageLoader extends FileLoader {
     static promise(file_name, base_url = this.Default_Base_URL) {
         return new Promise(resolve => {
             super.promise(file_name, base_url).then((response) => {

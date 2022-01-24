@@ -1,4 +1,12 @@
 class SubMesh {
+    index_buffer;
+    vertex_buffer;
+    //Offset in the index/vertex buffer
+    offset;
+    //Number of indices/vertices to draw
+    count;
+    //Material index reference the material of the mesh instance
+    material_index;
     constructor(material_index, offset, count, vertex_buffer, index_buffer) {
         this.index_buffer = index_buffer;
         this.vertex_buffer = vertex_buffer;

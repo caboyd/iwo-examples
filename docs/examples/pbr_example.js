@@ -1,19 +1,19 @@
-import { mat4, vec3, glMatrix } from 'https://unpkg.com/gl-matrix@3.3.0/esm/index.js';
-import { Camera as Camera$1, Camera_Movement } from '../iwo/src/cameras/Camera.js';
-import { BoxGeometry as BoxGeometry$1 } from '../iwo/src/geometry/BoxGeometry.js';
-import { Mesh as Mesh$1 } from '../iwo/src/meshes/Mesh.js';
-import { MeshInstance as MeshInstance$1 } from '../iwo/src/meshes/MeshInstance.js';
-import { Texture2D as Texture2D$1 } from '../iwo/src/graphics/Texture2D.js';
-import { HDRImageLoader as HDRImageLoader$1 } from '../iwo/src/loader/HDRImageLoader.js';
-import { TextureCubeMap as TextureCubeMap$1 } from '../iwo/src/graphics/TextureCubeMap.js';
-import { Renderer as Renderer$1 } from '../iwo/src/graphics/Renderer.js';
-import { SphereGeometry as SphereGeometry$1 } from '../iwo/src/geometry/SphereGeometry.js';
-import { PlaneGeometry as PlaneGeometry$1 } from '../iwo/src/geometry/PlaneGeometry.js';
-import { GridMaterial as GridMaterial$1 } from '../iwo/src/materials/GridMaterial.js';
-import { PBRMaterial as PBRMaterial$1 } from '../iwo/src/materials/PBRMaterial.js';
-import { BasicMaterial as BasicMaterial$1 } from '../iwo/src/materials/BasicMaterial.js';
-import { ImageLoader as ImageLoader$1 } from '../iwo/src/loader/ImageLoader.js';
-import { TextureLoader as TextureLoader$1 } from '../iwo/src/loader/TextureLoader.js';
+import { mat4, vec3, glMatrix } from 'https://unpkg.com/gl-matrix@3.4.3/esm/index.js';
+import { Camera, Camera_Movement } from '../iwo/src/cameras/Camera.js';
+import { BoxGeometry } from '../iwo/src/geometry/BoxGeometry.js';
+import { Mesh } from '../iwo/src/meshes/Mesh.js';
+import { MeshInstance } from '../iwo/src/meshes/MeshInstance.js';
+import { Renderer } from '../iwo/src/graphics/Renderer.js';
+import { SphereGeometry } from '../iwo/src/geometry/SphereGeometry.js';
+import { PlaneGeometry } from '../iwo/src/geometry/PlaneGeometry.js';
+import { GridMaterial } from '../iwo/src/materials/GridMaterial.js';
+import { PBRMaterial } from '../iwo/src/materials/PBRMaterial.js';
+import { BasicMaterial } from '../iwo/src/materials/BasicMaterial.js';
+import { ImageLoader } from '../iwo/src/loader/ImageLoader.js';
+import { Texture2D } from '../iwo/src/graphics/Texture2D.js';
+import { HDRImageLoader } from '../iwo/src/loader/HDRImageLoader.js';
+import { TextureCubeMap } from '../iwo/src/graphics/TextureCubeMap.js';
+import { TextureLoader } from '../iwo/src/loader/TextureLoader.js';
 
 let canvas;
 let gl;
@@ -68,7 +68,7 @@ const stats = () => {
     canvas = document.getElementById("canvas");
     document.addEventListener("mousemove", moveCallback, false);
     gl = initGL();
-    renderer = new Renderer$1(gl);
+    renderer = new Renderer(gl);
     window.addEventListener("resize", resizeCanvas, false);
     function resizeCanvas() {
         canvas.width = window.innerWidth;
@@ -77,7 +77,7 @@ const stats = () => {
         mat4.perspective(proj_matrix, glMatrix.toRadian(90), gl.drawingBufferWidth / gl.drawingBufferHeight, 0.1, 1000.0);
     }
     resizeCanvas();
-    camera = new Camera$1(cPos, cFront, cUp);
+    camera = new Camera(cPos, cFront, cUp);
     gl.clearColor(0.2, 0.3, 0.3, 1.0);
     gl.enable(gl.DEPTH_TEST);
     gl.enable(gl.CULL_FACE);
@@ -89,7 +89,7 @@ const stats = () => {
     const sun_dir = sphereUVtoVec3(vec3.create(), 0.5 + 0.872, 1 - 0.456);
     const sun_intensity = 24;
     const sun_color = [(sun_intensity * 254) / 255, (sun_intensity * 238) / 255, (sun_intensity * 224) / 255];
-    const pbrShader = PBRMaterial$1.Shader;
+    const pbrShader = PBRMaterial.Shader;
     pbrShader.use();
     pbrShader.setUniform("u_lights[0].position", [sun_dir[0], sun_dir[1], sun_dir[2], 0]);
     pbrShader.setUniform("u_lights[0].color", sun_color);
@@ -119,10 +119,10 @@ function initScene() {
     let global_root = window.location.href.substr(0, window.location.href.lastIndexOf("/"));
     //Removes /examples subfolder off end of url so images are found in correct folder
     global_root = global_root.substring(0, global_root.lastIndexOf("/") + 1);
-    const sky_tex = new Texture2D$1(gl);
-    let irr_tex = new TextureCubeMap$1(gl);
-    let env_tex = new TextureCubeMap$1(gl);
-    const cube_tex = new TextureCubeMap$1(gl);
+    const sky_tex = new Texture2D(gl);
+    let irr_tex = new TextureCubeMap(gl);
+    let env_tex = new TextureCubeMap(gl);
+    const cube_tex = new TextureCubeMap(gl);
     const tex2D_opts = {
         wrap_S: gl.CLAMP_TO_EDGE,
         wrap_T: gl.CLAMP_TO_EDGE,
@@ -131,55 +131,55 @@ function initScene() {
         flip: true,
     };
     const file_prefix = "../assets/cubemap/monvalley/MonValley_A_LookoutPoint";
-    ImageLoader$1.promise(file_prefix + "_preview.jpg").then((image) => {
+    ImageLoader.promise(file_prefix + "_preview.jpg").then((image) => {
         sky_tex.setImage(gl, image, tex2D_opts);
-        ImageLoader$1.promise(file_prefix + "_8k.jpg").then((image) => {
+        ImageLoader.promise(file_prefix + "_8k.jpg").then((image) => {
             sky_tex.setImage(gl, image, tex2D_opts);
         });
     });
-    HDRImageLoader$1.promise(file_prefix + "_Env.hdr").then((data) => {
+    HDRImageLoader.promise(file_prefix + "_Env.hdr").then((data) => {
         cube_tex.setEquirectangularHDRBuffer(renderer, data);
-        irr_tex = TextureCubeMap$1.irradianceFromCubemap(irr_tex, renderer, cube_tex);
-        env_tex = TextureCubeMap$1.specularFromCubemap(env_tex, renderer, cube_tex);
-        HDRImageLoader$1.promise(file_prefix + "_2k.hdr").then((data) => {
+        irr_tex = TextureCubeMap.irradianceFromCubemap(irr_tex, renderer, cube_tex);
+        env_tex = TextureCubeMap.specularFromCubemap(env_tex, renderer, cube_tex);
+        HDRImageLoader.promise(file_prefix + "_2k.hdr").then((data) => {
             cube_tex.setEquirectangularHDRBuffer(renderer, data);
-            env_tex = TextureCubeMap$1.specularFromCubemap(env_tex, renderer, cube_tex, data.width);
+            env_tex = TextureCubeMap.specularFromCubemap(env_tex, renderer, cube_tex, data.width);
             cube_tex.destroy(gl);
         });
     });
-    const earth_tex = TextureLoader$1.load(gl, "../assets/earth.jpg");
-    const box_geom = new BoxGeometry$1(3.0, 3.0, 3.0, 1, 1, 1, false);
-    const sphere_geom = new SphereGeometry$1(0.75, 16, 16);
-    const plane_geom = new PlaneGeometry$1(100, 100, 1, 1, true);
-    const sphere_mesh = new Mesh$1(gl, sphere_geom);
-    const plane_mesh = new Mesh$1(gl, plane_geom);
-    const box_mesh = new Mesh$1(gl, box_geom);
-    sphere_mat = new PBRMaterial$1(vec3.fromValues(1, 0, 0), 0.0, 0.0);
+    const earth_tex = TextureLoader.load(gl, "../assets/earth.jpg");
+    const box_geom = new BoxGeometry(3.0, 3.0, 3.0, 1, 1, 1, false);
+    const sphere_geom = new SphereGeometry(0.75, 16, 16);
+    const plane_geom = new PlaneGeometry(100, 100, 1, 1, true);
+    const sphere_mesh = new Mesh(gl, sphere_geom);
+    const plane_mesh = new Mesh(gl, plane_geom);
+    const box_mesh = new Mesh(gl, box_geom);
+    sphere_mat = new PBRMaterial(vec3.fromValues(1, 0, 0), 0.0, 0.0);
     sphere_mat.albedo_texture = earth_tex;
     //GRID
-    const grid_mat = new GridMaterial$1(50);
-    grid = new MeshInstance$1(plane_mesh, grid_mat);
+    const grid_mat = new GridMaterial(50);
+    grid = new MeshInstance(plane_mesh, grid_mat);
     //SKYBOX
-    const sky_geom = new SphereGeometry$1(1, 48, 48);
-    const sky_mesh = new Mesh$1(gl, sky_geom);
-    const sky_mat = new BasicMaterial$1([1, 1, 1]);
+    const sky_geom = new SphereGeometry(1, 48, 48);
+    const sky_mesh = new Mesh(gl, sky_geom);
+    const sky_mat = new BasicMaterial([1, 1, 1]);
     sky_mat.setAlbedoTexture(sky_tex);
-    skybox = new MeshInstance$1(sky_mesh, sky_mat);
+    skybox = new MeshInstance(sky_mesh, sky_mat);
     //LIGHTS
-    const light_geom = new BoxGeometry$1(1.0, 1.0, 1.0);
-    const light_mesh = new Mesh$1(gl, light_geom);
-    const light_mat = new PBRMaterial$1(vec3.fromValues(1000, 1000, 1000), 0.0, 1.0);
+    const light_geom = new BoxGeometry(1.0, 1.0, 1.0);
+    const light_mesh = new Mesh(gl, light_geom);
+    const light_mat = new PBRMaterial(vec3.fromValues(1000, 1000, 1000), 0.0, 1.0);
     light_boxes = [];
     for (const pos of light_positions) {
-        const lb = new MeshInstance$1(light_mesh, light_mat);
+        const lb = new MeshInstance(light_mesh, light_mat);
         mat4.translate(lb.model_matrix, lb.model_matrix, [pos[0], pos[1], pos[2]]);
         light_boxes.push(lb);
     }
     //BOX
-    const box_mat = new BasicMaterial$1(vec3.fromValues(1, 1, 1));
+    const box_mat = new BasicMaterial(vec3.fromValues(1, 1, 1));
     //box_mat.setAlbedoTexture(env_tex, true);
     box_mat.setAlbedoCubeTexture(cube_tex);
-    box = new MeshInstance$1(box_mesh, box_mat);
+    box = new MeshInstance(box_mesh, box_mat);
     mat4.translate(box.model_matrix, box.model_matrix, vec3.fromValues(-2, 5, 3));
     //SPHERES
     spheres = [];
@@ -187,11 +187,11 @@ function initScene() {
     const num_rows = 8;
     for (let i = 0; i <= num_cols; i++) {
         for (let k = 0; k <= num_rows; k++) {
-            const mat = new PBRMaterial$1([1, 1, 1], k / num_rows, Math.min(1, Math.max(0.025, i / num_cols)), 1);
+            const mat = new PBRMaterial([1, 1, 1], k / num_rows, Math.min(1, Math.max(0.025, i / num_cols)), 1);
             //mat.albedo_texture = sphere_mat.albedo_texture;
             mat.irradiance_texture = irr_tex;
             mat.specular_env = env_tex;
-            const s = new MeshInstance$1(sphere_mesh, mat);
+            const s = new MeshInstance(sphere_mesh, mat);
             spheres.push(s);
             const model = s.model_matrix;
             mat4.identity(model);

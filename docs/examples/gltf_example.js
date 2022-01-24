@@ -1,26 +1,26 @@
-import { mat4, vec3, glMatrix } from 'https://unpkg.com/gl-matrix@3.3.0/esm/index.js';
-import { Camera as Camera$1, Camera_Movement } from '../iwo/src/cameras/Camera.js';
-import '../iwo/src/geometry/Geometry.js';
+import { mat4, vec3, glMatrix } from 'https://unpkg.com/gl-matrix@3.4.3/esm/index.js';
+import { Camera } from '../iwo/src/cameras/Camera.js';
+import { OrbitControl } from '../iwo/src/cameras/OrbitControl.js';
 import '../iwo/src/geometry/BoxGeometry.js';
-import '../iwo/src/graphics/WebglHelper.js';
+import '../iwo/src/geometry/Geometry.js';
 import '../iwo/src/geometry/BufferedGeometry.js';
-import { Mesh as Mesh$1 } from '../iwo/src/meshes/Mesh.js';
-import { MeshInstance as MeshInstance$1 } from '../iwo/src/meshes/MeshInstance.js';
+import { PlaneGeometry } from '../iwo/src/geometry/PlaneGeometry.js';
+import { SphereGeometry } from '../iwo/src/geometry/SphereGeometry.js';
+import '../iwo/src/graphics/WebglHelper.js';
+import { Renderer } from '../iwo/src/graphics/Renderer.js';
+import { Texture2D } from '../iwo/src/graphics/Texture2D.js';
+import { TextureCubeMap } from '../iwo/src/graphics/TextureCubeMap.js';
 import '../iwo/src/graphics/TextureHelper.js';
 import '../iwo/src/graphics/WebglConstants.js';
-import { Texture2D as Texture2D$1 } from '../iwo/src/graphics/Texture2D.js';
 import '../iwo/src/loader/FileLoader.js';
-import { HDRImageLoader as HDRImageLoader$1 } from '../iwo/src/loader/HDRImageLoader.js';
-import { TextureCubeMap as TextureCubeMap$1 } from '../iwo/src/graphics/TextureCubeMap.js';
-import { Renderer as Renderer$1 } from '../iwo/src/graphics/Renderer.js';
-import { SphereGeometry as SphereGeometry$1 } from '../iwo/src/geometry/SphereGeometry.js';
-import { PlaneGeometry as PlaneGeometry$1 } from '../iwo/src/geometry/PlaneGeometry.js';
-import { GridMaterial as GridMaterial$1 } from '../iwo/src/materials/GridMaterial.js';
-import { PBRMaterial as PBRMaterial$1 } from '../iwo/src/materials/PBRMaterial.js';
-import { BasicMaterial as BasicMaterial$1 } from '../iwo/src/materials/BasicMaterial.js';
-import { ImageLoader as ImageLoader$1 } from '../iwo/src/loader/ImageLoader.js';
-import { OrbitControl as OrbitControl$1 } from '../iwo/src/cameras/OrbitControl.js';
+import { HDRImageLoader } from '../iwo/src/loader/HDRImageLoader.js';
 import { glTFLoader } from '../iwo/src/loader/gltfLoader.js';
+import { ImageLoader } from '../iwo/src/loader/ImageLoader.js';
+import { BasicMaterial } from '../iwo/src/materials/BasicMaterial.js';
+import { GridMaterial } from '../iwo/src/materials/GridMaterial.js';
+import { PBRMaterial } from '../iwo/src/materials/PBRMaterial.js';
+import { Mesh } from '../iwo/src/meshes/Mesh.js';
+import { MeshInstance } from '../iwo/src/meshes/MeshInstance.js';
 
 let canvas;
 let gl;
@@ -31,8 +31,6 @@ let camera;
 let orbit;
 let mouse_x_total = 0;
 let mouse_y_total = 0;
-const keys = [];
-let grid;
 let renderer;
 let skybox;
 let helmet;
@@ -70,7 +68,7 @@ const stats = () => {
     canvas = document.getElementById("canvas");
     document.addEventListener("mousemove", moveCallback, false);
     gl = initGL();
-    renderer = new Renderer$1(gl);
+    renderer = new Renderer(gl);
     window.addEventListener("resize", resizeCanvas, false);
     function resizeCanvas() {
         canvas.width = window.innerWidth;
@@ -79,19 +77,21 @@ const stats = () => {
         mat4.perspective(proj_matrix, glMatrix.toRadian(45), gl.drawingBufferWidth / gl.drawingBufferHeight, 0.25, 20.0);
     }
     resizeCanvas();
-    camera = new Camera$1(cPos);
-    orbit = new OrbitControl$1(camera, { minimum_distance: 5.5 });
+    camera = new Camera(cPos);
+    orbit = new OrbitControl(camera, { minimum_distance: 5.5 });
     gl.clearColor(173 / 255, 196 / 255, 221 / 255, 1.0);
     gl.enable(gl.DEPTH_TEST);
     gl.enable(gl.CULL_FACE);
     gl.cullFace(gl.BACK);
-    const pbrShader = PBRMaterial$1.Shader;
+    const sun_dir = sphereUVtoVec3(vec3.create(), 0.5 + 0.872, 1 - 0.456);
+    const sun_intensity = 24;
+    const sun_color = [(sun_intensity * 254) / 255, (sun_intensity * 238) / 255, (sun_intensity * 224) / 255];
+    const pbrShader = PBRMaterial.Shader;
     pbrShader.use();
-    pbrShader.setUniform("gamma", 1.0);
-    // pbrShader.setUniform("u_lights[0].position", [sun_dir[0], sun_dir[1], sun_dir[2], 0]);
-    // pbrShader.setUniform("u_lights[0].color", sun_color);
-    // pbrShader.setUniform("u_light_count", 1);
-    pbrShader.setUniform("light_ambient", [1.25, 1.25, 1.25]);
+    pbrShader.setUniform("u_lights[0].position", [sun_dir[0], sun_dir[1], sun_dir[2], 0]);
+    pbrShader.setUniform("u_lights[0].color", sun_color);
+    pbrShader.setUniform("u_light_count", 1);
+    // pbrShader.setUniform("light_ambient", [1.25, 1.25, 1.25]);
     initScene();
     requestAnimationFrame(update);
 })();
@@ -108,18 +108,18 @@ function initGL() {
     return gl;
 }
 function initScene() {
-    const plane_geom = new PlaneGeometry$1(100, 100, 1, 1, true);
-    const plane_mesh = new Mesh$1(gl, plane_geom);
-    const sky_tex = new Texture2D$1(gl);
-    let irr_tex = new TextureCubeMap$1(gl);
-    let env_tex = new TextureCubeMap$1(gl);
-    const cube_tex = new TextureCubeMap$1(gl);
+    const plane_geom = new PlaneGeometry(100, 100, 1, 1, true);
+    const plane_mesh = new Mesh(gl, plane_geom);
+    const sky_tex = new Texture2D(gl);
+    let irr_tex = new TextureCubeMap(gl);
+    let env_tex = new TextureCubeMap(gl);
+    const cube_tex = new TextureCubeMap(gl);
     //Init Helmet
     glTFLoader.promise("DamagedHelmet.gltf", "../assets/damaged-helmet/").then((value) => {
         helmet_loaded = true;
-        const m = new Mesh$1(gl, value.buffered_geometries[0]);
+        const m = new Mesh(gl, value.buffered_geometries[0]);
         renderer.resetSaveBindings();
-        helmet = new MeshInstance$1(m, value.materials);
+        helmet = new MeshInstance(m, value.materials);
         const pbr = helmet.materials[0];
         pbr.irradiance_texture = irr_tex;
         pbr.specular_env = env_tex;
@@ -155,16 +155,16 @@ function initScene() {
     //     });
     // });
     const file_prefix = "../assets/cubemap/monvalley/MonValley_A_LookoutPoint";
-    ImageLoader$1.promise(file_prefix + "_preview.jpg").then((image) => {
+    ImageLoader.promise(file_prefix + "_preview.jpg").then((image) => {
         sky_tex.setImage(gl, image, tex2D_opts);
-        ImageLoader$1.promise(file_prefix + "_8k.jpg").then((image) => {
+        ImageLoader.promise(file_prefix + "_8k.jpg").then((image) => {
             sky_tex.setImage(gl, image, tex2D_opts);
         });
     });
-    HDRImageLoader$1.promise(file_prefix + "_2k.hdr").then((data) => {
+    HDRImageLoader.promise(file_prefix + "_2k.hdr").then((data) => {
         cube_tex.setEquirectangularHDRBuffer(renderer, data);
-        irr_tex = TextureCubeMap$1.irradianceFromCubemap(irr_tex, renderer, cube_tex, 16);
-        env_tex = TextureCubeMap$1.specularFromCubemap(env_tex, renderer, cube_tex, 512);
+        irr_tex = TextureCubeMap.irradianceFromCubemap(irr_tex, renderer, cube_tex, 16);
+        env_tex = TextureCubeMap.specularFromCubemap(env_tex, renderer, cube_tex, 512);
         // HDRImageLoader.promise(file_prefix + "_2k.hdr").then((data: HDRBuffer) => {
         //     cube_tex.setEquirectangularHDRBuffer(renderer, data);
         //     env_tex = TextureCubeMap.specularFromCubemap(env_tex, renderer, cube_tex, data.width);
@@ -172,28 +172,16 @@ function initScene() {
         // });
     });
     //GRID
-    const grid_mat = new GridMaterial$1(50);
-    grid = new MeshInstance$1(plane_mesh, grid_mat);
+    const grid_mat = new GridMaterial(50);
+    new MeshInstance(plane_mesh, grid_mat);
     //SKYBOX
-    const sky_geom = new SphereGeometry$1(1, 48, 48);
-    const sky_mesh = new Mesh$1(gl, sky_geom);
-    const sky_mat = new BasicMaterial$1([1, 1, 1]);
+    const sky_geom = new SphereGeometry(1, 48, 48);
+    const sky_mesh = new Mesh(gl, sky_geom);
+    const sky_mat = new BasicMaterial([1, 1, 1]);
     sky_mat.setAlbedoTexture(sky_tex);
-    skybox = new MeshInstance$1(sky_mesh, sky_mat);
+    skybox = new MeshInstance(sky_mesh, sky_mat);
 }
 function update() {
-    if (keys[87])
-        camera.processKeyboard(Camera_Movement.FORWARD, 0.001);
-    else if (keys[83])
-        camera.processKeyboard(Camera_Movement.BACKWARD, 0.001);
-    if (keys[65])
-        camera.processKeyboard(Camera_Movement.LEFT, 0.001);
-    else if (keys[68])
-        camera.processKeyboard(Camera_Movement.RIGHT, 0.001);
-    if (keys[82])
-        camera.lookAt(vec3.fromValues(0, 0, 0));
-    if (keys[32])
-        camera.processKeyboard(Camera_Movement.UP, 0.001);
     orbit.processMouseMovement(-mouse_x_total, -mouse_y_total, true);
     mouse_x_total = 0;
     mouse_y_total = 0;
@@ -217,12 +205,21 @@ function drawScene() {
     if (helmet_loaded)
         helmet.render(renderer, view_matrix, proj_matrix);
     renderer.resetSaveBindings();
-    gl.enable(gl.BLEND);
-    gl.disable(gl.CULL_FACE);
-    //gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-    gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-    grid.render(renderer, view_matrix, proj_matrix);
-    gl.enable(gl.CULL_FACE);
-    gl.disable(gl.BLEND);
+    // gl.enable(gl.BLEND);
+    // gl.disable(gl.CULL_FACE);
+    // //gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+    // gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+    // grid.render(renderer, view_matrix, proj_matrix);
+    // gl.enable(gl.CULL_FACE);
+    // gl.disable(gl.BLEND);
+}
+function sphereUVtoVec3(out, u, v) {
+    const theta = (v - 0.5) * Math.PI;
+    const phi = u * 2 * Math.PI;
+    const x = Math.cos(phi) * Math.cos(theta);
+    const y = Math.sin(theta);
+    const z = Math.sin(phi) * Math.cos(theta);
+    vec3.set(out, x, y, z);
+    return out;
 }
 //# sourceMappingURL=gltf_example.js.map

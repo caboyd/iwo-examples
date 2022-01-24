@@ -1,6 +1,9 @@
-import { mat4 } from 'https://unpkg.com/gl-matrix@3.3.0/esm/index.js';
+import { mat4 } from 'https://unpkg.com/gl-matrix@3.4.3/esm/index.js';
 
 class MeshInstance {
+    mesh;
+    materials;
+    model_matrix;
     constructor(mesh, materials) {
         this.mesh = mesh;
         this.materials = materials;

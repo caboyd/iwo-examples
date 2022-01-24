@@ -1,10 +1,11 @@
+import { FileLoader } from './FileLoader.js';
 import { AttributeType } from '../geometry/Geometry.js';
-import { BufferedGeometry as BufferedGeometry$1, DefaultAttribute } from '../geometry/BufferedGeometry.js';
-import { FileLoader as FileLoader$1 } from './FileLoader.js';
-import { PBRMaterial as PBRMaterial$1 } from '../materials/PBRMaterial.js';
-import { ImageLoader as ImageLoader$1 } from './ImageLoader.js';
+import { BufferedGeometry, DefaultAttribute } from '../geometry/BufferedGeometry.js';
+import { ImageLoader } from './ImageLoader.js';
+import { PBRMaterial } from '../materials/PBRMaterial.js';
 
 class Color {
+    data;
     constructor(r, g, b, a) {
         if (Array.isArray(r)) {
             const [red, green, blue, alpha] = r;
@@ -23,9 +24,9 @@ class Color {
     }
 }
 class glTFLoader {
-    static async promise(file_name, base_url = FileLoader$1.Default_Base_URL) {
+    static async promise(file_name, base_url = FileLoader.Default_Base_URL) {
         return new Promise(resolve => {
-            FileLoader$1.promise(file_name, base_url).then((response) => {
+            FileLoader.promise(file_name, base_url).then((response) => {
                 response.json().then(async (o) => {
                     //Validate toplevel
                     if (o.meshes === undefined)
@@ -36,7 +37,7 @@ class glTFLoader {
                         glTFLoaderError(o.bufferViews);
                     if (o.accessors === undefined)
                         glTFLoaderError(o.accessors);
-                    const buffers = (await FileLoader$1.promiseAll(o.buffers.map(v => v.uri), base_url));
+                    const buffers = (await FileLoader.promiseAll(o.buffers.map(v => v.uri), base_url));
                     const array_buffers = await Promise.all(buffers.map(v => v.arrayBuffer()));
                     // const typed_buffer_view = new Map<[number, ComponentType], TypedArray>();
                     // const geom_buffers: BufferView[] = [];
@@ -58,11 +59,11 @@ class glTFLoader {
                     // console.log(geom_buffers);
                     let images = [];
                     if (o.images) {
-                        images = ImageLoader$1.loadAllBackground(o.images.map(v => v.uri), base_url);
+                        images = ImageLoader.loadAllBackground(o.images.map(v => v.uri), base_url);
                     }
                     const buffered_geometries = [];
                     for (const mesh of o.meshes) {
-                        const x = new BufferedGeometry$1();
+                        const x = new BufferedGeometry();
                         //x.buffers = geom_buffers;
                         if (mesh.primitives.length === 0)
                             throw new Error("glTF missing mesh primitives");
@@ -139,7 +140,7 @@ class glTFLoader {
                     const materials = [];
                     if (o.materials !== undefined)
                         for (const mat of o.materials) {
-                            const m = new PBRMaterial$1(new Color(mat.pbrMetallicRoughness?.baseColorFactor).rgb, mat.pbrMetallicRoughness?.metallicFactor ?? 1, mat.pbrMetallicRoughness?.roughnessFactor ?? 1);
+                            const m = new PBRMaterial(new Color(mat.pbrMetallicRoughness?.baseColorFactor).rgb, mat.pbrMetallicRoughness?.metallicFactor ?? 1, mat.pbrMetallicRoughness?.roughnessFactor ?? 1);
                             m.albedo_image = images[mat.pbrMetallicRoughness.baseColorTexture.index];
                             m.normal_image = images[mat.normalTexture.index];
                             m.occlusion_image = images[mat.occlusionTexture.index];

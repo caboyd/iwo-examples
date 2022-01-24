@@ -1,7 +1,5 @@
 import { glMatrix, mat4, vec3 } from "gl-matrix";
-import * as IWO from "iwo";
-import { DefaultTextureOptions, TextureOptions } from "graphics/Texture2D";
-import { Texture2D } from "iwo";
+import * as IWO from "iwo/src/iwo";
 
 let canvas: HTMLCanvasElement;
 let gl: WebGL2RenderingContext;
@@ -116,8 +114,6 @@ function initGL(): WebGL2RenderingContext {
     }
     return gl;
 }
-
-const a = { } as TextureOptions
 
 function initScene(): void {
     const plane_geom = new IWO.PlaneGeometry(100, 100, 1, 1, true).getBufferedGeometry();

@@ -35,6 +35,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 class Uniform {
+    set;
     constructor(gl, program, info) {
         const location = gl.getUniformLocation(program, info.name);
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -49,6 +50,8 @@ class Uniform {
     }
 }
 class UniformBlock {
+    set;
+    _buffer_view;
     constructor(buffer, type, offset, count, size) {
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
         const uniform_info = uniform_info_map[type];

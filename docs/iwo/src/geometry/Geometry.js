@@ -7,15 +7,19 @@ var AttributeType;
     AttributeType[AttributeType["Tangent"] = 3] = "Tangent";
     AttributeType[AttributeType["Bitangent"] = 4] = "Bitangent";
 })(AttributeType || (AttributeType = {}));
-const AttributeTypeValues = Object.keys(AttributeType)
+Object.keys(AttributeType)
     .filter(value => !isNaN(Number(value)))
     .map(value => Number(value));
 class Geometry {
+    indices;
+    attributes;
+    groups;
+    interleaved_attributes;
     constructor() {
         this.attributes = new Map();
         this.groups = [];
     }
 }
 
-export { AttributeType, AttributeTypeValues, Geometry };
+export { AttributeType, Geometry };
 //# sourceMappingURL=Geometry.js.map

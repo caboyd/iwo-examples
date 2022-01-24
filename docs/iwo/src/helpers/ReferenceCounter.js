@@ -1,4 +1,5 @@
 class ReferenceCounter {
+    _count;
     constructor() {
         this._count = 0;
     }

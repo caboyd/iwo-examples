@@ -8,7 +8,7 @@ var DefaultAttribute;
             type: AttributeType.Vertex,
             enabled: true,
             buffer_index: 0,
-            component_type: 5126,
+            component_type: 5126, // FLOAT
         };
     };
     DefaultAttribute.Tex_Coord = () => {
@@ -16,7 +16,7 @@ var DefaultAttribute;
             type: AttributeType.Tex_Coord,
             enabled: true,
             buffer_index: 0,
-            component_type: 5126,
+            component_type: 5126, // FLOAT
         };
     };
     DefaultAttribute.Normal = () => {
@@ -24,7 +24,7 @@ var DefaultAttribute;
             type: AttributeType.Normal,
             enabled: true,
             buffer_index: 0,
-            component_type: 5126,
+            component_type: 5126, // FLOAT
         };
     };
     DefaultAttribute.Tangent = () => {
@@ -32,7 +32,7 @@ var DefaultAttribute;
             type: AttributeType.Tangent,
             enabled: false,
             buffer_index: 0,
-            component_type: 5126,
+            component_type: 5126, // FLOAT
         };
     };
     DefaultAttribute.Bitangent = () => {
@@ -40,7 +40,7 @@ var DefaultAttribute;
             type: AttributeType.Bitangent,
             enabled: false,
             buffer_index: 0,
-            component_type: 5126,
+            component_type: 5126, // FLOAT
         };
     };
     DefaultAttribute.SingleBufferApproach = () => {
@@ -69,14 +69,18 @@ const AttributeComponentCountMap = {
     [AttributeType.Tangent]: 3,
     [AttributeType.Bitangent]: 3,
 };
-const AttributeAccessorTypeMap = {
+({
     [AttributeType.Vertex]: "VEC3",
     [AttributeType.Tex_Coord]: "VEC2",
     [AttributeType.Normal]: "VEC3",
     [AttributeType.Tangent]: "VEC3",
     [AttributeType.Bitangent]: "VEC3",
-};
+});
 class BufferedGeometry {
+    attributes;
+    index_buffer;
+    buffers;
+    groups;
     constructor() {
         this.attributes = DefaultAttribute.SingleBufferApproach();
         this.buffers = [];
@@ -105,7 +109,7 @@ class BufferedGeometry {
     //TODO: finish this if i want
     setupInterleavedBuffer(geom) {
         //loopity loop through everything and put in a float32array
-        const len = this.getTotalBufferLength(geom);
+        this.getTotalBufferLength(geom);
     }
     setupAttributes(geom) {
         this.attributes[0].enabled = geom.attributes.has(AttributeType.Vertex);
@@ -189,5 +193,5 @@ class BufferedGeometry {
     }
 }
 
-export { AttributeAccessorTypeMap, AttributeComponentCountMap, BufferedGeometry, DefaultAttribute };
+export { AttributeComponentCountMap, BufferedGeometry, DefaultAttribute };
 //# sourceMappingURL=BufferedGeometry.js.map

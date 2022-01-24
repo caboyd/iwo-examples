@@ -1,4 +1,4 @@
-import { vec3, mat4, vec4 } from 'https://unpkg.com/gl-matrix@3.3.0/esm/index.js';
+import { vec3, mat4, vec4 } from 'https://unpkg.com/gl-matrix@3.4.3/esm/index.js';
 
 const DefaultOrbitControlBinds = {
     LEFT: "ArrowLeft",
@@ -7,15 +7,16 @@ const DefaultOrbitControlBinds = {
     DOWN: "ArrowDown",
 };
 class OrbitControl {
+    camera;
+    target_pitch = 0;
+    target_heading = 0;
+    mouse_sensitivity = 0.005;
+    step_size = 0.5;
+    minimum_distance = 5.0;
+    maximum_distance = 10.0;
+    orbit_control_binds = DefaultOrbitControlBinds;
+    orbit_point = [0, 0, 0];
     constructor(camera, options) {
-        this.target_pitch = 0;
-        this.target_heading = 0;
-        this.mouse_sensitivity = 0.005;
-        this.step_size = 0.5;
-        this.minimum_distance = 5.0;
-        this.maximum_distance = 10.0;
-        this.orbit_control_binds = DefaultOrbitControlBinds;
-        this.orbit_point = [0, 0, 0];
         this.camera = camera;
         this.mouse_sensitivity = options?.mouse_sensitivity ?? this.mouse_sensitivity;
         this.orbit_point = options?.orbit_point ?? this.orbit_point;

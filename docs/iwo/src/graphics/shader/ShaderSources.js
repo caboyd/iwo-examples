@@ -1,8 +1,8 @@
-import { BasicShader as BasicShader$1 } from './BasicShader.js';
-import { PBRShader as PBRShader$1 } from './PBRShader.js';
-import { EquiToCubemapShader as EquiToCubemapShader$1 } from './EquiToCubemapShader.js';
-import { CubemapToIrradianceShader as CubemapToIrradianceShader$1 } from './CubemapToIrradianceShader.js';
-import { CubemapSpecularPrefilterShader as CubemapSpecularPrefilterShader$1 } from './CubemapSpecularPrefilterShader.js';
+import { BasicShader } from './BasicShader.js';
+import { PBRShader } from './PBRShader.js';
+import { EquiToCubemapShader } from './EquiToCubemapShader.js';
+import { CubemapToIrradianceShader } from './CubemapToIrradianceShader.js';
+import { CubemapSpecularPrefilterShader } from './CubemapSpecularPrefilterShader.js';
 import standardVert from '../../shaders/standard.vert.js';
 import basicFrag from '../../shaders/basic.frag.js';
 import pbrFrag from '../../shaders/pbr.frag.js';
@@ -26,13 +26,13 @@ var ShaderSource;
         name: "BasicShader",
         vert: standardVert,
         frag: basicFrag,
-        subclass: BasicShader$1,
+        subclass: BasicShader,
     };
     ShaderSource.PBR = {
         name: "PBRShader",
         vert: standardVert,
         frag: pbrFrag,
-        subclass: PBRShader$1,
+        subclass: PBRShader,
     };
     ShaderSource.NormalOnly = {
         name: "NormalOnlyShader",
@@ -44,19 +44,19 @@ var ShaderSource;
         name: "EquiToCubemapShader",
         vert: standardVert,
         frag: equiToCubemapFrag,
-        subclass: EquiToCubemapShader$1,
+        subclass: EquiToCubemapShader,
     };
     ShaderSource.CubemapToIrradiance = {
         name: "CubemapToIrradianceShader",
         vert: standardVert,
         frag: cubemapToIrradianceFrag,
-        subclass: CubemapToIrradianceShader$1,
+        subclass: CubemapToIrradianceShader,
     };
     ShaderSource.CubemapSpecularPrefilter = {
         name: "CubemapSpecularPrefilter",
         vert: standardVert,
         frag: cubemapSpecularPrefilterFrag,
-        subclass: CubemapSpecularPrefilterShader$1,
+        subclass: CubemapSpecularPrefilterShader,
     };
     ShaderSource.Grid = {
         name: "GridShader",

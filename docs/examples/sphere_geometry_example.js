@@ -1,21 +1,21 @@
-import { mat4, vec3, glMatrix } from 'https://unpkg.com/gl-matrix@3.3.0/esm/index.js';
-import { Camera as Camera$1, Camera_Movement } from '../iwo/src/cameras/Camera.js';
-import '../iwo/src/geometry/Geometry.js';
+import { mat4, vec3, glMatrix } from 'https://unpkg.com/gl-matrix@3.4.3/esm/index.js';
+import { Camera, Camera_Movement } from '../iwo/src/cameras/Camera.js';
 import '../iwo/src/geometry/BoxGeometry.js';
+import '../iwo/src/geometry/Geometry.js';
+import { BufferedGeometry } from '../iwo/src/geometry/BufferedGeometry.js';
+import { PlaneGeometry } from '../iwo/src/geometry/PlaneGeometry.js';
+import { SphereGeometry } from '../iwo/src/geometry/SphereGeometry.js';
 import '../iwo/src/graphics/WebglHelper.js';
-import { BufferedGeometry as BufferedGeometry$1 } from '../iwo/src/geometry/BufferedGeometry.js';
-import { Mesh as Mesh$1 } from '../iwo/src/meshes/Mesh.js';
-import { MeshInstance as MeshInstance$1 } from '../iwo/src/meshes/MeshInstance.js';
-import '../iwo/src/graphics/TextureHelper.js';
-import '../iwo/src/graphics/WebglConstants.js';
+import { Renderer } from '../iwo/src/graphics/Renderer.js';
 import '../iwo/src/graphics/Texture2D.js';
 import '../iwo/src/loader/FileLoader.js';
+import { Mesh } from '../iwo/src/meshes/Mesh.js';
 import '../iwo/src/graphics/shader/ShaderSources.js';
-import { Renderer as Renderer$1 } from '../iwo/src/graphics/Renderer.js';
-import { SphereGeometry as SphereGeometry$1 } from '../iwo/src/geometry/SphereGeometry.js';
-import { PlaneGeometry as PlaneGeometry$1 } from '../iwo/src/geometry/PlaneGeometry.js';
-import { GridMaterial as GridMaterial$1 } from '../iwo/src/materials/GridMaterial.js';
-import { PBRMaterial as PBRMaterial$1 } from '../iwo/src/materials/PBRMaterial.js';
+import '../iwo/src/graphics/TextureHelper.js';
+import '../iwo/src/graphics/WebglConstants.js';
+import { PBRMaterial } from '../iwo/src/materials/PBRMaterial.js';
+import { GridMaterial } from '../iwo/src/materials/GridMaterial.js';
+import { MeshInstance } from '../iwo/src/meshes/MeshInstance.js';
 
 let canvas;
 let gl;
@@ -63,7 +63,7 @@ const stats = () => {
     canvas = document.getElementById("canvas");
     document.addEventListener("mousemove", moveCallback, false);
     gl = initGL();
-    renderer = new Renderer$1(gl);
+    renderer = new Renderer(gl);
     window.addEventListener("resize", resizeCanvas, false);
     function resizeCanvas() {
         canvas.width = window.innerWidth;
@@ -72,7 +72,7 @@ const stats = () => {
         mat4.perspective(proj_matrix, glMatrix.toRadian(90), gl.drawingBufferWidth / gl.drawingBufferHeight, 0.1, 1000.0);
     }
     resizeCanvas();
-    camera = new Camera$1(cPos);
+    camera = new Camera(cPos);
     gl.clearColor(173 / 255, 196 / 255, 221 / 255, 1.0);
     gl.enable(gl.DEPTH_TEST);
     gl.enable(gl.CULL_FACE);
@@ -82,7 +82,7 @@ const stats = () => {
     const sun_dir = [-0.3, 0, 1];
     const sun_intensity = 4;
     const sun_color = [(sun_intensity * 254) / 255, (sun_intensity * 238) / 255, (sun_intensity * 224) / 255];
-    const pbrShader = PBRMaterial$1.Shader;
+    const pbrShader = PBRMaterial.Shader;
     pbrShader.use();
     pbrShader.setUniform("u_lights[0].position", [sun_dir[0], sun_dir[1], sun_dir[2], 0]);
     pbrShader.setUniform("u_lights[0].color", sun_color);
@@ -103,21 +103,21 @@ function initGL() {
     return gl;
 }
 function initScene() {
-    const plane_geom = new PlaneGeometry$1(100, 100, 1, 1, true).getBufferedGeometry();
-    const plane_mesh = new Mesh$1(gl, plane_geom);
-    sphere_mat = new PBRMaterial$1(vec3.fromValues(1, 1, 1), 0, 0, 2);
+    const plane_geom = new PlaneGeometry(100, 100, 1, 1, true).getBufferedGeometry();
+    const plane_mesh = new Mesh(gl, plane_geom);
+    sphere_mat = new PBRMaterial(vec3.fromValues(1, 1, 1), 0, 0, 2);
     //GRID
-    const grid_mat = new GridMaterial$1(50);
-    grid = new MeshInstance$1(plane_mesh, grid_mat);
+    const grid_mat = new GridMaterial(50);
+    grid = new MeshInstance(plane_mesh, grid_mat);
     //SPHERES
     spheres = [];
     const num_cols = 8;
     const num_rows = 8;
     for (let i = 0; i <= num_cols; i++) {
         for (let k = 0; k <= num_rows; k++) {
-            const sphere_geom = BufferedGeometry$1.fromGeometry(new SphereGeometry$1(0.75, 3 + i * 2, 2 + k * 2));
-            const sphere_mesh = new Mesh$1(gl, sphere_geom);
-            const s = new MeshInstance$1(sphere_mesh, sphere_mat);
+            const sphere_geom = BufferedGeometry.fromGeometry(new SphereGeometry(0.75, 3 + i * 2, 2 + k * 2));
+            const sphere_mesh = new Mesh(gl, sphere_geom);
+            const s = new MeshInstance(sphere_mesh, sphere_mat);
             spheres.push(s);
             const model = s.model_matrix;
             mat4.identity(model);

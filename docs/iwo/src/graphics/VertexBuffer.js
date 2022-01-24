@@ -1,12 +1,16 @@
-import { ReferenceCounter as ReferenceCounter$1 } from '../helpers/ReferenceCounter.js';
 import { WebGL } from './WebglHelper.js';
+import { ReferenceCounter } from '../helpers/ReferenceCounter.js';
 import { AttributeComponentCountMap } from '../geometry/BufferedGeometry.js';
 
 class VertexBuffer {
+    attributes;
+    buffers;
+    VAO;
+    references;
+    stride = 0;
     constructor(gl, geometry) {
-        this.stride = 0;
         this.attributes = geometry.attributes;
-        this.references = new ReferenceCounter$1();
+        this.references = new ReferenceCounter();
         this.buffers = [];
         this.constructFromBufferedGeometry(gl, geometry);
     }
