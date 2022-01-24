@@ -20,7 +20,7 @@ import { PBRMaterial as PBRMaterial$1 } from '../iwo/src/materials/PBRMaterial.j
 import { BasicMaterial as BasicMaterial$1 } from '../iwo/src/materials/BasicMaterial.js';
 import { ImageLoader as ImageLoader$1 } from '../iwo/src/loader/ImageLoader.js';
 import { OrbitControl as OrbitControl$1 } from '../iwo/src/cameras/OrbitControl.js';
-import { glTFLoader as glTFLoader$1 } from '../iwo/src/loader/glTFLoader.js';
+import { glTFLoader } from '../iwo/src/loader/gltfLoader.js';
 
 let canvas;
 let gl;
@@ -91,7 +91,7 @@ const stats = () => {
     // pbrShader.setUniform("u_lights[0].position", [sun_dir[0], sun_dir[1], sun_dir[2], 0]);
     // pbrShader.setUniform("u_lights[0].color", sun_color);
     // pbrShader.setUniform("u_light_count", 1);
-    pbrShader.setUniform("light_ambient", [0.25, 0.25, 0.25]);
+    pbrShader.setUniform("light_ambient", [1.25, 1.25, 1.25]);
     initScene();
     requestAnimationFrame(update);
 })();
@@ -115,7 +115,7 @@ function initScene() {
     let env_tex = new TextureCubeMap$1(gl);
     const cube_tex = new TextureCubeMap$1(gl);
     //Init Helmet
-    glTFLoader$1.promise("DamagedHelmet.gltf", "../assets/damaged-helmet/").then((value) => {
+    glTFLoader.promise("DamagedHelmet.gltf", "../assets/damaged-helmet/").then((value) => {
         helmet_loaded = true;
         const m = new Mesh$1(gl, value.buffered_geometries[0]);
         renderer.resetSaveBindings();
@@ -154,17 +154,17 @@ function initScene() {
     //         cube_tex.destroy(gl);
     //     });
     // });
-    const file_prefix = "../assets/cubemap/royal_esplanade/royal_esplanade";
+    const file_prefix = "../assets/cubemap/monvalley/MonValley_A_LookoutPoint";
     ImageLoader$1.promise(file_prefix + "_preview.jpg").then((image) => {
         sky_tex.setImage(gl, image, tex2D_opts);
-        ImageLoader$1.promise(file_prefix + ".jpg").then((image) => {
+        ImageLoader$1.promise(file_prefix + "_8k.jpg").then((image) => {
             sky_tex.setImage(gl, image, tex2D_opts);
         });
     });
-    HDRImageLoader$1.promise(file_prefix + "_1k.hdr").then((data) => {
+    HDRImageLoader$1.promise(file_prefix + "_2k.hdr").then((data) => {
         cube_tex.setEquirectangularHDRBuffer(renderer, data);
         irr_tex = TextureCubeMap$1.irradianceFromCubemap(irr_tex, renderer, cube_tex, 16);
-        env_tex = TextureCubeMap$1.specularFromCubemap(env_tex, renderer, cube_tex, 256);
+        env_tex = TextureCubeMap$1.specularFromCubemap(env_tex, renderer, cube_tex, 512);
         // HDRImageLoader.promise(file_prefix + "_2k.hdr").then((data: HDRBuffer) => {
         //     cube_tex.setEquirectangularHDRBuffer(renderer, data);
         //     env_tex = TextureCubeMap.specularFromCubemap(env_tex, renderer, cube_tex, data.width);
@@ -217,12 +217,12 @@ function drawScene() {
     if (helmet_loaded)
         helmet.render(renderer, view_matrix, proj_matrix);
     renderer.resetSaveBindings();
-    // gl.enable(gl.BLEND);
-    // gl.disable(gl.CULL_FACE);
-    // //gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-    // gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-    // grid.render(renderer, view_matrix, proj_matrix);
-    // gl.enable(gl.CULL_FACE);
-    // gl.disable(gl.BLEND);
+    gl.enable(gl.BLEND);
+    gl.disable(gl.CULL_FACE);
+    //gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+    gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+    grid.render(renderer, view_matrix, proj_matrix);
+    gl.enable(gl.CULL_FACE);
+    gl.disable(gl.BLEND);
 }
 //# sourceMappingURL=gltf_example.js.map
