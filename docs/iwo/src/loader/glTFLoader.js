@@ -194,4 +194,4 @@ function ArrayBufferToTypedArray(component_type, view, offset = 0, length) {
 }
 
 export { glTFLoader };
-//# sourceMappingURL=gltfLoader.js.map
+//# sourceMappingURL=glTFLoader.js.map
