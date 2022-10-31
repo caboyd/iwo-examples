@@ -21,6 +21,7 @@ const examples = {
     pbr_example: "PBR Example",
     sphere_geometry_example: "Sphere Geometry Example",
     gltf_example: "glTF Model Example",
+    obj_example: "Obj Model Example",
 };
 
 const template = readFileSync("examples/template.html", "utf-8");
@@ -30,11 +31,7 @@ const output_dir = "docs";
 export default {
     //NOTE: Enable node_modules and src imports to keep in original files and location
     preserveModules: true,
-    input: [
-        ...Object.keys(examples).map(function(key) {
-            return `examples/${key}.ts`;
-        }),
-    ],
+    input: Object.keys(examples).map((key) => `examples/${key}.ts`),
     output: {
         dir: output_dir,
         format: "es",
@@ -54,8 +51,8 @@ export default {
         //  - Using subst on windows to shortcut directories
         nodeResolve(),
         typescript(),
-        ...Object.keys(examples).map(key => {
-            return html({
+        ...Object.keys(examples).map((key) => 
+            (html({
                 fileName: `examples/${key}.html`,
                 template: ({ attributes, bundle, files, publicPath, title }) => {
                     const html = template
@@ -63,8 +60,8 @@ export default {
                         .replace("</title>", `${examples[key]}</title>`);
                     return html;
                 },
-            });
-        }),
+            }))
+        ),
         glslify({
             //compress removes spaces and new line breaks after keywords like 'else' breaking shaders with braces
             compress: false,
