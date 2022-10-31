@@ -1,10 +1,12 @@
 import { Material } from './Material.js';
 import { Renderer } from '../graphics/Renderer.js';
+import { Texture2D } from '../graphics/Texture2D.js';
 import { vec3 } from 'https://unpkg.com/gl-matrix@3.4.3/esm/index.js';
 
 class BasicMaterial extends Material {
     equirectangular_albedo = false;
     albedo;
+    albedo_image;
     albedo_texture;
     albedo_cube_texture;
     constructor(color) {
@@ -14,6 +16,11 @@ class BasicMaterial extends Material {
     activate(gl) {
         const shader = this.shader;
         const active_textures = [false, false];
+        if (this.albedo_texture === undefined && this.albedo_image?.complete) {
+            this.albedo_texture = new Texture2D(gl, this.albedo_image, {
+                flip: false,
+            });
+        }
         if (this.albedo_texture) {
             this.albedo_texture.bind(gl, 0);
             active_textures[0] = true;

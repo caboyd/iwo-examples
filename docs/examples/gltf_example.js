@@ -15,10 +15,11 @@ import '../iwo/src/graphics/WebglConstants.js';
 import '../iwo/src/loader/FileLoader.js';
 import { HDRImageLoader } from '../iwo/src/loader/HDRImageLoader.js';
 import { glTFLoader } from '../iwo/src/loader/glTFLoader.js';
+import '../iwo/src/loader/ObjLoader.js';
 import { ImageLoader } from '../iwo/src/loader/ImageLoader.js';
+import { PBRMaterial } from '../iwo/src/materials/PBRMaterial.js';
 import { BasicMaterial } from '../iwo/src/materials/BasicMaterial.js';
 import { GridMaterial } from '../iwo/src/materials/GridMaterial.js';
-import { PBRMaterial } from '../iwo/src/materials/PBRMaterial.js';
 import { Mesh } from '../iwo/src/meshes/Mesh.js';
 import { MeshInstance } from '../iwo/src/meshes/MeshInstance.js';
 
