@@ -17,9 +17,11 @@ const keys: Array<boolean> = [];
 
 let renderer: IWO.Renderer;
 let grid: IWO.MeshInstance;
-let plane: IWO.MeshInstance;
+
 let cube: IWO.MeshInstance;
 let cube_loaded = false;
+let teapot: IWO.MeshInstance;
+let teapot_loaded = false;
 
 document.getElementById("loading-text-wrapper")!.remove();
 
@@ -96,9 +98,9 @@ await (async function main(): Promise<void> {
     // pbrShader.setUniform("u_lights[0].position", [sun_dir[0], sun_dir[1], sun_dir[2], 0]);
     // pbrShader.setUniform("u_lights[0].color", sun_color);
     // pbrShader.setUniform("u_light_count", 1);
-    pbrShader.setUniform("light_ambient", [1.0, 1.0, 1.0]);
+    const light = 1.0 / Math.PI;
+    pbrShader.setUniform("light_ambient", [light, light, light]);
 
-    console.log("before init");
     await initScene();
 
     requestAnimationFrame(update);
@@ -128,25 +130,25 @@ async function initScene(): Promise<void> {
     const m = await IWO.MtlLoader.promise("cube.mtl", "../assets/obj/cube");
 
     //Init Cube
-    IWO.ObjLoader.promise("cube.obj", "../assets/obj/cube/").then((value: IWO.ObjData) => {
+    IWO.ObjLoader.promise("cube.obj", "../assets/obj/cube/", { flip_image_y: true }).then((value: IWO.ObjData) => {
         cube_loaded = true;
-        // const { objects, materials } = value;
-        // const geom = objects[0].buffered_geometry;
-        const geom = new IWO.BoxGeometry(1, 1, 1);
+        const geom = value.objects[0].buffered_geometry;
         const mesh = new IWO.Mesh(gl, geom);
         renderer.resetSaveBindings();
-        cube = new IWO.MeshInstance(mesh, m.get("cube")!);
-        //const pbr = (cube.materials as IWO.Material[])[0] as IWO.PBRMaterial;
-        // const cube_rot = mat4.fromQuat(mat4.create(), [0.7071068286895752, 0.0, -0.0, 0.7071068286895752]);
-        // mat4.multiply(cube.model_matrix, cube.model_matrix, cube_rot);
-        // mat4.scale(cube.model_matrix, cube.model_matrix, [4, 4, 4]);
-        mat4.translate(cube.model_matrix, cube.model_matrix, [2, 0, 2]);
+        cube = new IWO.MeshInstance(mesh, value.materials ? value.materials : new IWO.NormalOnlyMaterial());
+        mat4.translate(cube.model_matrix, cube.model_matrix, [-2, 2, -2]);
     });
 
-    const plane_geom2 = new IWO.PlaneGeometry(2, 2, 2, 2, false).getBufferedGeometry();
-    const plane_mesh2 = new IWO.Mesh(gl, plane_geom2);
-    plane = new IWO.MeshInstance(plane_mesh2, m.get("cube")!);
-    //mat4.rotateX(plane.model_matrix, plane.model_matrix, Math.PI / 2);
+    //Init Teapot
+    IWO.ObjLoader.promise("teapot.obj", "../assets/obj/teapot/").then((value: IWO.ObjData) => {
+        teapot_loaded = true;
+        const geom = value.objects[0].buffered_geometry;
+        const mesh = new IWO.Mesh(gl, geom);
+        renderer.resetSaveBindings();
+        teapot = new IWO.MeshInstance(mesh, value.materials ? value.materials : new IWO.NormalOnlyMaterial());
+        mat4.scale(teapot.model_matrix, teapot.model_matrix, [0.1, 0.1, 0.1]);
+        mat4.rotateX(teapot.model_matrix, teapot.model_matrix, -Math.PI / 2);
+    });
 }
 
 function update(): void {
@@ -171,10 +173,10 @@ function drawScene(): void {
     camera.getViewMatrix(view_matrix);
     renderer.setPerFrameUniforms(view_matrix, proj_matrix);
 
+    gl.disable(gl.CULL_FACE);
     //Draw Cube
     if (cube_loaded) cube.render(renderer, view_matrix, proj_matrix);
-
-    plane.render(renderer, view_matrix, proj_matrix);
+    if (teapot_loaded) teapot.render(renderer, view_matrix, proj_matrix);
 
     gl.enable(gl.BLEND);
     gl.disable(gl.CULL_FACE);

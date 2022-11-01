@@ -307,11 +307,11 @@ function drawScene(): void {
     gl.disable(gl.BLEND);
 }
 
-window.onkeydown = function(e: KeyboardEvent): void {
+window.onkeydown = function (e: KeyboardEvent): void {
     keys[e.keyCode] = true;
 };
 
-window.onkeyup = function(e: KeyboardEvent): void {
+window.onkeyup = function (e: KeyboardEvent): void {
     keys[e.keyCode] = false;
 };
 
