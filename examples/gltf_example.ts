@@ -80,7 +80,7 @@ const stats = (): void => {
     resizeCanvas();
 
     camera = new IWO.Camera(cPos);
-    orbit = new IWO.OrbitControl(camera, { minimum_distance: 5.5 });
+    orbit = new IWO.OrbitControl(camera, { minimum_distance: 5.5, maximum_distance: 14 });
 
     gl.clearColor(173 / 255, 196 / 255, 221 / 255, 1.0);
     gl.enable(gl.DEPTH_TEST);
@@ -96,7 +96,7 @@ const stats = (): void => {
     pbrShader.setUniform("u_lights[0].position", [sun_dir[0], sun_dir[1], sun_dir[2], 0]);
     pbrShader.setUniform("u_lights[0].color", sun_color);
     pbrShader.setUniform("u_light_count", 1);
-   // pbrShader.setUniform("light_ambient", [1.25, 1.25, 1.25]);
+    // pbrShader.setUniform("light_ambient", [1.25, 1.25, 1.25]);
 
     initScene();
 
@@ -200,17 +200,7 @@ function initScene(): void {
 }
 
 function update(): void {
-    if (keys[87]) camera.processKeyboard(IWO.Camera_Movement.FORWARD, 0.001);
-    else if (keys[83]) camera.processKeyboard(IWO.Camera_Movement.BACKWARD, 0.001);
-    if (keys[65]) camera.processKeyboard(IWO.Camera_Movement.LEFT, 0.001);
-    else if (keys[68]) camera.processKeyboard(IWO.Camera_Movement.RIGHT, 0.001);
-    if (keys[82]) camera.lookAt(vec3.fromValues(0, 0, 0));
-    if (keys[32]) camera.processKeyboard(IWO.Camera_Movement.UP, 0.001);
-
-    orbit.processMouseMovement(-mouse_x_total, -mouse_y_total, true);
-    mouse_x_total = 0;
-    mouse_y_total = 0;
-
+    orbit.update();
     drawScene();
     requestAnimationFrame(update);
 }
