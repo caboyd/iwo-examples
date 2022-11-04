@@ -20,10 +20,7 @@ const light_positions: [number, number, number, number][] = [
 ];
 
 let camera: IWO.Camera;
-
-let mouse_x_total = 0;
-let mouse_y_total = 0;
-const keys: Array<boolean> = [];
+let fps_control: IWO.FPSControl;
 
 let box: IWO.MeshInstance;
 let light_boxes: IWO.MeshInstance[];
@@ -34,18 +31,8 @@ let renderer: IWO.Renderer;
 
 document.getElementById("loading-text-wrapper")!.remove();
 
-const moveCallback = (e: MouseEvent): void => {
-    const movementX = e.movementX || 0;
-    const movementY = e.movementY || 0;
-    if (e.which == 1) {
-        mouse_x_total -= movementX;
-        mouse_y_total -= movementY;
-    }
-};
-
 (function main(): void {
     canvas = <HTMLCanvasElement>document.getElementById("canvas");
-    document.addEventListener("mousemove", moveCallback, false);
 
     gl = IWO.initGL(canvas);
 
@@ -68,7 +55,14 @@ const moveCallback = (e: MouseEvent): void => {
 
     resizeCanvas();
 
-    camera = new IWO.Camera(cPos, cFront, cUp);
+    initScene();
+
+    requestAnimationFrame(update);
+})();
+
+function initScene(): void {
+    camera = new IWO.Camera(cPos, cFront);
+    fps_control = new IWO.FPSControl(camera);
 
     gl.clearColor(0.2, 0.3, 0.3, 1.0);
     gl.enable(gl.DEPTH_TEST);
@@ -78,6 +72,21 @@ const moveCallback = (e: MouseEvent): void => {
     renderer.setViewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
     mat4.perspective(proj_matrix, glMatrix.toRadian(90), gl.drawingBufferWidth / gl.drawingBufferHeight, 0.1, 1000.0);
 
+    /*
+    Converts UV coords of equirectangular image to the vector direction,
+    as if it was projected onto the sphere
+     */
+    function sphereUVtoVec3(out: vec3, u: number, v: number): vec3 {
+        const theta = (v - 0.5) * Math.PI;
+        const phi = u * 2 * Math.PI;
+
+        const x = Math.cos(phi) * Math.cos(theta);
+        const y = Math.sin(theta);
+        const z = Math.sin(phi) * Math.cos(theta);
+
+        vec3.set(out, x, y, z);
+        return out;
+    }
     //0.5-u because we scaled x by -1 to invert sphere
     //1-v because we flipped the image
     const sun_dir = sphereUVtoVec3(vec3.create(), 0.5 + 0.872, 1 - 0.456);
@@ -100,12 +109,6 @@ const moveCallback = (e: MouseEvent): void => {
 
     pbrShader.setUniform("u_light_count", 4);
 
-    initScene();
-
-    requestAnimationFrame(update);
-})();
-
-function initScene(): void {
     const sky_tex = new IWO.Texture2D(gl);
     let irr_tex = new IWO.TextureCubeMap(gl);
     let env_tex = new IWO.TextureCubeMap(gl);
@@ -199,17 +202,7 @@ function initScene(): void {
 }
 
 function update(): void {
-    if (keys[87]) camera.processKeyboard(IWO.Camera_Movement.FORWARD, 0.001);
-    else if (keys[83]) camera.processKeyboard(IWO.Camera_Movement.BACKWARD, 0.001);
-    if (keys[65]) camera.processKeyboard(IWO.Camera_Movement.LEFT, 0.001);
-    else if (keys[68]) camera.processKeyboard(IWO.Camera_Movement.RIGHT, 0.001);
-    if (keys[82]) camera.lookAt(vec3.fromValues(0, 0, 0));
-    if (keys[32]) camera.processKeyboard(IWO.Camera_Movement.UP, 0.001);
-
-    camera.processMouseMovement(-mouse_x_total, -mouse_y_total, true);
-    mouse_x_total = 0;
-    mouse_y_total = 0;
-
+    fps_control.update();
     drawScene();
     requestAnimationFrame(update);
 }
@@ -244,29 +237,4 @@ function drawScene(): void {
     }
 
     grid.render(renderer, view_matrix, proj_matrix);
-
-}
-
-window.onkeydown = function (e: KeyboardEvent): void {
-    keys[e.keyCode] = true;
-};
-
-window.onkeyup = function (e: KeyboardEvent): void {
-    keys[e.keyCode] = false;
-};
-
-/*
-    Converts UV coords of equirectangular image to the vector direction,
-    as if it was projected onto the sphere
- */
-function sphereUVtoVec3(out: vec3, u: number, v: number): vec3 {
-    const theta = (v - 0.5) * Math.PI;
-    const phi = u * 2 * Math.PI;
-
-    const x = Math.cos(phi) * Math.cos(theta);
-    const y = Math.sin(theta);
-    const z = Math.sin(phi) * Math.cos(theta);
-
-    vec3.set(out, x, y, z);
-    return out;
 }

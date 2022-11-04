@@ -11,11 +11,6 @@ const cPos: vec3 = vec3.fromValues(2.5, 0, 6.0);
 let camera: IWO.Camera;
 let orbit: IWO.OrbitControl;
 
-let mouse_x_total = 0;
-let mouse_y_total = 0;
-const keys: Array<boolean> = [];
-
-let grid: IWO.MeshInstance;
 let renderer: IWO.Renderer;
 let skybox: IWO.MeshInstance;
 let helmet: IWO.MeshInstance;
@@ -23,42 +18,10 @@ let helmet_loaded = false;
 
 document.getElementById("loading-text-wrapper")!.remove();
 
-const moveCallback = (e: MouseEvent): void => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const movementX = e.movementX || e.mozMovementX || e.webkitMovementX || 0;
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const movementY = e.movementY || e.mozMovementY || e.webkitMovementY || 0;
-    if (e.which == 1) {
-        mouse_x_total += movementX;
-        mouse_y_total += movementY;
-    }
-};
-
-const stats = (): void => {
-    const script = document.createElement("script");
-    script.onload = (): void => {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        const stats = new Stats();
-        document.body.appendChild(stats.dom);
-        requestAnimationFrame(function loop() {
-            stats.update();
-            requestAnimationFrame(loop);
-        });
-    };
-    script.src = "//rawgit.com/mrdoob/stats.js/master/build/stats.min.js";
-    document.head.appendChild(script);
-};
-
 (function main(): void {
-    stats();
-
     canvas = <HTMLCanvasElement>document.getElementById("canvas");
-    document.addEventListener("mousemove", moveCallback, false);
 
-    gl = initGL();
+    gl = IWO.initGL(canvas);
 
     renderer = new IWO.Renderer(gl);
 
@@ -72,31 +35,12 @@ const stats = (): void => {
             proj_matrix,
             glMatrix.toRadian(45),
             gl.drawingBufferWidth / gl.drawingBufferHeight,
-            0.25,
-            20.0
+            0.1,
+            1000.0
         );
     }
 
     resizeCanvas();
-
-    camera = new IWO.Camera(cPos);
-    orbit = new IWO.OrbitControl(camera, { minimum_distance: 5.5, maximum_distance: 14 });
-
-    gl.clearColor(173 / 255, 196 / 255, 221 / 255, 1.0);
-    gl.enable(gl.DEPTH_TEST);
-    gl.enable(gl.CULL_FACE);
-    gl.cullFace(gl.BACK);
-
-    const sun_dir = sphereUVtoVec3(vec3.create(), 0.5 + 0.872, 1 - 0.456);
-    const sun_intensity = 24;
-    const sun_color = [(sun_intensity * 254) / 255, (sun_intensity * 238) / 255, (sun_intensity * 224) / 255];
-
-    const pbrShader = IWO.PBRMaterial.Shader;
-    pbrShader.use();
-    pbrShader.setUniform("u_lights[0].position", [sun_dir[0], sun_dir[1], sun_dir[2], 0]);
-    pbrShader.setUniform("u_lights[0].color", sun_color);
-    pbrShader.setUniform("u_light_count", 1);
-    // pbrShader.setUniform("light_ambient", [1.25, 1.25, 1.25]);
 
     initScene();
 
@@ -117,8 +61,36 @@ function initGL(): WebGL2RenderingContext {
 }
 
 function initScene(): void {
-    const plane_geom = new IWO.PlaneGeometry(100, 100, 1, 1, true);
-    const plane_mesh = new IWO.Mesh(gl, plane_geom);
+    camera = new IWO.Camera(cPos);
+    orbit = new IWO.OrbitControl(camera, { minimum_distance: 5.5, maximum_distance: 14 });
+
+    gl.clearColor(173 / 255, 196 / 255, 221 / 255, 1.0);
+    gl.enable(gl.DEPTH_TEST);
+    gl.enable(gl.CULL_FACE);
+    gl.cullFace(gl.BACK);
+
+    function sphereUVtoVec3(out: vec3, u: number, v: number): vec3 {
+        const theta = (v - 0.5) * Math.PI;
+        const phi = u * 2 * Math.PI;
+
+        const x = Math.cos(phi) * Math.cos(theta);
+        const y = Math.sin(theta);
+        const z = Math.sin(phi) * Math.cos(theta);
+
+        vec3.set(out, x, y, z);
+        return out;
+    }
+
+    const sun_dir = sphereUVtoVec3(vec3.create(), 0.5 + 0.872, 1 - 0.456);
+    const sun_intensity = 24;
+    const sun_color = [(sun_intensity * 254) / 255, (sun_intensity * 238) / 255, (sun_intensity * 224) / 255];
+
+    const pbrShader = IWO.PBRMaterial.Shader;
+    pbrShader.use();
+    pbrShader.setUniform("u_lights[0].position", [sun_dir[0], sun_dir[1], sun_dir[2], 0]);
+    pbrShader.setUniform("u_lights[0].color", sun_color);
+    pbrShader.setUniform("u_light_count", 1);
+    // pbrShader.setUniform("light_ambient", [1.25, 1.25, 1.25]);
 
     const sky_tex = new IWO.Texture2D(gl);
     let irr_tex = new IWO.TextureCubeMap(gl);
@@ -150,24 +122,6 @@ function initScene(): void {
         flip: true,
     };
 
-    // const file_prefix = "../assets/cubemap/monvalley/MonValley_A_LookoutPoint";
-    // ImageLoader.promise(file_prefix + "_preview.jpg").then((image: HTMLImageElement) => {
-    //     sky_tex.setImage(gl, image, tex2D_opts);
-    //     ImageLoader.promise(file_prefix + "_8k.jpg").then((image: HTMLImageElement) => {
-    //         sky_tex.setImage(gl, image, tex2D_opts);
-    //     });
-    // });
-    //
-    // HDRImageLoader.promise(file_prefix + "_Env.hdr").then((data: HDRBuffer) => {
-    //     cube_tex.setEquirectangularHDRBuffer(renderer, data);
-    //     irr_tex = TextureCubeMap.irradianceFromCubemap(irr_tex, renderer, cube_tex);
-    //     env_tex = TextureCubeMap.specularFromCubemap(env_tex, renderer, cube_tex);
-    //     HDRImageLoader.promise(file_prefix + "_2k.hdr").then((data: HDRBuffer) => {
-    //         cube_tex.setEquirectangularHDRBuffer(renderer, data);
-    //         env_tex = TextureCubeMap.specularFromCubemap(env_tex, renderer, cube_tex, data.width);
-    //         cube_tex.destroy(gl);
-    //     });
-    // });
     const file_prefix = "../assets/cubemap/monvalley/MonValley_A_LookoutPoint";
     IWO.ImageLoader.promise(file_prefix + "_preview.jpg").then((image: HTMLImageElement) => {
         sky_tex.setImage(gl, image, tex2D_opts);
@@ -186,10 +140,6 @@ function initScene(): void {
         //     cube_tex.destroy(gl);
         // });
     });
-
-    //GRID
-    const grid_mat = new IWO.GridMaterial(50);
-    grid = new IWO.MeshInstance(plane_mesh, grid_mat);
 
     //SKYBOX
     const sky_geom = new IWO.SphereGeometry(1, 48, 48);
@@ -226,23 +176,4 @@ function drawScene(): void {
     if (helmet_loaded) helmet.render(renderer, view_matrix, proj_matrix);
     renderer.resetSaveBindings();
 
-    // gl.enable(gl.BLEND);
-    // gl.disable(gl.CULL_FACE);
-    // //gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-    // gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-    // grid.render(renderer, view_matrix, proj_matrix);
-    // gl.enable(gl.CULL_FACE);
-    // gl.disable(gl.BLEND);
-}
-
-function sphereUVtoVec3(out: vec3, u: number, v: number): vec3 {
-    const theta = (v - 0.5) * Math.PI;
-    const phi = u * 2 * Math.PI;
-
-    const x = Math.cos(phi) * Math.cos(theta);
-    const y = Math.sin(theta);
-    const z = Math.sin(phi) * Math.cos(theta);
-
-    vec3.set(out, x, y, z);
-    return out;
 }

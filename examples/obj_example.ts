@@ -37,8 +37,8 @@ await (async function main(): Promise<void> {
             proj_matrix,
             glMatrix.toRadian(45),
             gl.drawingBufferWidth / gl.drawingBufferHeight,
-            0.25,
-            20.0
+            0.1,
+            1000.0
         );
     }
 
