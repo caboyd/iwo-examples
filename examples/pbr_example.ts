@@ -1,5 +1,5 @@
 import { glMatrix, mat4, vec3 } from "gl-matrix";
-import * as IWO from "iwo/src/iwo";
+import * as IWO from "iwo";
 
 let canvas: HTMLCanvasElement;
 

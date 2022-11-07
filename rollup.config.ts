@@ -20,6 +20,7 @@ const pkg = require("./package.json");
 const examples = {
     pbr_example: "PBR Example",
     sphere_geometry_example: "Sphere Geometry Example",
+    line_geometry_example: "Line Geometry Example",
     gltf_example: "glTF Model Example",
     obj_example: "Obj Model Example",
 };
@@ -51,8 +52,8 @@ export default {
         //  - Using subst on windows to shortcut directories
         nodeResolve(),
         typescript(),
-        ...Object.keys(examples).map((key) => 
-            (html({
+        ...Object.keys(examples).map((key) =>
+            html({
                 fileName: `examples/${key}.html`,
                 template: ({ attributes, bundle, files, publicPath, title }) => {
                     const html = template
@@ -60,7 +61,7 @@ export default {
                         .replace("</title>", `${examples[key]}</title>`);
                     return html;
                 },
-            }))
+            })
         ),
         glslify({
             //compress removes spaces and new line breaks after keywords like 'else' breaking shaders with braces

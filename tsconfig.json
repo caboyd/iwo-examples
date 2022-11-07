@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "target": "esnext",
+    "target": "ESNext",
     "moduleResolution": "node",
-    "module": "es6",
+    "module": "ES2020",
     "sourceMap": true,
     "esModuleInterop": true,
     "declaration": false,
@@ -10,9 +10,7 @@
     "rootDir": ".",
     "paths":{
       "*":[
-        "*",
         "examples/*",
-        "iwo/*",
         "iwo/src/*"
       ]
     },
