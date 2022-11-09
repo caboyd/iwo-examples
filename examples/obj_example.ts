@@ -1,5 +1,5 @@
 import { glMatrix, mat4, vec3 } from "gl-matrix";
-import * as IWO from "iwo"
+import * as IWO from "iwo";
 
 let gl: WebGL2RenderingContext;
 
@@ -52,8 +52,8 @@ await (async function main(): Promise<void> {
     gl.enable(gl.DEPTH_TEST);
 
     const light = 1.0 / Math.PI;
-    const pbrShader = IWO.PBRMaterial.Shader;
-    pbrShader.use();
+    const pbrShader = renderer.getorCreateShader(IWO.ShaderSource.PBR);
+    renderer.setAndActivateShader(pbrShader);
     pbrShader.setUniform("light_ambient", [light, light, light]);
 
     await initScene();

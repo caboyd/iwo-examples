@@ -1,6 +1,5 @@
 import { mat4, vec3 } from "gl-matrix";
 import * as IWO from "iwo";
-import { LineGeometry } from "geometry/LineGeometry";
 
 let canvas: HTMLCanvasElement;
 let gl: WebGL2RenderingContext;

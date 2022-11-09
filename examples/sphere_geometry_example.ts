@@ -61,8 +61,8 @@ function initScene(): void {
     const sun_intensity = 20;
     const sun_color = [(sun_intensity * 254) / 255, (sun_intensity * 238) / 255, (sun_intensity * 224) / 255];
 
-    const pbrShader = IWO.PBRMaterial.Shader;
-    pbrShader.use();
+    const pbrShader = renderer.getorCreateShader(IWO.ShaderSource.PBR);
+    renderer.setAndActivateShader(pbrShader);
     pbrShader.setUniform("u_lights[0].position", [sun_dir[0], sun_dir[1], sun_dir[2], 0]);
     pbrShader.setUniform("u_lights[0].color", sun_color);
     pbrShader.setUniform("light_ambient", [0.01, 0.01, 0.01]);
