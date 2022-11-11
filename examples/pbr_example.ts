@@ -142,8 +142,7 @@ function initScene(): void {
     });
 
     const earth_tex = IWO.TextureLoader.load(gl, "../assets/earth.jpg");
-
-    const box_geom = new IWO.BoxGeometry(3.0, 3.0, 3.0, 1, 1, 1, false);
+    const box_geom = new IWO.BoxGeometry({ width: 3.0, height: 3.0, depth: 3.0, stretch_texture: false });
     const sphere_geom = new IWO.SphereGeometry(0.75, 16, 16);
     const plane_geom = new IWO.PlaneGeometry(100, 100, 1, 1, true);
 
@@ -166,7 +165,7 @@ function initScene(): void {
     skybox = new IWO.MeshInstance(sky_mesh, sky_mat);
 
     //LIGHTS
-    const light_geom = new IWO.BoxGeometry(1.0, 1.0, 1.0);
+    const light_geom = new IWO.BoxGeometry();
     const light_mesh = new IWO.Mesh(gl, light_geom);
     const light_mat = new IWO.PBRMaterial(vec3.fromValues(1000, 1000, 1000), 0.0, 1.0);
     light_boxes = [];

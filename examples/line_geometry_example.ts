@@ -1,4 +1,4 @@
-import { mat4, vec3 } from "gl-matrix";
+import { mat4, vec3, glMatrix } from "gl-matrix";
 import * as IWO from "iwo";
 
 let canvas: HTMLCanvasElement;
@@ -12,6 +12,7 @@ let camera: IWO.Camera;
 let orbit: IWO.OrbitControl;
 
 let line: IWO.MeshInstance;
+let linejoin: IWO.MeshInstance;
 let grid: IWO.MeshInstance;
 let renderer: IWO.Renderer;
 
@@ -29,22 +30,22 @@ await (async function main(): Promise<void> {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         renderer.setViewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-        // mat4.perspective(
-        //     proj_matrix,
-        //     glMatrix.toRadian(90),
-        //     gl.drawingBufferWidth / gl.drawingBufferHeight,
-        //     0.1,
-        //     1000.0
-        // );
-        mat4.ortho(
+        mat4.perspective(
             proj_matrix,
-            -gl.drawingBufferWidth / 2,
-            gl.drawingBufferWidth / 2,
-            -gl.drawingBufferHeight / 2,
-            gl.drawingBufferHeight / 2,
-            0,
-            -1
+            glMatrix.toRadian(90),
+            gl.drawingBufferWidth / gl.drawingBufferHeight,
+            0.1,
+            1000.0
         );
+        // mat4.ortho(
+        //     proj_matrix,
+        //     -gl.drawingBufferWidth / 2,
+        //     gl.drawingBufferWidth / 2,
+        //     -gl.drawingBufferHeight / 2,
+        //     gl.drawingBufferHeight / 2,
+        //     0.1,
+        //     -1
+        // );
     }
 
     resizeCanvas();
@@ -62,32 +63,18 @@ function initScene(): void {
     gl.enable(gl.DEPTH_TEST);
     gl.disable(gl.CULL_FACE);
 
-    const points: vec3[] = [
-        [-233.85453851692355, -50, 0],
-        [-167.0389560835168, 50, 0],
-        [-100.22337365011009, -50, 0],
-        [-33.407791216703366, 50, 0],
-        [33.407791216703366, -50, 0],
-        [100.22337365011009, 50, 0],
-        [167.0389560835168, -50, 0],
-        [233.85453851692355, 50, 0],
-        [0, 1, 0],
-        [1, 1, 0],
-    ];
-
-    const line_geom = new IWO.LineGeometry(generatePoints(gl, 1));
+    const line_geom = new IWO.LineGeometry(generatePoints(gl, 1), { type: "line strip" });
     const line_mesh = new IWO.Mesh(gl, line_geom);
 
-    //GRID
-    const line_mat = new IWO.LineMaterial([0, 0, 0, 1]);
+    const line_mat = new IWO.LineMaterial([gl.drawingBufferWidth, gl.drawingBufferHeight], [0, 0, 0, 1], 8);
     line = new IWO.MeshInstance(line_mesh, line_mat);
 
-    // const plane_geom = new IWO.PlaneGeometry(100, 100, 1, 1, true);
-    // const plane_mesh = new IWO.Mesh(gl, plane_geom);
+    const plane_geom = new IWO.PlaneGeometry(100, 100, 1, 1, true);
+    const plane_mesh = new IWO.Mesh(gl, plane_geom);
 
-    // //GRID
-    // const grid_mat = new IWO.GridMaterial(50);
-    // grid = new IWO.MeshInstance(plane_mesh, grid_mat);
+    //GRID
+    const grid_mat = new IWO.GridMaterial(50);
+    grid = new IWO.MeshInstance(plane_mesh, grid_mat);
 }
 
 let delta = 0;
@@ -123,22 +110,23 @@ function update(): void {
 function drawScene(): void {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    //camera.getViewMatrix(view_matrix);
+    camera.getViewMatrix(view_matrix);
     renderer.setPerFrameUniforms(view_matrix, proj_matrix);
 
     line.render(renderer, view_matrix, proj_matrix);
-    //grid.render(renderer, view_matrix, proj_matrix);
+
+    grid.render(renderer, view_matrix, proj_matrix);
 }
 
 function generatePoints(gl: WebGL2RenderingContext, scale: number): number[] {
-    const width = gl.drawingBufferWidth;
-    const height = gl.drawingBufferHeight;
+    const width = 20;
+    const height = 20;
     const stepx = width / 9;
     const stepy = height / 3;
     const points = [];
     for (let x = 1; x < 9; x += 2) {
-        points.push(((x + 0) * stepx - width / 2) * scale, 1 * stepy - height / 2, 0);
-        points.push(((x + 1) * stepx - width / 2) * scale, 2 * stepy - height / 2, 0);
+        points.push(((x + 0) * stepx - width / 2) * scale, 0, 1 * stepy - height / 2);
+        points.push(((x + 1) * stepx - width / 2) * scale, 0, 2 * stepy - height / 2);
     }
     return points;
 }
