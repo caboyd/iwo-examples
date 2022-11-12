@@ -12,7 +12,7 @@ let camera: IWO.Camera;
 let orbit: IWO.OrbitControl;
 
 let line: IWO.MeshInstance;
-let linejoin: IWO.MeshInstance;
+let line2: IWO.MeshInstance;
 let grid: IWO.MeshInstance;
 let renderer: IWO.Renderer;
 
@@ -57,17 +57,24 @@ await (async function main(): Promise<void> {
 
 function initScene(): void {
     camera = new IWO.Camera(cPos);
-    orbit = new IWO.OrbitControl(camera, { maximum_distance: 16, orbit_point: [0, 0, 0] });
+    orbit = new IWO.OrbitControl(camera, { maximum_distance: 30, orbit_point: [0, 0, 0] });
 
     gl.clearColor(173 / 255, 196 / 255, 221 / 255, 1.0);
     gl.enable(gl.DEPTH_TEST);
-    gl.disable(gl.CULL_FACE);
+    //gl.enable(gl.CULL_FACE);
+    //gl.cullFace(gl.BACK);
 
-    const line_geom = new IWO.LineGeometry(generatePoints(gl, 1), { type: "line strip" });
-    const line_mesh = new IWO.Mesh(gl, line_geom);
+    let line_geom = new IWO.LineGeometry(generatePoints(gl, 1, -2), { type: "line strip" });
+    let line_mesh = new IWO.Mesh(gl, line_geom);
 
-    const line_mat = new IWO.LineMaterial([gl.drawingBufferWidth, gl.drawingBufferHeight], [0, 0, 0, 1], 8);
+    const line_mat = new IWO.LineMaterial([gl.drawingBufferWidth, gl.drawingBufferHeight], [0, 0, 0, 1], 50, true);
     line = new IWO.MeshInstance(line_mesh, line_mat);
+
+    line_geom = new IWO.LineGeometry(generatePoints(gl, 1, 2), { type: "line strip" });
+    line_mesh = new IWO.Mesh(gl, line_geom);
+
+    const line_mat2 = new IWO.LineMaterial([gl.drawingBufferWidth, gl.drawingBufferHeight], [1, 1, 1, 1], 15, false);
+    line2 = new IWO.MeshInstance(line_mesh, line_mat2);
 
     const plane_geom = new IWO.PlaneGeometry(100, 100, 1, 1, true);
     const plane_mesh = new IWO.Mesh(gl, plane_geom);
@@ -87,6 +94,8 @@ function update(): void {
     delta = new_now - last_now;
     last_now = new_now;
 
+    delta = Math.min(delta, 20);
+
     orbit.update();
     drawScene();
 
@@ -99,9 +108,11 @@ function update(): void {
     loop += delta * direction;
     const mod = loop / 2000;
 
-    const line_geom = new IWO.LineGeometry(generatePoints(gl, mod)).getBufferedGeometry();
-
+    let line_geom = new IWO.LineGeometry(generatePoints(gl, mod, -2)).getBufferedGeometry();
     line.mesh.updateGeometryBuffer(gl, line_geom);
+
+    line_geom = new IWO.LineGeometry(generatePoints(gl, mod, 2)).getBufferedGeometry();
+    line2.mesh.updateGeometryBuffer(gl, line_geom);
 
     renderer.resetSaveBindings();
     requestAnimationFrame(update);
@@ -114,19 +125,20 @@ function drawScene(): void {
     renderer.setPerFrameUniforms(view_matrix, proj_matrix);
 
     line.render(renderer, view_matrix, proj_matrix);
+    line2.render(renderer, view_matrix, proj_matrix);
 
     grid.render(renderer, view_matrix, proj_matrix);
 }
 
-function generatePoints(gl: WebGL2RenderingContext, scale: number): number[] {
+function generatePoints(gl: WebGL2RenderingContext, scale: number, zoffset: number): number[] {
     const width = 20;
     const height = 20;
     const stepx = width / 9;
     const stepy = height / 3;
     const points = [];
     for (let x = 1; x < 9; x += 2) {
-        points.push(((x + 0) * stepx - width / 2) * scale, 0, 1 * stepy - height / 2);
-        points.push(((x + 1) * stepx - width / 2) * scale, 0, 2 * stepy - height / 2);
+        points.push(((x + 0) * stepx - width / 2) * scale, 0.1, 1 * stepy - height / 2 + zoffset);
+        points.push(((x + 1) * stepx - width / 2) * scale, 0.1, 2 * stepy - height / 2 + zoffset);
     }
     return points;
 }
