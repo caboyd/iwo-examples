@@ -3,6 +3,7 @@ import * as IWO from "iwo";
 
 let canvas: HTMLCanvasElement;
 let gl: WebGL2RenderingContext;
+const FOV = 60 as const;
 
 const view_matrix: mat4 = mat4.create();
 const proj_matrix: mat4 = mat4.create();
@@ -32,7 +33,7 @@ await (async function main(): Promise<void> {
         renderer.setViewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
         mat4.perspective(
             proj_matrix,
-            glMatrix.toRadian(90),
+            glMatrix.toRadian(FOV),
             gl.drawingBufferWidth / gl.drawingBufferHeight,
             0.1,
             1000.0
@@ -64,11 +65,11 @@ function initScene(): void {
     //gl.enable(gl.CULL_FACE);
     //gl.cullFace(gl.BACK);
 
-    camera.getInverseViewMatrix(view_matrix);
-    frustum = new IWO.Frustum(gl, view_matrix);
+    camera.getViewMatrix(view_matrix);
+    frustum = new IWO.Frustum(gl, view_matrix, { fov: FOV });
 
     let line_points = [];
-    const p = frustum.calculateFrustumCorners();
+    const p = frustum.calculateFrustumCorners(camera.getInverseViewMatrix(mat4.create()));
 
     //add far plane line segments
     line_points.push(p[0], p[1], p[1], p[3], p[3], p[2], p[2], p[0]);
