@@ -89,7 +89,7 @@ function initScene(): void {
     const plane_mesh = new IWO.Mesh(gl, plane_geom);
 
     //GRID
-    const grid_mat = new IWO.GridMaterial(50);
+    const grid_mat = new IWO.GridMaterial();
     grid = new IWO.MeshInstance(plane_mesh, grid_mat);
 }
 

@@ -154,7 +154,7 @@ function initScene(): void {
     sphere_mat.albedo_texture = earth_tex;
 
     //GRID
-    const grid_mat = new IWO.GridMaterial(50);
+    const grid_mat = new IWO.GridMaterial();
     grid = new IWO.MeshInstance(plane_mesh, grid_mat);
 
     //SKYBOX

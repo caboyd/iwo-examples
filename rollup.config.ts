@@ -24,6 +24,7 @@ const examples = {
     gltf_example: "glTF Model Example",
     obj_example: "Obj Model Example",
     frustum_example: "Camera Frustum Example",
+    shadows_example: "Shadows Example",
 };
 
 const template = readFileSync("examples/template.html", "utf-8");
@@ -65,7 +66,7 @@ export default {
             })
         ),
         glslify({
-            //compress removes spaces and new line breaks after keywords like 'else' breaking shaders with braces
+            //compress removes spaces and new line breaks after keywords like 'else' breaking shaders without braces
             compress: false,
         }),
         copy({

@@ -74,7 +74,7 @@ function initScene(): void {
     const sphere_mat = new IWO.PBRMaterial(vec3.fromValues(1, 1, 1), 0, 1, 0);
 
     //GRID
-    const grid_mat = new IWO.GridMaterial(50);
+    const grid_mat = new IWO.GridMaterial();
     grid = new IWO.MeshInstance(plane_mesh, grid_mat);
 
     //SPHERES
