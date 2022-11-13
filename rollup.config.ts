@@ -23,6 +23,7 @@ const examples = {
     line_geometry_example: "Line Geometry Example",
     gltf_example: "glTF Model Example",
     obj_example: "Obj Model Example",
+    frustum_example: "Camera Frustum Example",
 };
 
 const template = readFileSync("examples/template.html", "utf-8");
