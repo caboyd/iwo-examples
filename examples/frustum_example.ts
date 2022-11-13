@@ -13,7 +13,7 @@ let camera: IWO.Camera;
 let orbit: IWO.OrbitControl;
 let frustum: IWO.Frustum;
 
-let line: IWO.MeshInstance;
+let frustum_line: IWO.MeshInstance;
 let grid: IWO.MeshInstance;
 let renderer: IWO.Renderer;
 
@@ -65,9 +65,22 @@ function initScene(): void {
     //gl.enable(gl.CULL_FACE);
     //gl.cullFace(gl.BACK);
 
-    camera.getViewMatrix(view_matrix);
-    frustum = new IWO.Frustum(gl, view_matrix, { fov: FOV });
+    frustum = new IWO.Frustum(gl, { fov: FOV });
 
+    let line_mesh = getFrustumLineMesh();
+
+    const line_mat = new IWO.LineMaterial([gl.drawingBufferWidth, gl.drawingBufferHeight], [0, 0, 0, 1], 8, false);
+    frustum_line = new IWO.MeshInstance(line_mesh, line_mat);
+
+    const plane_geom = new IWO.PlaneGeometry(100, 100, 1, 1, true);
+    const plane_mesh = new IWO.Mesh(gl, plane_geom);
+
+    //GRID
+    const grid_mat = new IWO.GridMaterial();
+    grid = new IWO.MeshInstance(plane_mesh, grid_mat);
+}
+
+function getFrustumLineMesh() {
     let line_points = [];
     const p = frustum.calculateFrustumCorners(camera.getInverseViewMatrix(mat4.create()));
 
@@ -81,16 +94,7 @@ function initScene(): void {
 
     let line_geom = new IWO.LineGeometry(line_points, { type: "lines" });
     let line_mesh = new IWO.Mesh(gl, line_geom);
-
-    const line_mat = new IWO.LineMaterial([gl.drawingBufferWidth, gl.drawingBufferHeight], [0, 0, 0, 1], 8, false);
-    line = new IWO.MeshInstance(line_mesh, line_mat);
-
-    const plane_geom = new IWO.PlaneGeometry(100, 100, 1, 1, true);
-    const plane_mesh = new IWO.Mesh(gl, plane_geom);
-
-    //GRID
-    const grid_mat = new IWO.GridMaterial();
-    grid = new IWO.MeshInstance(plane_mesh, grid_mat);
+    return line_mesh;
 }
 
 function update(): void {
@@ -107,7 +111,7 @@ function drawScene(): void {
     camera.getViewMatrix(view_matrix);
     renderer.setPerFrameUniforms(view_matrix, proj_matrix);
 
-    line.render(renderer, view_matrix, proj_matrix);
+    frustum_line.render(renderer, view_matrix, proj_matrix);
 
     grid.render(renderer, view_matrix, proj_matrix);
 }
