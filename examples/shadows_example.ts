@@ -99,7 +99,7 @@ function initScene(): void {
 
     //GRID
     const grid_mat = new IWO.GridMaterial({
-        base_color: [0.49, 0.49, 0.49, 1.0],
+        base_color: [0.49, 0.49, 0.49, 0.4],
     });
     grid = new IWO.MeshInstance(plane_mesh, grid_mat);
 
@@ -198,10 +198,14 @@ function drawScene(): void {
     //mat4.perspective(proj_matrix, glMatrix.toRadian(FOV), DEPTH_TEXTURE_SIZE / DEPTH_TEXTURE_SIZE, 0.1, 1000.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     camera.getViewMatrix(view_matrix);
-    renderer.setPerFrameUniforms(view_matrix, proj_matrix);
-    frustum_line.render(renderer, view_matrix, proj_matrix);
-    cuboid_line.render(renderer, view_matrix, proj_matrix);
-    //grid.render(renderer, view_matrix, proj_matrix);
+
+    const v = view_matrix;
+    const p = proj_matrix;
+    renderer.setPerFrameUniforms(v, p);
+
+    frustum_line.render(renderer, v, p);
+    cuboid_line.render(renderer, v, p);
+    // grid.render(renderer, v, p);
 
     const inverse_view = camera.getInverseViewMatrix(mat4.create());
     let b = mat4.multiply(mat4.create(), light_view_matrix, inverse_view);
@@ -222,7 +226,7 @@ function drawScene(): void {
 
         sphere.materials = [mat];
 
-        sphere.render(renderer, view_matrix, proj_matrix);
+        sphere.render(renderer, v, p);
     }
     renderDepth();
 }
@@ -268,30 +272,45 @@ function updateLightViewMatrix() {
     let center = frustum.getCenter();
     vec3.negate(center, center);
 
+    console.log(camera.position, center);
+
     let light_inverse_dir = vec3.fromValues(-LIGHT_DIRECTION[0], -LIGHT_DIRECTION[1], -LIGHT_DIRECTION[2]);
 
     mat4.identity(light_view_matrix);
 
-    let pitch = Math.acos(vec2.length([light_inverse_dir[0], light_inverse_dir[2]]));
+    // let pitch = Math.acos(vec2.length([light_inverse_dir[0], light_inverse_dir[2]]));
 
-    mat4.rotateX(light_view_matrix, light_view_matrix, pitch);
+    // mat4.rotateX(light_view_matrix, light_view_matrix, pitch);
 
-    let yaw = Math.atan2(light_inverse_dir[2], light_inverse_dir[0]);
+    // let yaw = Math.atan2(light_inverse_dir[2], light_inverse_dir[0]);
 
-    yaw = light_inverse_dir[2] > 0 ? yaw - Math.PI : yaw;
+    // yaw = light_inverse_dir[2] > 0 ? yaw - Math.PI : yaw;
 
-    mat4.rotateY(light_view_matrix, light_view_matrix, yaw + Math.PI / 2);
-    //mat4.translate(light_view_matrix, light_view_matrix, center);
+    // mat4.rotateY(light_view_matrix, light_view_matrix, yaw + Math.PI / 2);
+
+    mat4.lookAt(light_view_matrix, [0, 0, 0], light_inverse_dir, [0, 1, 0]);
+
+    //move to frustum center
+    //get camera pos in light space
+    const c = vec3.transformMat4(vec3.create(), frustum.getCenter(), light_view_matrix);
+
+    //move frustum to camera world pos
+    //mat4.translate(light_view_matrix, light_view_matrix, c);
+
+    //move ontop of camera in world space
+    //mat4.translate(light_view_matrix, light_view_matrix, camera.position);
 }
 
 function getFrustumLineGeometry() {
     const inverse_view = camera.getInverseViewMatrix(mat4.create());
+    const inverse_light = mat4.invert(mat4.create(), light_view_matrix);
     let b = mat4.multiply(mat4.create(), light_view_matrix, inverse_view);
-    const p = frustum.calculateFrustumCorners(b);
+    let vv = mat4.multiply(mat4.create(), inverse_light, inverse_view);
+    const p = frustum.calculateFrustumCorners(vv);
 
     let line_points = [];
     //add far plane line segments
-    line_points.push(p[0], p[1], p[1], p[3], p[3], p[2], p[2], p[0]);
+    line_points.push(p[0][0], p[0][1], p[0][2], p[1][0], p[1][1], p[1][2], p[1], p[3], p[3], p[2], p[2], p[0]);
     //add near plane lines
     line_points.push(p[0 + 4], p[1 + 4], p[1 + 4], p[3 + 4], p[3 + 4], p[2 + 4], p[2 + 4], p[0 + 4]);
     //add near to far top left, top right, bottom left, bottom right
@@ -304,8 +323,10 @@ function getFrustumLineGeometry() {
 
 function getFrustumCuboidLineGeometry() {
     const inverse_view = camera.getInverseViewMatrix(mat4.create());
+    const inverse_light = mat4.invert(mat4.create(), light_view_matrix);
     let b = mat4.multiply(mat4.create(), light_view_matrix, inverse_view);
-    frustum.update(b);
+    let vv = mat4.multiply(mat4.create(), inverse_light, inverse_view);
+    frustum.update(vv);
 
     const c = frustum.getCenter();
     const w = frustum.getWidth();
@@ -329,7 +350,7 @@ function updateDepthProjectionMatrix() {
     const inverse_view = camera.getInverseViewMatrix(mat4.create());
     let b = mat4.multiply(mat4.create(), light_view_matrix, inverse_view);
     frustum.update(b);
-    frustum.getOrth(depth_proj_matrix);
+    frustum.getOrtho(depth_proj_matrix);
 }
 
 function renderDepthTextureToQuad(offset_x: number, offset_y: number, width: number, height: number) {
