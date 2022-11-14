@@ -18,6 +18,7 @@ const depth_proj_matrix: mat4 = mat4.create();
 
 let camera: IWO.Camera;
 let orbit: IWO.OrbitControl;
+let fps: IWO.FPSControl;
 let frustum: IWO.Frustum;
 
 let frustum_line: IWO.MeshInstance;
@@ -63,7 +64,8 @@ await (async function main(): Promise<void> {
 
 function initScene(): void {
     camera = new IWO.Camera(cPos);
-    orbit = new IWO.OrbitControl(camera, { maximum_distance: 60, orbit_point: [0, 0, 0] });
+    //orbit = new IWO.OrbitControl(camera, { maximum_distance: 60, orbit_point: [0, 0, 0] });
+    fps = new IWO.FPSControl(camera);
 
     gl.clearColor(173 / 255, 196 / 255, 221 / 255, 1.0);
     gl.enable(gl.DEPTH_TEST);
@@ -72,7 +74,7 @@ function initScene(): void {
 
     camera.getViewMatrix(view_matrix);
 
-    frustum = new IWO.Frustum(gl, { fov: FOV });
+    frustum = new IWO.Frustum(gl, light_view_matrix, camera, { fov: FOV });
 
     const pbrShader = renderer.getorCreateShader(IWO.ShaderSource.PBR);
     renderer.setAndActivateShader(pbrShader);
@@ -100,6 +102,7 @@ function initScene(): void {
     //GRID
     const grid_mat = new IWO.GridMaterial({
         base_color: [0.49, 0.49, 0.49, 0.4],
+        grid_color: [0, 0, 0, 1],
     });
     grid = new IWO.MeshInstance(plane_mesh, grid_mat);
 
@@ -108,7 +111,7 @@ function initScene(): void {
     const sphere_geom = IWO.BufferedGeometry.fromGeometry(new IWO.SphereGeometry(0.3, 8, 8));
     spheres = [];
     const num_cols = 4;
-    const num_rows = 4;
+    const num_rows = 6;
     for (let i = 0; i <= num_cols; i++) {
         for (let k = 0; k <= num_rows; k++) {
             const sphere_mesh = new IWO.Mesh(gl, sphere_geom);
@@ -116,7 +119,7 @@ function initScene(): void {
             spheres.push(s);
             const model = s.model_matrix;
             mat4.identity(model);
-            mat4.translate(model, model, vec3.fromValues((i - num_cols / 2) * 1.5, 1, -k));
+            mat4.translate(model, model, vec3.fromValues((i - num_cols / 2) * 5, 1, num_rows * 2 - k * 5));
         }
     }
 
@@ -179,7 +182,9 @@ function initRenderDepth() {
 }
 
 function update(): void {
-    orbit.update();
+    //orbit.update();
+    fps.update();
+    frustum.update();
     drawScene();
 
     let geom = getFrustumLineGeometry();
@@ -195,7 +200,6 @@ function update(): void {
 function drawScene(): void {
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-    //mat4.perspective(proj_matrix, glMatrix.toRadian(FOV), DEPTH_TEXTURE_SIZE / DEPTH_TEXTURE_SIZE, 0.1, 1000.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     camera.getViewMatrix(view_matrix);
 
@@ -205,29 +209,29 @@ function drawScene(): void {
 
     frustum_line.render(renderer, v, p);
     cuboid_line.render(renderer, v, p);
-    // grid.render(renderer, v, p);
 
-    const inverse_view = camera.getInverseViewMatrix(mat4.create());
-    let b = mat4.multiply(mat4.create(), light_view_matrix, inverse_view);
-    frustum.update(b);
+    const c = frustum.getCenter();
+    const w = frustum.getWidth();
 
     for (const sphere of spheres) {
         let mat = new IWO.PBRMaterial([1, 1, 1], 0, 1);
 
         const pos = vec3.transformMat4(vec3.create(), vec3.create(), sphere.model_matrix);
-        if (pos[0] > frustum.getCenter()[0] + frustum.getWidth()) mat = new IWO.PBRMaterial([1, 0, 0], 0, 1);
-        if (pos[0] < frustum.getCenter()[0] - frustum.getWidth()) mat = new IWO.PBRMaterial([1, 1, 0], 0, 1);
+        if (pos[0] > c[0] + w) mat = new IWO.PBRMaterial([1, 0, 0], 0, 1);
+        if (pos[0] < c[0] - w) mat = new IWO.PBRMaterial([1, 1, 0], 0, 1);
 
-        if (pos[1] > frustum.getCenter()[1] + frustum.getHeight()) mat = new IWO.PBRMaterial([0, 1, 0], 0, 1);
-        if (pos[1] < frustum.getCenter()[1] - frustum.getHeight()) mat = new IWO.PBRMaterial([0, 1, 1], 0, 1);
+        if (pos[1] > c[1] + w) mat = new IWO.PBRMaterial([0, 1, 0], 0, 1);
+        if (pos[1] < c[1] - w) mat = new IWO.PBRMaterial([0, 1, 1], 0, 1);
 
-        if (pos[2] > frustum.getCenter()[2] + frustum.getLength()) mat = new IWO.PBRMaterial([0, 0, 1], 0, 1);
-        if (pos[2] < frustum.getCenter()[2] - frustum.getLength()) mat = new IWO.PBRMaterial([1, 0, 1], 0, 1);
+        if (pos[2] > c[2] + w) mat = new IWO.PBRMaterial([0, 0, 1], 0, 1);
+        if (pos[2] < c[2] - w) mat = new IWO.PBRMaterial([1, 0, 1], 0, 1);
 
         sphere.materials = [mat];
 
         sphere.render(renderer, v, p);
     }
+    grid.render(renderer, v, p);
+
     renderDepth();
 }
 
@@ -236,8 +240,8 @@ function renderDepth() {
     gl.viewport(0, 0, DEPTH_TEXTURE_SIZE, DEPTH_TEXTURE_SIZE);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.disable(gl.CULL_FACE);
-    // gl.enable(gl.POLYGON_OFFSET_FILL);
-    //  gl.polygonOffset(0.4, 4.0);
+    gl.enable(gl.POLYGON_OFFSET_FILL);
+    gl.polygonOffset(0.4, 4.0);
 
     updateLightViewMatrix();
     updateDepthProjectionMatrix();
@@ -247,69 +251,45 @@ function renderDepth() {
     const p = depth_proj_matrix;
 
     renderer.setPerFrameUniforms(v, p);
-    //line.renderWithMaterial(renderer, v, p, depth_mat);
-    //grid.renderWithMaterial(renderer, v, p, depth_mat);
+    grid.renderWithMaterial(renderer, v, p, depth_mat);
     for (const sphere of spheres) {
         sphere.renderWithMaterial(renderer, v, p, depth_mat);
     }
 
-    //gl.disable(gl.POLYGON_OFFSET_FILL);
-    //gl.enable(gl.CULL_FACE);
-    //gl.cullFace(gl.BACK);
+    gl.disable(gl.POLYGON_OFFSET_FILL);
+    gl.enable(gl.CULL_FACE);
+    gl.cullFace(gl.BACK);
 
     //reset to render to canvas
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
-    renderDepthTextureToQuad(0, 0, 400, 400);
+    renderDepthTextureToQuad(0, 0, 256, 256);
 
     //reset to render viewport
     gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
 }
 
 function updateLightViewMatrix() {
-    const inverse_view = camera.getInverseViewMatrix(mat4.create());
-    frustum.update(inverse_view);
+    frustum.update();
+    frustum.update();
     let center = frustum.getCenter();
     vec3.negate(center, center);
-
-    console.log(camera.position, center);
-
     let light_inverse_dir = vec3.fromValues(-LIGHT_DIRECTION[0], -LIGHT_DIRECTION[1], -LIGHT_DIRECTION[2]);
 
     mat4.identity(light_view_matrix);
-
-    // let pitch = Math.acos(vec2.length([light_inverse_dir[0], light_inverse_dir[2]]));
-
-    // mat4.rotateX(light_view_matrix, light_view_matrix, pitch);
-
-    // let yaw = Math.atan2(light_inverse_dir[2], light_inverse_dir[0]);
-
-    // yaw = light_inverse_dir[2] > 0 ? yaw - Math.PI : yaw;
-
-    // mat4.rotateY(light_view_matrix, light_view_matrix, yaw + Math.PI / 2);
-
-    mat4.lookAt(light_view_matrix, [0, 0, 0], light_inverse_dir, [0, 1, 0]);
-
-    //move to frustum center
-    //get camera pos in light space
-    const c = vec3.transformMat4(vec3.create(), frustum.getCenter(), light_view_matrix);
-
-    //move frustum to camera world pos
-    //mat4.translate(light_view_matrix, light_view_matrix, c);
-
-    //move ontop of camera in world space
-    //mat4.translate(light_view_matrix, light_view_matrix, camera.position);
+    let pitch = Math.acos(vec2.length([light_inverse_dir[0], light_inverse_dir[2]]));
+    mat4.rotateX(light_view_matrix, light_view_matrix, pitch);
+    let yaw = Math.atan2(light_inverse_dir[2], light_inverse_dir[0]);
+    yaw = light_inverse_dir[2] > 0 ? yaw - Math.PI : yaw;
+    mat4.rotateY(light_view_matrix, light_view_matrix, yaw + Math.PI / 2);
+    mat4.translate(light_view_matrix, light_view_matrix, center);
 }
 
 function getFrustumLineGeometry() {
-    const inverse_view = camera.getInverseViewMatrix(mat4.create());
-    const inverse_light = mat4.invert(mat4.create(), light_view_matrix);
-    let b = mat4.multiply(mat4.create(), light_view_matrix, inverse_view);
-    let vv = mat4.multiply(mat4.create(), inverse_light, inverse_view);
-    const p = frustum.calculateFrustumCorners(vv);
+    const p = frustum.calculateFrustumVertices();
 
     let line_points = [];
-    //add far plane line segments
+    //add  far plane line segments
     line_points.push(p[0][0], p[0][1], p[0][2], p[1][0], p[1][1], p[1][2], p[1], p[3], p[3], p[2], p[2], p[0]);
     //add near plane lines
     line_points.push(p[0 + 4], p[1 + 4], p[1 + 4], p[3 + 4], p[3 + 4], p[2 + 4], p[2 + 4], p[0 + 4]);
@@ -322,12 +302,6 @@ function getFrustumLineGeometry() {
 }
 
 function getFrustumCuboidLineGeometry() {
-    const inverse_view = camera.getInverseViewMatrix(mat4.create());
-    const inverse_light = mat4.invert(mat4.create(), light_view_matrix);
-    let b = mat4.multiply(mat4.create(), light_view_matrix, inverse_view);
-    let vv = mat4.multiply(mat4.create(), inverse_light, inverse_view);
-    frustum.update(vv);
-
     const c = frustum.getCenter();
     const w = frustum.getWidth();
     const l = frustum.getLength();
@@ -347,9 +321,7 @@ function getFrustumCuboidLineGeometry() {
 }
 
 function updateDepthProjectionMatrix() {
-    const inverse_view = camera.getInverseViewMatrix(mat4.create());
-    let b = mat4.multiply(mat4.create(), light_view_matrix, inverse_view);
-    frustum.update(b);
+    frustum.update();
     frustum.getOrtho(depth_proj_matrix);
 }
 
