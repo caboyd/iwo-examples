@@ -8,7 +8,7 @@ let depth_texture: IWO.Texture2D;
 let depth_texture2: IWO.Texture2D;
 
 const DEPTH_TEXTURE_SIZE = 1024;
-const SHADOW_DISTANCE = 20;
+const SHADOW_DISTANCE = 28;
 const TRANSITION_DISTANCE = 5;
 
 const FOV = 45 as const;
@@ -81,7 +81,11 @@ function initScene(): void {
 
     camera.getViewMatrix(view_matrix);
 
-    frustum = new IWO.Frustum(gl, light_view_matrix, camera, { fov: FOV, clip_far: SHADOW_DISTANCE });
+    frustum = new IWO.Frustum(gl, light_view_matrix, camera, {
+        fov: FOV,
+        clip_far: SHADOW_DISTANCE - TRANSITION_DISTANCE,
+        clip_near: -SHADOW_DISTANCE / 1.5,
+    });
     initRenderDepth();
 
     const pbrShader = renderer.getorCreateShader(IWO.ShaderSource.PBR);
@@ -92,7 +96,7 @@ function initScene(): void {
     pbrShader.setUniform("light_ambient", [0.03, 0.03, 0.03]);
     pbrShader.setUniform("shadow_map_size", DEPTH_TEXTURE_SIZE);
     pbrShader.setUniform("shadow_distance", SHADOW_DISTANCE);
-    pbrShader.setUniform("shadow_transition_distance", TRANSITION_DISTANCE);
+    pbrShader.setUniform("transition_distance", TRANSITION_DISTANCE);
 
     const inverse_view = camera.getInverseViewMatrix(mat4.create());
     let line_geom = getFrustumLineGeometry();
@@ -107,7 +111,7 @@ function initScene(): void {
     const cuboid_mat = new IWO.LineMaterial([gl.drawingBufferWidth, gl.drawingBufferHeight], [1, 1, 1, 1], 4, false);
     cuboid_line = new IWO.MeshInstance(cuboid_line_mesh, cuboid_mat);
 
-    const plane_geom = new IWO.PlaneGeometry(100, 100, 1, 1, true);
+    const plane_geom = new IWO.PlaneGeometry(100, 100, 1, 1, false);
     const plane_mesh = new IWO.Mesh(gl, plane_geom);
 
     //GRID
@@ -163,7 +167,7 @@ function initRenderDepth() {
         type: gl.UNSIGNED_INT,
         mag_filter: gl.LINEAR,
         min_filter: gl.LINEAR,
-        texture_compare_func: gl.LESS,
+        texture_compare_func: gl.LEQUAL,
         texture_compare_mode: gl.COMPARE_REF_TO_TEXTURE,
     });
 
@@ -177,7 +181,7 @@ function initRenderDepth() {
         type: gl.FLOAT,
         mag_filter: gl.NEAREST,
         min_filter: gl.NEAREST,
-        texture_compare_func: gl.LESS,
+        texture_compare_func: gl.LEQUAL,
     });
 
     //Set "renderedTexture" as our color attachment #0
@@ -216,12 +220,9 @@ function update(): void {
 
     let geom = getFrustumLineGeometry();
     frustum_line.mesh.updateGeometryBuffer(gl, geom);
-    const inverse_depth = mat4.invert(mat4.create(), depth_proj_matrix);
-    //mat4.multiply(frustum_line.model_matrix, light_view_matrix, inverse_depth);
 
     geom = getFrustumCuboidLineGeometry();
     cuboid_line.mesh.updateGeometryBuffer(gl, geom);
-    //mat4.multiply(cuboid_line.model_matrix, light_view_matrix, inverse_depth);
 
     renderer.resetSaveBindings();
     requestAnimationFrame(update);
@@ -242,18 +243,10 @@ function drawScene(): void {
     mat4.multiply(shadow_map_matrix, depth_proj_matrix, light_view_matrix);
     const s = mat4.multiply(mat4.create(), BIAS_MATRIX, shadow_map_matrix);
 
-    let textureMatrix = mat4.create();
-    textureMatrix = mat4.translate(textureMatrix, textureMatrix, [0.5, 0.5, 0.5]);
-    textureMatrix = mat4.scale(textureMatrix, textureMatrix, [0.5, 0.5, 0.5]);
-    textureMatrix = mat4.multiply(textureMatrix, textureMatrix, depth_proj_matrix);
-    textureMatrix = mat4.multiply(textureMatrix, textureMatrix, mat4.invert(mat4.create(), light_view_matrix));
-
-    // console.log(mat4.determinant(shadow_map_matrix))
-
     renderer.setPerFrameUniforms(v, p, s);
 
-    frustum_line.render(renderer, v, p);
-    cuboid_line.render(renderer, v, p);
+    //frustum_line.render(renderer, v, p);
+    //cuboid_line.render(renderer, v, p);
 
     plane.render(renderer, v, p);
     for (const sphere of spheres) {
@@ -282,8 +275,6 @@ function renderDepth() {
     const p = depth_proj_matrix;
     mat4.multiply(shadow_map_matrix, depth_proj_matrix, light_view_matrix);
 
-    //  console.log(mat4.determinant(shadow_map_matrix))
-
     renderer.setPerFrameUniforms(v, p);
     plane.renderWithMaterial(renderer, v, p, depth_mat);
     for (const sphere of spheres) {
@@ -298,6 +289,7 @@ function renderDepth() {
 function updateLightViewMatrix() {
     frustum.update();
     let center = frustum.getCenter();
+    //console.log(center);
     vec3.negate(center, center);
     let light_inverse_dir = vec3.fromValues(-LIGHT_DIRECTION[0], -LIGHT_DIRECTION[1], -LIGHT_DIRECTION[2]);
 
@@ -309,9 +301,16 @@ function updateLightViewMatrix() {
     mat4.rotateY(light_view_matrix, light_view_matrix, yaw + Math.PI / 2);
     mat4.translate(light_view_matrix, light_view_matrix, center);
 
-    mat4.lookAt(light_view_matrix, LIGHT_DIRECTION, [0, 0, 0], [0, 1, 0]);
-    const light_model = mat4.fromTranslation(mat4.create(), center);
-    mat4.multiply(light_view_matrix, light_view_matrix, light_model);
+    // //const c4 = vec4.fromValues(camera.position[0], camera.position[1], camera.position[2], 1);
+    // const b = vec3.sub(vec3.create(), center, [0, 0, 0]);
+    // const c4 = vec4.fromValues(b[0], b[1], b[2], 1);
+    // vec4.transformMat4(c4, c4, light_view_matrix);
+    // const c = vec3.fromValues(c4[0], c4[1], c4[2]);
+
+    // let tar = vec3.add(vec3.create(), c, light_inverse_dir);
+    // mat4.lookAt(light_view_matrix, c, tar, [0, 1, 0]);
+    // const light_model = mat4.fromTranslation(mat4.create(), center);
+    // mat4.multiply(light_view_matrix, light_view_matrix, light_model);
     //const inverse_light = mat4.invert(mat4.create(), light_view_matrix);
     //const light_view_pos = vec3.transformMat4(vec3.create(), center, light_view_matrix);
     // console.log("center    : ", center[0], center[1], center[2]);
@@ -327,10 +326,7 @@ function updateLightViewMatrix() {
 }
 
 function updateDepthProjectionMatrix() {
-    frustum.update();
     frustum.getOrtho(depth_proj_matrix);
-
-    //mat4.ortho(depth_proj_matrix, -10, 10, -10, 10, 1, 10);
 }
 
 function getFrustumLineGeometry() {
@@ -354,9 +350,10 @@ function getFrustumCuboidLineGeometry() {
     const inverse = mat4.invert(mat4.create(), light_view_matrix);
     let c = frustum.getCenter();
     //put center back into light space so we can move it to world space with the other points
-    const c4 = vec4.fromValues(c[0], c[1], c[2], 1);
+    const c4 = vec4.fromValues(camera.position[0], camera.position[1], camera.position[2], 1);
     vec4.transformMat4(c4, c4, light_view_matrix);
     c = vec3.fromValues(c4[0], c4[1], c4[2]);
+    //console.log(c);
     const w = frustum.getWidth() / 2;
     const l = frustum.getLength() / 2;
     const h = frustum.getHeight() / 2;
