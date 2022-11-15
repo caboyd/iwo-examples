@@ -7,6 +7,7 @@ const FOV = 60 as const;
 
 const view_matrix: mat4 = mat4.create();
 const proj_matrix: mat4 = mat4.create();
+const light_view_matrix: mat4 = mat4.create();
 
 const cPos: vec3 = vec3.fromValues(0, 4, 4);
 let camera: IWO.Camera;
@@ -65,7 +66,7 @@ function initScene(): void {
     //gl.enable(gl.CULL_FACE);
     //gl.cullFace(gl.BACK);
 
-    frustum = new IWO.Frustum(gl, { fov: FOV });
+    frustum = new IWO.Frustum(gl, light_view_matrix, camera, { fov: FOV });
 
     let line_mesh = getFrustumLineMesh();
 
@@ -82,7 +83,7 @@ function initScene(): void {
 
 function getFrustumLineMesh() {
     let line_points = [];
-    const p = frustum.calculateFrustumCorners(camera.getInverseViewMatrix(mat4.create()));
+    const p = frustum.calculateFrustumVertices(camera.getInverseViewMatrix(mat4.create()));
 
     //add far plane line segments
     line_points.push(p[0], p[1], p[1], p[3], p[3], p[2], p[2], p[0]);
