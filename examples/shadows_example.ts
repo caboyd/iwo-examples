@@ -262,13 +262,13 @@ function renderDepth() {
     gl.bindFramebuffer(gl.FRAMEBUFFER, depth_frame_buffer);
     gl.viewport(0, 0, DEPTH_TEXTURE_SIZE, DEPTH_TEXTURE_SIZE);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    //gl.disable(gl.CULL_FACE);
-    //gl.cullFace(gl.FRONT);
+    gl.disable(gl.CULL_FACE);
+    gl.cullFace(gl.FRONT);
     gl.enable(gl.POLYGON_OFFSET_FILL);
     gl.polygonOffset(0.4, 4.0);
 
     updateLightViewMatrix();
-    updateDepthProjectionMatrix();
+    frustum.getOrtho(depth_proj_matrix);
     camera.getViewMatrix(view_matrix);
 
     const v = light_view_matrix;
@@ -289,7 +289,6 @@ function renderDepth() {
 function updateLightViewMatrix() {
     frustum.update();
     let center = frustum.getCenter();
-    //console.log(center);
     vec3.negate(center, center);
     let light_inverse_dir = vec3.fromValues(-LIGHT_DIRECTION[0], -LIGHT_DIRECTION[1], -LIGHT_DIRECTION[2]);
 
@@ -300,34 +299,9 @@ function updateLightViewMatrix() {
     yaw = light_inverse_dir[2] > 0 ? yaw - Math.PI : yaw;
     mat4.rotateY(light_view_matrix, light_view_matrix, yaw + Math.PI / 2);
     mat4.translate(light_view_matrix, light_view_matrix, center);
-
-    // //const c4 = vec4.fromValues(camera.position[0], camera.position[1], camera.position[2], 1);
-    // const b = vec3.sub(vec3.create(), center, [0, 0, 0]);
-    // const c4 = vec4.fromValues(b[0], b[1], b[2], 1);
-    // vec4.transformMat4(c4, c4, light_view_matrix);
-    // const c = vec3.fromValues(c4[0], c4[1], c4[2]);
-
-    // let tar = vec3.add(vec3.create(), c, light_inverse_dir);
-    // mat4.lookAt(light_view_matrix, c, tar, [0, 1, 0]);
-    // const light_model = mat4.fromTranslation(mat4.create(), center);
-    // mat4.multiply(light_view_matrix, light_view_matrix, light_model);
-    //const inverse_light = mat4.invert(mat4.create(), light_view_matrix);
-    //const light_view_pos = vec3.transformMat4(vec3.create(), center, light_view_matrix);
-    // console.log("center    : ", center[0], center[1], center[2]);
-    // console.log("camera_pos: ", camera.position[0], camera.position[1], camera.position[2]);
-    // console.log("light_view: ", light_view_matrix[12], light_view_matrix[13], light_view_matrix[14]);
-    // console.log("inverse_light_view: ", inverse_light[12], inverse_light[13], inverse_light[14]);
-    // console.log("light_dir", LIGHT_DIRECTION[0], LIGHT_DIRECTION[1], LIGHT_DIRECTION[2]);
-
-    // const cam_dir = vec3.normalize(vec3.create(), camera.position);
-    // console.log("cam_dir", cam_dir[0], cam_dir[1], cam_dir[2]);
-
-    //mat4.lookAt(light_view_matrix, [4, 5, 0], [4, 0, 4], [0, 1, 0]);
 }
 
-function updateDepthProjectionMatrix() {
-    frustum.getOrtho(depth_proj_matrix);
-}
+
 
 function getFrustumLineGeometry() {
     const inverse = mat4.invert(mat4.create(), light_view_matrix);
