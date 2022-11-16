@@ -176,9 +176,9 @@ function initRenderDepth() {
         height: DEPTH_TEXTURE_SIZE,
         wrap_S: gl.CLAMP_TO_EDGE,
         wrap_T: gl.CLAMP_TO_EDGE,
-        internal_format: gl.RGBA32F,
+        internal_format: gl.RGBA,
         format: gl.RGBA,
-        type: gl.FLOAT,
+        type: gl.UNSIGNED_BYTE,
         mag_filter: gl.NEAREST,
         min_filter: gl.NEAREST,
         texture_compare_func: gl.LEQUAL,
@@ -301,8 +301,6 @@ function updateLightViewMatrix() {
     mat4.translate(light_view_matrix, light_view_matrix, center);
 }
 
-
-
 function getFrustumLineGeometry() {
     const inverse = mat4.invert(mat4.create(), light_view_matrix);
     const p = frustum.getOrthoVertices(inverse);
@@ -348,17 +346,6 @@ function getFrustumCuboidLineGeometry() {
         point[2] = p[2];
     }
     line_points = line_points.flat(2) as number[];
-
-    // const target = vec3.sub(vec3.create(), frustum.getCenter(), LIGHT_DIRECTION);
-    // const rot = mat4.targetTo(mat4.create(), frustum.getCenter(), target, [0, 1, 0]);
-    // //convert points to light space orientation
-    // for (let i = 0; i < line_points.length - 2; i += 3) {
-    //     const p = vec4.fromValues(i, i + 1, i + 2, 1);
-    //     vec4.transformMat4(p, p, rot);
-    //     line_points[i] = p[0];
-    //     line_points[i + 1] = p[1];
-    //     line_points[i + 2] = p[2];
-    // }
 
     let line_geom = new IWO.LineGeometry(line_points, { type: "lines" }).getBufferedGeometry();
     return line_geom;
