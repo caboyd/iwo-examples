@@ -239,9 +239,8 @@ function drawScene(): void {
     const v = view_matrix;
     const p = proj_matrix;
 
-    let BIAS_MATRIX = mat4.fromValues(0.5, 0, 0, 0, 0, 0.5, 0, 0, 0, 0, 0.5, 0, 0.5, 0.5, 0.5, 1);
     mat4.multiply(shadow_map_matrix, depth_proj_matrix, light_view_matrix);
-    const s = mat4.multiply(mat4.create(), BIAS_MATRIX, shadow_map_matrix);
+    const s = shadow_map_matrix;
 
     renderer.setPerFrameUniforms(v, p, s);
 
