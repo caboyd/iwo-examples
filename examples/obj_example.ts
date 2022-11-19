@@ -75,7 +75,7 @@ async function initScene(): Promise<void> {
         const geom = value.objects[0].buffered_geometry;
         const mesh = new IWO.Mesh(gl, geom);
         renderer.resetSaveBindings();
-        cube = new IWO.MeshInstance(mesh, value.materials ? value.materials : new IWO.NormalOnlyMaterial());
+        cube = new IWO.MeshInstance(mesh, value.materials.length > 0 ? value.materials : new IWO.NormalOnlyMaterial());
         mat4.translate(cube.model_matrix, cube.model_matrix, [-2, 2, -2]);
     });
 
@@ -85,7 +85,10 @@ async function initScene(): Promise<void> {
         const geom = value.objects[0].buffered_geometry;
         const mesh = new IWO.Mesh(gl, geom);
         renderer.resetSaveBindings();
-        teapot = new IWO.MeshInstance(mesh, value.materials ? value.materials : new IWO.NormalOnlyMaterial());
+        teapot = new IWO.MeshInstance(
+            mesh,
+            value.materials.length > 0 ? value.materials : new IWO.NormalOnlyMaterial()
+        );
         mat4.scale(teapot.model_matrix, teapot.model_matrix, [0.1, 0.1, 0.1]);
         mat4.rotateX(teapot.model_matrix, teapot.model_matrix, -Math.PI / 2);
     });
