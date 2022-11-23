@@ -71,7 +71,7 @@ function initScene(): void {
     const plane_geom = new IWO.PlaneGeometry(100, 100, 1, 1, true).getBufferedGeometry();
     const plane_mesh = new IWO.Mesh(gl, plane_geom);
 
-    const sphere_mat = new IWO.PBRMaterial(vec3.fromValues(1, 1, 1), 0, 1, 0);
+    const sphere_mat = new IWO.PBRMaterial({ albedo_color: [1, 1, 1] });
 
     //GRID
     const grid_mat = new IWO.GridMaterial();

@@ -105,7 +105,7 @@ function initScene(): void {
         helmet = new IWO.MeshInstance(m, value.materials);
         const pbr = (helmet.materials as IWO.Material[])[0] as IWO.PBRMaterial;
         pbr.irradiance_texture = irr_tex;
-        pbr.specular_env = env_tex;
+        pbr.specular_env_texture = env_tex;
 
         const helmet_rot = mat4.fromQuat(mat4.create(), [0.7071068286895752, 0.0, -0.0, 0.7071068286895752]);
         //const boom_rot = mat4.fromRotation(mat4.create(), Math.PI/2 , [0, 1, 0]);
@@ -175,5 +175,4 @@ function drawScene(): void {
     //Draw Helmet
     if (helmet_loaded) helmet.render(renderer, view_matrix, proj_matrix);
     renderer.resetSaveBindings();
-
 }

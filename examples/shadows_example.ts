@@ -7,7 +7,7 @@ let depth_frame_buffer: WebGLFramebuffer;
 let depth_texture: IWO.Texture2D;
 let depth_texture2: IWO.Texture2D;
 
-const DEPTH_TEXTURE_SIZE = 1024;
+const DEPTH_TEXTURE_SIZE = 1536;
 const SHADOW_DISTANCE = 28;
 const TRANSITION_DISTANCE = 5;
 
@@ -118,14 +118,18 @@ function initScene(): void {
     const grid_mat = new IWO.GridMaterial();
     grid = new IWO.MeshInstance(plane_mesh, grid_mat);
 
-    const plane_mat = new IWO.PBRMaterial([1, 1, 1], 0, 1);
-    plane_mat.shadow_texture = depth_texture;
+    const plane_mat = new IWO.PBRMaterial({ albedo_color: [1, 1, 1], shadow_texture: depth_texture });
     plane = new IWO.MeshInstance(plane_mesh, plane_mat);
     mat4.translate(plane.model_matrix, plane.model_matrix, [0, -0.01, 0]);
 
     //SPHERES
-    let sphere_mat = new IWO.PBRMaterial([1, 1, 1], 0.5, 1);
-    sphere_mat.shadow_texture = depth_texture;
+    let sphere_mat = new IWO.PBRMaterial({
+        albedo_color: [1, 1, 1],
+        metallic: 0.5,
+        roughness: 1,
+        shadow_texture: depth_texture,
+    });
+
     const sphere_geom = IWO.BufferedGeometry.fromGeometry(new IWO.SphereGeometry(0.3, 8, 8));
     spheres = [];
     const num_cols = 4;

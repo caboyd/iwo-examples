@@ -141,7 +141,6 @@ function initScene(): void {
         });
     });
 
-    const earth_tex = IWO.TextureLoader.load(gl, "../assets/earth.jpg");
     const box_geom = new IWO.BoxGeometry({ width: 3.0, height: 3.0, depth: 3.0, stretch_texture: false });
     const sphere_geom = new IWO.SphereGeometry(0.75, 16, 16);
     const plane_geom = new IWO.PlaneGeometry(100, 100, 1, 1, true);
@@ -149,9 +148,6 @@ function initScene(): void {
     const sphere_mesh = new IWO.Mesh(gl, sphere_geom);
     const plane_mesh = new IWO.Mesh(gl, plane_geom);
     const box_mesh = new IWO.Mesh(gl, box_geom);
-
-    const sphere_mat = new IWO.PBRMaterial(vec3.fromValues(1, 0, 0), 0.0, 0.0);
-    sphere_mat.albedo_texture = earth_tex;
 
     //GRID
     const grid_mat = new IWO.GridMaterial();
@@ -167,7 +163,7 @@ function initScene(): void {
     //LIGHTS
     const light_geom = new IWO.BoxGeometry();
     const light_mesh = new IWO.Mesh(gl, light_geom);
-    const light_mat = new IWO.PBRMaterial(vec3.fromValues(1000, 1000, 1000), 0.0, 1.0);
+    const light_mat = new IWO.BasicMaterial([1, 1, 1]);
     light_boxes = [];
     for (const pos of light_positions) {
         const lb = new IWO.MeshInstance(light_mesh, light_mat);
@@ -188,9 +184,13 @@ function initScene(): void {
     const num_rows = 8;
     for (let i = 0; i <= num_cols; i++) {
         for (let k = 0; k <= num_rows; k++) {
-            const mat = new IWO.PBRMaterial([1, 1, 1], k / num_rows, Math.min(1, Math.max(0.025, i / num_cols)), 1);
-            mat.irradiance_texture = irr_tex;
-            mat.specular_env = env_tex;
+            const mat = new IWO.PBRMaterial({
+                albedo_color: [1, 1, 1],
+                metallic: k / num_rows,
+                roughness: Math.min(1, Math.max(0.025, i / num_cols)),
+                irradiance_texture: irr_tex,
+                specular_env_texture: env_tex,
+            });
             const s = new IWO.MeshInstance(sphere_mesh, mat);
             spheres.push(s);
             const model = s.model_matrix;
