@@ -7,6 +7,7 @@ let gl: WebGL2RenderingContext;
 
 const view_matrix: mat4 = mat4.create();
 const proj_matrix: mat4 = mat4.create();
+const root_url = "../iwo-assets/examples/";
 
 const cPos: vec3 = vec3.fromValues(0.5, 8, 9.0);
 const cUp: vec3 = vec3.fromValues(0, 1, 0);
@@ -122,7 +123,7 @@ function initScene(): void {
         flip: true,
     };
 
-    const file_prefix = "../assets/cubemap/monvalley/MonValley_A_LookoutPoint";
+    const file_prefix =  root_url + "cubemap/monvalley/MonValley_A_LookoutPoint";
     IWO.ImageLoader.promise(file_prefix + "_preview.jpg").then((image: HTMLImageElement) => {
         sky_tex.setImage(gl, image, tex2D_opts);
         IWO.ImageLoader.promise(file_prefix + "_8k.jpg").then((image: HTMLImageElement) => {

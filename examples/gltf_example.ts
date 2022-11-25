@@ -6,6 +6,7 @@ let gl: WebGL2RenderingContext;
 
 const view_matrix: mat4 = mat4.create();
 const proj_matrix: mat4 = mat4.create();
+const root_url = "../iwo-assets/examples/";
 
 const cPos: vec3 = vec3.fromValues(2.5, 0, 6.0);
 let camera: IWO.Camera;
@@ -98,7 +99,7 @@ function initScene(): void {
     const cube_tex = new IWO.TextureCubeMap(gl);
 
     //Init Helmet
-    IWO.glTFLoader.promise("DamagedHelmet.gltf", "../assets/damaged-helmet/").then((value: IWO.glTFData) => {
+    IWO.glTFLoader.promise("DamagedHelmet.gltf", root_url + "damaged-helmet").then((value: IWO.glTFData) => {
         helmet_loaded = true;
         const m = new IWO.Mesh(gl, value.buffered_geometries[0]);
         renderer.resetSaveBindings();
@@ -122,7 +123,7 @@ function initScene(): void {
         flip: true,
     };
 
-    const file_prefix = "../assets/cubemap/monvalley/MonValley_A_LookoutPoint";
+    const file_prefix = root_url + "cubemap/monvalley/MonValley_A_LookoutPoint";
     IWO.ImageLoader.promise(file_prefix + "_preview.jpg").then((image: HTMLImageElement) => {
         sky_tex.setImage(gl, image, tex2D_opts);
         IWO.ImageLoader.promise(file_prefix + "_8k.jpg").then((image: HTMLImageElement) => {

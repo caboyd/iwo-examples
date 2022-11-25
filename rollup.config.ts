@@ -71,7 +71,7 @@ export default {
         }),
         copy({
             targets: [
-                { src: "examples/assets/**/*", dest: output_dir },
+                { src: "iwo-assets/examples/**/*", dest: output_dir + "/iwo-assets" },
                 { src: "examples/index.html", dest: output_dir },
                 { src: "examples/*.css", dest: output_dir },
             ],

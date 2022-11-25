@@ -5,6 +5,7 @@ let gl: WebGL2RenderingContext;
 
 const view_matrix: mat4 = mat4.create();
 const proj_matrix: mat4 = mat4.create();
+const root_url = "../iwo-assets/examples/";
 
 const cPos: vec3 = vec3.fromValues(2.5, 2, 6.0);
 let camera: IWO.Camera;
@@ -70,7 +71,7 @@ async function initScene(): Promise<void> {
     grid = new IWO.MeshInstance(plane_mesh, grid_mat);
 
     //Init Cube
-    IWO.ObjLoader.promise("cube.obj", "../assets/obj/cube/", { flip_image_y: true }).then((value: IWO.ObjData) => {
+    IWO.ObjLoader.promise("cube.obj", root_url + "obj/cube", { flip_image_y: true }).then((value: IWO.ObjData) => {
         cube_loaded = true;
         const geom = value.objects[0].buffered_geometry;
         const mesh = new IWO.Mesh(gl, geom);
@@ -80,7 +81,7 @@ async function initScene(): Promise<void> {
     });
 
     //Init Teapot
-    IWO.ObjLoader.promise("teapot.obj", "../assets/obj/teapot/").then((value: IWO.ObjData) => {
+    IWO.ObjLoader.promise("teapot.obj", root_url + "/obj/teapot/").then((value: IWO.ObjData) => {
         teapot_loaded = true;
         const geom = value.objects[0].buffered_geometry;
         const mesh = new IWO.Mesh(gl, geom);
