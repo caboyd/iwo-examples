@@ -1,5 +1,7 @@
 import { glMatrix, mat4, vec3 } from "gl-matrix";
 import * as IWO from "iwo";
+import * as ImGui from "imgui-js/imgui";
+import * as ImGui_Impl from "imgui-js/imgui_impl";
 
 let canvas: HTMLCanvasElement;
 let gl: WebGL2RenderingContext;
@@ -22,6 +24,13 @@ await (async function main(): Promise<void> {
     gl = IWO.initGL(canvas);
 
     renderer = new IWO.Renderer(gl);
+
+    await ImGui.default();
+    ImGui.IMGUI_CHECKVERSION();
+    ImGui.CreateContext();
+    // // Setup style
+    ImGui.StyleColorsDark();
+    ImGui_Impl.Init(gl);
 
     window.addEventListener("resize", resizeCanvas, false);
 
@@ -95,8 +104,12 @@ function initScene(): void {
 }
 
 function update(): void {
+    let io = ImGui.GetIO();
+    orbit.mouse_active = !io.WantCaptureMouse;
     orbit.update();
     drawScene();
+    drawUI();
+    renderer.resetSaveBindings();
     requestAnimationFrame(update);
 }
 
@@ -111,4 +124,26 @@ function drawScene(): void {
     }
 
     grid.render(renderer, view_matrix, proj_matrix);
+
+    //after last object rendered
+    renderer.cleanupGLState();
+}
+
+function drawUI(): void {
+    //imgui render
+    ImGui_Impl.NewFrame(0);
+    ImGui.NewFrame();
+    ImGui.SetNextWindowPos(new ImGui.ImVec2(gl.drawingBufferWidth - 300 + 1, 0));
+    ImGui.SetNextWindowSize(new ImGui.ImVec2(300, 340), ImGui.Cond.FirstUseEver);
+    ImGui.SetNextWindowSizeConstraints(new ImGui.ImVec2(300, 0), new ImGui.ImVec2(300, gl.drawingBufferHeight));
+    {
+        ImGui.Begin("Settings");
+
+        ImGui.Text(`Test`);
+        ImGui.End();
+    }
+    ImGui.EndFrame();
+    ImGui.Render();
+
+    ImGui_Impl.RenderDrawData(ImGui.GetDrawData());
 }

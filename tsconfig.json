@@ -9,12 +9,14 @@
     "baseUrl": ".",
     "rootDir": ".",
     "paths":{
-      "*":[
-        "examples/*",
-        "iwo/src/*",
-      ],
       "@*":[
         "iwo/src/*",
+      ],
+      "iwo":[
+        "iwo/src/iwo"
+      ],
+      "imgui-js/*":[
+        "lib/imgui-js/*",
       ]
     },
     "outDir": "docs",
