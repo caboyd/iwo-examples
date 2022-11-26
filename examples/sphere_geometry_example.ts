@@ -28,6 +28,7 @@ let phi_length = Math.PI * 2;
 let theta_start = 0;
 let theta_length = Math.PI;
 let current_material = 0;
+let flat_shading = true;
 
 let sphere: IWO.MeshInstance;
 let grid: IWO.MeshInstance;
@@ -123,7 +124,9 @@ function buildSphere() {
 
     const sphere_mat = Object.values(mat_map)[current_material];
     //@ts-ignore
-    if (sphere_mat.albedo_color) sphere_mat.albedo_color = color;
+    if (sphere_mat.albedo_color !== undefined) sphere_mat.albedo_color = color;
+    //@ts-ignore
+    if (sphere_mat.flat_shading !== undefined) sphere_mat.flat_shading = flat_shading;
 
     const sphere_geom = new IWO.SphereGeometry(
         radius,
@@ -159,7 +162,7 @@ function drawUI(): void {
     ImGui.NewFrame();
     const frame_width = 420;
     ImGui.SetNextWindowPos(new ImGui.ImVec2(gl.drawingBufferWidth - frame_width + 1, 0));
-    ImGui.SetNextWindowSize(new ImGui.ImVec2(frame_width, 250), ImGui.Cond.FirstUseEver);
+    ImGui.SetNextWindowSize(new ImGui.ImVec2(frame_width, 280), ImGui.Cond.FirstUseEver);
     ImGui.SetNextWindowSizeConstraints(
         new ImGui.ImVec2(frame_width, 0),
         new ImGui.ImVec2(frame_width, gl.drawingBufferHeight)
@@ -180,6 +183,7 @@ function drawUI(): void {
         let c: ImGui.ImTuple3<number> = [color[0], color[1], color[2]];
         ImGui.ColorEdit3("Color", c);
         vec3.set(color, c[0], c[1], c[2]);
+        ImGui.Checkbox("Flat Shading", (v = flat_shading) => (flat_shading = v));
         ImGui.End();
     }
     ImGui.EndFrame();
