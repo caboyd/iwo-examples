@@ -36,8 +36,6 @@ let spheres: IWO.MeshInstance[];
 let renderer: IWO.Renderer;
 let depth_mat: IWO.EmptyMaterial;
 
-document.getElementById("loading-text-wrapper")!.remove();
-
 await (async function main(): Promise<void> {
     canvas = <HTMLCanvasElement>document.getElementById("canvas");
     gl = IWO.initGL(canvas);

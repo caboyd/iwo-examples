@@ -18,8 +18,6 @@ let frustum_line: IWO.MeshInstance;
 let grid: IWO.MeshInstance;
 let renderer: IWO.Renderer;
 
-document.getElementById("loading-text-wrapper")!.remove();
-
 await (async function main(): Promise<void> {
     canvas = <HTMLCanvasElement>document.getElementById("canvas");
     gl = IWO.initGL(canvas);

@@ -17,8 +17,6 @@ let skybox: IWO.MeshInstance;
 let helmet: IWO.MeshInstance;
 let helmet_loaded = false;
 
-document.getElementById("loading-text-wrapper")!.remove();
-
 (function main(): void {
     canvas = <HTMLCanvasElement>document.getElementById("canvas");
 

@@ -19,8 +19,6 @@ let cube_loaded = false;
 let teapot: IWO.MeshInstance;
 let teapot_loaded = false;
 
-document.getElementById("loading-text-wrapper")!.remove();
-
 await (async function main(): Promise<void> {
     const canvas = <HTMLCanvasElement>document.getElementById("canvas");
 
