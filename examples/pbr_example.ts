@@ -1,7 +1,8 @@
-import { glMatrix, mat4, vec3 } from "gl-matrix";
+import { glMatrix, mat4, vec3, vec4 } from "gl-matrix";
 import * as IWO from "iwo";
-
-let canvas: HTMLCanvasElement;
+import * as ImGui from "imgui-js/imgui";
+import * as ImGui_Impl from "imgui-js/imgui_impl";
+import { PBRMaterial } from "../iwo/src/materials/PBRMaterial";
 
 let gl: WebGL2RenderingContext;
 
@@ -9,35 +10,53 @@ const view_matrix: mat4 = mat4.create();
 const proj_matrix: mat4 = mat4.create();
 const root_url = "../iwo-assets/examples/";
 
-const cPos: vec3 = vec3.fromValues(0.5, 8, 9.0);
-const cUp: vec3 = vec3.fromValues(0, 1, 0);
-const cFront: vec3 = vec3.fromValues(0, 0, -1);
+const cPos: vec3 = [0, 8, 16];
+const vFov = 60;
 
 const light_color: vec3 = vec3.fromValues(12.47, 12.31, 12.79);
-const light_positions: [number, number, number, number][] = [
-    [10, 15, 10, 1],
-    [-10, 5, 10, 1],
-    [0, 5, -10, 1],
-];
 
 let camera: IWO.Camera;
-let fps_control: IWO.FPSControl;
+let orbit: IWO.OrbitControl;
 
 let box: IWO.MeshInstance;
-let light_boxes: IWO.MeshInstance[];
+let lights: IWO.MeshInstance[];
 let skybox: IWO.MeshInstance;
 let spheres: IWO.MeshInstance[];
 let grid: IWO.MeshInstance;
 let renderer: IWO.Renderer;
 
-document.getElementById("loading-text-wrapper")!.remove();
+class Static<T> {
+    constructor(public value: T) {}
+    access: ImGui.Access<T> = (value: T = this.value): T => (this.value = value);
+}
 
-(function main(): void {
-    canvas = <HTMLCanvasElement>document.getElementById("canvas");
+const gui = {
+    point_light_count: new Static<number>(4),
+    point_light_attenuation: new Static<number>(16),
+    sun_light: new Static<boolean>(true),
+    sky_box: new Static<boolean>(true),
+    grid: new Static<boolean>(true),
+    diffuse_irradiance: new Static<boolean>(true),
+    specular_reflectance: new Static<boolean>(true),
+    current_environment: new Static<number>(0),
+    environments: ["Monument Valley", "Royal Esplanade"],
+    sphere_color: new Static<ImGui.ImTuple3<number>>([1, 1, 1]),
+    sphere_color2: new Static<vec3>([1, 1, 1]),
+};
+
+await (async function main() {
+    const canvas = <HTMLCanvasElement>document.getElementById("canvas");
 
     gl = IWO.initGL(canvas);
 
     renderer = new IWO.Renderer(gl);
+
+    await ImGui.default();
+    ImGui.IMGUI_CHECKVERSION();
+    ImGui.CreateContext();
+    // // Setup style
+    ImGui.StyleColorsDark();
+    ImGui_Impl.Init(gl);
 
     window.addEventListener("resize", resizeCanvas, false);
 
@@ -47,10 +66,10 @@ document.getElementById("loading-text-wrapper")!.remove();
         renderer.setViewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
         mat4.perspective(
             proj_matrix,
-            glMatrix.toRadian(90),
+            glMatrix.toRadian(vFov),
             gl.drawingBufferWidth / gl.drawingBufferHeight,
             0.1,
-            1000.0
+            100.0
         );
     }
 
@@ -62,53 +81,14 @@ document.getElementById("loading-text-wrapper")!.remove();
 })();
 
 function initScene(): void {
-    camera = new IWO.Camera(cPos, cFront);
-    fps_control = new IWO.FPSControl(camera);
+    camera = new IWO.Camera(cPos);
+    orbit = new IWO.OrbitControl(camera, { orbit_point: [0, 8, 0], maximum_distance: 20 } as IWO.OrbitControlOptions);
 
-    gl.clearColor(0.2, 0.3, 0.3, 1.0);
+    gl.clearColor(0.05, 0.05, 0.05, 1.0);
+
     gl.enable(gl.DEPTH_TEST);
     gl.enable(gl.CULL_FACE);
     gl.cullFace(gl.BACK);
-
-    renderer.setViewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-    mat4.perspective(proj_matrix, glMatrix.toRadian(90), gl.drawingBufferWidth / gl.drawingBufferHeight, 0.1, 1000.0);
-
-    /*
-    Converts UV coords of equirectangular image to the vector direction,
-    as if it was projected onto the sphere
-     */
-    function sphereUVtoVec3(out: vec3, u: number, v: number): vec3 {
-        const theta = (v - 0.5) * Math.PI;
-        const phi = u * 2 * Math.PI;
-
-        const x = Math.cos(phi) * Math.cos(theta);
-        const y = Math.sin(theta);
-        const z = Math.sin(phi) * Math.cos(theta);
-
-        vec3.set(out, x, y, z);
-        return out;
-    }
-    //0.5-u because we scaled x by -1 to invert sphere
-    //1-v because we flipped the image
-    const sun_dir = sphereUVtoVec3(vec3.create(), 0.5 + 0.872, 1 - 0.456);
-    const sun_intensity = 24;
-    const sun_color = [(sun_intensity * 254) / 255, (sun_intensity * 238) / 255, (sun_intensity * 224) / 255];
-
-    const pbrShader = renderer.getorCreateShader(IWO.ShaderSource.PBR);
-    renderer.setAndActivateShader(pbrShader);
-    pbrShader.setUniform("u_lights[0].position", [sun_dir[0], sun_dir[1], sun_dir[2], 0]);
-    pbrShader.setUniform("u_lights[0].color", sun_color);
-
-    pbrShader.setUniform("u_lights[1].position", light_positions[0]);
-    pbrShader.setUniform("u_lights[1].color", light_color);
-
-    pbrShader.setUniform("u_lights[2].position", light_positions[1]);
-    pbrShader.setUniform("u_lights[2].color", light_color);
-
-    pbrShader.setUniform("u_lights[3].position", light_positions[2]);
-    pbrShader.setUniform("u_lights[3].color", light_color);
-
-    pbrShader.setUniform("u_light_count", 4);
 
     const sky_tex = new IWO.Texture2D(gl);
     let irr_tex = new IWO.TextureCubeMap(gl);
@@ -123,7 +103,7 @@ function initScene(): void {
         flip: true,
     };
 
-    const file_prefix =  root_url + "cubemap/monvalley/MonValley_A_LookoutPoint";
+    const file_prefix = root_url + "cubemap/monvalley/MonValley_A_LookoutPoint";
     IWO.ImageLoader.promise(file_prefix + "_preview.jpg").then((image: HTMLImageElement) => {
         sky_tex.setImage(gl, image, tex2D_opts);
         IWO.ImageLoader.promise(file_prefix + "_8k.jpg").then((image: HTMLImageElement) => {
@@ -143,7 +123,7 @@ function initScene(): void {
     });
 
     const box_geom = new IWO.BoxGeometry({ width: 3.0, height: 3.0, depth: 3.0, stretch_texture: false });
-    const sphere_geom = new IWO.SphereGeometry(0.75, 16, 16);
+    const sphere_geom = new IWO.SphereGeometry(0.75, 32, 16);
     const plane_geom = new IWO.PlaneGeometry(100, 100, 1, 1, true);
 
     const sphere_mesh = new IWO.Mesh(gl, sphere_geom);
@@ -162,14 +142,12 @@ function initScene(): void {
     skybox = new IWO.MeshInstance(sky_mesh, sky_mat);
 
     //LIGHTS
-    const light_geom = new IWO.BoxGeometry();
-    const light_mesh = new IWO.Mesh(gl, light_geom);
+    const light_mesh = new IWO.Mesh(gl, sphere_geom);
     const light_mat = new IWO.BasicMaterial([1, 1, 1]);
-    light_boxes = [];
-    for (const pos of light_positions) {
+    lights = [];
+    for (let i = 0; i < 15; i++) {
         const lb = new IWO.MeshInstance(light_mesh, light_mat);
-        mat4.translate(lb.model_matrix, lb.model_matrix, [pos[0], pos[1], pos[2]]);
-        light_boxes.push(lb);
+        lights.push(lb);
     }
 
     //BOX
@@ -201,9 +179,65 @@ function initScene(): void {
     }
 }
 
+let last_now = Date.now();
+let light_pi = 0;
+
 function update(): void {
-    fps_control.update();
+    const now = Date.now();
+    const delta = now - last_now;
+    last_now = now;
+
+    let io = ImGui.GetIO();
+    orbit.mouse_active = !io.WantCaptureMouse;
+    orbit.update();
+
+    //update point light positions
+    const pbrShader = renderer.getorCreateShader(IWO.ShaderSource.PBR);
+    renderer.setAndActivateShader(pbrShader);
+    light_pi += delta / 500;
+    const light_count = gui.point_light_count.value;
+    for (let i = 0; i < light_count; i++) {
+        const lb = lights[i];
+        mat4.identity(lb.model_matrix);
+        const c = Math.sin(light_pi / 2);
+        const size = 8 * (Math.cos(c) - 0.45);
+        const l = (2.3 * light_pi) / light_count + (i * Math.PI * 2) / light_count;
+        const x = (Math.cos(l) - Math.sin(l)) * size;
+        const y = (Math.sin(l) + Math.cos(l)) * size + 8;
+
+        const d = Math.sin(light_pi / 4);
+        const z = 8 * d;
+        mat4.translate(lb.model_matrix, lb.model_matrix, [x, y, z]);
+        mat4.scale(lb.model_matrix, lb.model_matrix, [0.4, 0.4, 0.4]);
+
+        let index = i;
+        const pos = vec3.create();
+        if (gui.sun_light.value) index += 1;
+        vec3.transformMat4(pos, pos, lb.model_matrix);
+        pbrShader.setUniform(`u_lights[${index}].position`, [x, y, z, 1]);
+        const a = gui.point_light_attenuation.value;
+        pbrShader.setUniform(`u_lights[${index}].color`, [a, a, a]);
+    }
+    if (gui.sun_light.value) {
+        //0.5-u because we scaled x by -1 to invert sphere
+        //1-v because we flipped the image
+        const sun_dir = sphereUVtoVec3(vec3.create(), 0.5 + 0.872, 1 - 0.456);
+        const sun_intensity = 24;
+        const sun_color = [(sun_intensity * 254) / 255, (sun_intensity * 238) / 255, (sun_intensity * 224) / 255];
+        pbrShader.setUniform("u_lights[0].position", [sun_dir[0], sun_dir[1], sun_dir[2], 0]);
+        pbrShader.setUniform("u_lights[0].color", sun_color);
+    }
+    pbrShader.setUniform("u_light_count", light_count + (gui.sun_light.value ? 1 : 0));
+
+    for (const sphere of spheres) {
+        const mat = sphere.materials[0] as PBRMaterial;
+        mat.specular_env_texture_active = gui.specular_reflectance.value;
+        mat.irradiance_texture_active = gui.diffuse_irradiance.value;
+    }
+
     drawScene();
+    drawUI();
+    renderer.resetSaveBindings();
     requestAnimationFrame(update);
 }
 
@@ -215,26 +249,74 @@ function drawScene(): void {
     renderer.setPerFrameUniforms(view_matrix, proj_matrix);
 
     //skybox
-    gl.disable(gl.DEPTH_TEST);
-    gl.disable(gl.CULL_FACE);
-    mat4.identity(skybox.model_matrix);
-    mat4.translate(skybox.model_matrix, skybox.model_matrix, camera.position);
-    mat4.scale(skybox.model_matrix, skybox.model_matrix, [-1, 1, -1]);
+    if (gui.sky_box.value) {
+        gl.disable(gl.DEPTH_TEST);
+        gl.disable(gl.CULL_FACE);
+        mat4.identity(skybox.model_matrix);
+        mat4.translate(skybox.model_matrix, skybox.model_matrix, camera.position);
+        mat4.scale(skybox.model_matrix, skybox.model_matrix, [-1, 1, -1]);
+        skybox.render(renderer, view_matrix, proj_matrix);
+        gl.enable(gl.CULL_FACE);
+        gl.enable(gl.DEPTH_TEST);
+    }
 
-    skybox.render(renderer, view_matrix, proj_matrix);
-    gl.enable(gl.CULL_FACE);
-    gl.enable(gl.DEPTH_TEST);
-
-    //mat4.rotateY(box.model_matrix, box.model_matrix, glMatrix.toRadian(0.7));
-    //mat4.rotateZ(box.model_matrix, box.model_matrix, glMatrix.toRadian(0.5));
-
-    //  box.render(renderer, view_matrix, proj_matrix);
-
-    for (const lb of light_boxes) lb.render(renderer, view_matrix, proj_matrix);
+    for (let i = 0; i < gui.point_light_count.value; i++) {
+        const lb = lights[i];
+        lb.render(renderer, view_matrix, proj_matrix);
+    }
 
     for (const sphere of spheres) {
         sphere.render(renderer, view_matrix, proj_matrix);
     }
 
-    grid.render(renderer, view_matrix, proj_matrix);
+    if (gui.grid.value) grid.render(renderer, view_matrix, proj_matrix);
+    renderer.cleanupGLState();
+}
+
+function drawUI(): void {
+    //imgui render
+    ImGui_Impl.NewFrame(0);
+    ImGui.NewFrame();
+    const frame_width = 420;
+    ImGui.SetNextWindowPos(new ImGui.ImVec2(gl.drawingBufferWidth - frame_width + 1, 0));
+    ImGui.SetNextWindowSize(new ImGui.ImVec2(frame_width, 280), ImGui.Cond.FirstUseEver);
+    ImGui.SetNextWindowSizeConstraints(
+        new ImGui.ImVec2(frame_width, 0),
+        new ImGui.ImVec2(frame_width, gl.drawingBufferHeight)
+    );
+    {
+        ImGui.Begin("Settings");
+        ImGui.PushItemWidth(-175);
+        ImGui.Text("Lights");
+        ImGui.Checkbox("Sun Light", gui.sun_light.access);
+        ImGui.SliderInt("Point Light Count", gui.point_light_count.access, 0, 15);
+        ImGui.SliderFloat("Point Light Attenuation", gui.point_light_attenuation.access, 0, 128);
+        ImGui.Text("Lighting");
+        ImGui.Checkbox("Diffuse Irradiance", gui.diffuse_irradiance.access);
+        ImGui.Checkbox("Specular Reflectance", gui.specular_reflectance.access);
+        ImGui.Text("Other");
+        ImGui.Checkbox("Sky Box", gui.sky_box.access);
+        ImGui.Checkbox("Grid", gui.grid.access);
+        ImGui.End();
+    }
+    ImGui.EndFrame();
+    ImGui.Render();
+
+    ImGui_Impl.RenderDrawData(ImGui.GetDrawData());
+}
+
+/*
+    Converts UV coords of equirectangular image to the vector direction,
+    as if it was projected onto the sphere
+     */
+function sphereUVtoVec3(out: vec3, u: number, v: number): vec3 {
+    const theta = (v - 0.5) * Math.PI;
+    const phi = u * 2 * Math.PI;
+
+    const x = Math.cos(phi) * Math.cos(theta);
+    const y = Math.sin(theta);
+    const z = Math.sin(phi) * Math.cos(theta);
+
+    vec3.set(out, x, y, z);
+    return out;
 }
