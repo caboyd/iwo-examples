@@ -194,8 +194,8 @@ function initRenderDepth() {
     if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE) throw "depth texture frame buffer error";
 
     //setup quad
-    const attrs = {
-        [IWO.StandardAttribute.Vertex.name]: IWO.StandardAttribute.Vertex.createAttribute(),
+    const attrs: IWO.Attributes = {
+        [IWO.StandardAttribute.Position.name]: IWO.StandardAttribute.Position.createAttribute(),
     };
 
     const quad_vertex_buffer_data = [
