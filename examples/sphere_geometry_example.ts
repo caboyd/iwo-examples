@@ -29,6 +29,7 @@ let theta_start = 0;
 let theta_length = Math.PI;
 let current_material = 0;
 let flat_shading = true;
+let has_changed = true;
 
 let sphere: IWO.MeshInstance;
 let grid: IWO.MeshInstance;
@@ -118,13 +119,15 @@ function update(): void {
 }
 
 function buildSphere() {
-    if (sphere) sphere.mesh.destroy(gl);
-
     const sphere_mat = Object.values(mat_map)[current_material];
+    if (sphere) sphere.materials[0] = sphere_mat;
     //@ts-ignore
     if (sphere_mat.albedo_color !== undefined) sphere_mat.albedo_color = color;
     //@ts-ignore
     if (sphere_mat.flat_shading !== undefined) sphere_mat.flat_shading = flat_shading;
+
+    if (!has_changed) return;
+    if (sphere) sphere.mesh.destroy(gl);
 
     const sphere_geom = new IWO.SphereGeometry(
         radius,
@@ -138,6 +141,7 @@ function buildSphere() {
     const sphere_mesh = new IWO.Mesh(gl, sphere_geom);
     sphere = new IWO.MeshInstance(sphere_mesh, sphere_mat);
     mat4.translate(sphere.model_matrix, sphere.model_matrix, [0, 3, 0]);
+    has_changed = false;
 }
 
 function drawScene(): void {
@@ -168,13 +172,18 @@ function drawUI(): void {
     {
         ImGui.Begin("Settings");
         ImGui.PushItemWidth(-150);
-        ImGui.SliderFloat("radius", (v = radius) => (radius = v), 1, 5);
-        ImGui.SliderInt("horizontal_segments", (v = horizontal_segments) => (horizontal_segments = v), 1, 64);
-        ImGui.SliderInt("vertical_segments", (v = vertical_segments) => (vertical_segments = v), 1, 32);
-        ImGui.SliderAngle("phi_start", (v = phi_start) => (phi_start = v), 0, 2 * 180);
-        ImGui.SliderAngle("phi_length", (v = phi_length) => (phi_length = v), 0, 2 * 180);
-        ImGui.SliderAngle("theta_start", (v = theta_start) => (theta_start = v), 0, 180);
-        ImGui.SliderAngle("theta_length", (v = theta_length) => (theta_length = v), 0, 180);
+        has_changed = ImGui.SliderFloat("radius", (v = radius) => (radius = v), 1, 5) || has_changed;
+        has_changed =
+            ImGui.SliderInt("horizontal_segments", (v = horizontal_segments) => (horizontal_segments = v), 1, 64) ||
+            has_changed;
+        has_changed =
+            ImGui.SliderInt("vertical_segments", (v = vertical_segments) => (vertical_segments = v), 1, 32) ||
+            has_changed;
+        has_changed = ImGui.SliderAngle("phi_start", (v = phi_start) => (phi_start = v), 0, 2 * 180) || has_changed;
+        has_changed = ImGui.SliderAngle("phi_length", (v = phi_length) => (phi_length = v), 0, 2 * 180) || has_changed;
+        has_changed = ImGui.SliderAngle("theta_start", (v = theta_start) => (theta_start = v), 0, 180) || has_changed;
+        has_changed =
+            ImGui.SliderAngle("theta_length", (v = theta_length) => (theta_length = v), 0, 180) || has_changed;
         const keys = Object.keys(mat_map);
         ImGui.Text("Material");
         ImGui.Combo("Material", (v = current_material) => (current_material = v), keys, keys.length);
