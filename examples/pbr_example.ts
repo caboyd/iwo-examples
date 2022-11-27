@@ -1,8 +1,7 @@
-import { glMatrix, mat4, vec3, vec4 } from "gl-matrix";
-import * as IWO from "iwo";
+import { glMatrix, mat4, vec3 } from "gl-matrix";
 import * as ImGui from "imgui-js/imgui";
 import * as ImGui_Impl from "imgui-js/imgui_impl";
-import { PBRMaterial } from "../iwo/src/materials/PBRMaterial";
+import * as IWO from "iwo";
 
 let gl: WebGL2RenderingContext;
 
@@ -13,17 +12,22 @@ const root_url = "../iwo-assets/examples/";
 const cPos: vec3 = [0, 8, 16];
 const vFov = 60;
 
-const light_color: vec3 = vec3.fromValues(12.47, 12.31, 12.79);
+const sun_dir = sphereUVtoVec3(vec3.create(), 0.5 + 0.872, 1 - 0.456);
+const sun_intensity = 24;
+const sun_color = [(sun_intensity * 254) / 255, (sun_intensity * 238) / 255, (sun_intensity * 224) / 255];
 
 let camera: IWO.Camera;
 let orbit: IWO.OrbitControl;
 
-let box: IWO.MeshInstance;
 let lights: IWO.MeshInstance[];
 let skybox: IWO.MeshInstance;
 let spheres: IWO.MeshInstance[];
 let grid: IWO.MeshInstance;
 let renderer: IWO.Renderer;
+
+let env_texs: IWO.TextureCubeMap[] = [];
+let irr_texs: IWO.TextureCubeMap[] = [];
+let sky_texs: IWO.Texture2D[] = [];
 
 class Static<T> {
     constructor(public value: T) {}
@@ -39,9 +43,18 @@ const gui = {
     diffuse_irradiance: new Static<boolean>(true),
     specular_reflectance: new Static<boolean>(true),
     current_environment: new Static<number>(0),
-    environments: ["Monument Valley", "Royal Esplanade"],
+    environments: [
+        { name: "Monument Valley", file_name: "cubemap/monvalley/MonValley_A_LookoutPoint", exists: false },
+        { name: "Royal Esplanade", file_name: "cubemap/royal_esplanade/royal_esplanade", exists: false },
+    ] as Env[],
     sphere_color: new Static<ImGui.ImTuple3<number>>([1, 1, 1]),
     sphere_color2: new Static<vec3>([1, 1, 1]),
+};
+
+type Env = {
+    name: string;
+    file_name: string;
+    exists: boolean;
 };
 
 await (async function main() {
@@ -75,52 +88,36 @@ await (async function main() {
 
     resizeCanvas();
 
-    initScene();
+    await initScene();
 
     requestAnimationFrame(update);
 })();
 
-function initScene(): void {
+async function initScene() {
     camera = new IWO.Camera(cPos);
     orbit = new IWO.OrbitControl(camera, { orbit_point: [0, 8, 0], maximum_distance: 20 } as IWO.OrbitControlOptions);
-
-    gl.clearColor(0.05, 0.05, 0.05, 1.0);
 
     gl.enable(gl.DEPTH_TEST);
     gl.enable(gl.CULL_FACE);
     gl.cullFace(gl.BACK);
 
-    const sky_tex = new IWO.Texture2D(gl);
-    let irr_tex = new IWO.TextureCubeMap(gl);
-    let env_tex = new IWO.TextureCubeMap(gl);
-    const cube_tex = new IWO.TextureCubeMap(gl);
-
     const tex2D_opts = {
         wrap_S: gl.CLAMP_TO_EDGE,
         wrap_T: gl.CLAMP_TO_EDGE,
-        mag_filter: gl.LINEAR,
         min_filter: gl.LINEAR,
         flip: true,
     };
 
-    const file_prefix = root_url + "cubemap/monvalley/MonValley_A_LookoutPoint";
-    IWO.ImageLoader.promise(file_prefix + "_preview.jpg").then((image: HTMLImageElement) => {
-        sky_tex.setImage(gl, image, tex2D_opts);
-        IWO.ImageLoader.promise(file_prefix + "_8k.jpg").then((image: HTMLImageElement) => {
-            sky_tex.setImage(gl, image, tex2D_opts);
-        });
-    });
+    for (let i = 0; i < gui.environments.length; i++) {
+        sky_texs.push(new IWO.Texture2D(gl));
+        irr_texs.push(new IWO.TextureCubeMap(gl));
+        env_texs.push(new IWO.TextureCubeMap(gl));
 
-    IWO.HDRImageLoader.promise(file_prefix + "_Env.hdr").then((data: IWO.HDRBuffer) => {
-        cube_tex.setEquirectangularHDRBuffer(renderer, data);
-        irr_tex = IWO.TextureCubeMap.irradianceFromCubemap(irr_tex, renderer, cube_tex);
-        env_tex = IWO.TextureCubeMap.specularFromCubemap(env_tex, renderer, cube_tex);
-        IWO.HDRImageLoader.promise(file_prefix + "_2k.hdr").then((data: IWO.HDRBuffer) => {
-            cube_tex.setEquirectangularHDRBuffer(renderer, data);
-            env_tex = IWO.TextureCubeMap.specularFromCubemap(env_tex, renderer, cube_tex, data.width);
-            cube_tex.destroy(gl);
+        const file_prefix = root_url + gui.environments[i].file_name;
+        await IWO.ImageLoader.promise(file_prefix + "_preview.jpg").then((image: HTMLImageElement) => {
+            sky_texs[i].setImage(gl, image, tex2D_opts);
         });
-    });
+    }
 
     const box_geom = new IWO.BoxGeometry({ width: 3.0, height: 3.0, depth: 3.0, stretch_texture: false });
     const sphere_geom = new IWO.SphereGeometry(0.75, 32, 16);
@@ -128,7 +125,6 @@ function initScene(): void {
 
     const sphere_mesh = new IWO.Mesh(gl, sphere_geom);
     const plane_mesh = new IWO.Mesh(gl, plane_geom);
-    const box_mesh = new IWO.Mesh(gl, box_geom);
 
     //GRID
     const grid_mat = new IWO.GridMaterial();
@@ -138,7 +134,7 @@ function initScene(): void {
     const sky_geom = new IWO.SphereGeometry(1, 48, 48);
     const sky_mesh = new IWO.Mesh(gl, sky_geom);
     const sky_mat = new IWO.BasicMaterial([1, 1, 1]);
-    sky_mat.setAlbedoTexture(sky_tex);
+    sky_mat.setAlbedoTexture(sky_texs[gui.current_environment.value]);
     skybox = new IWO.MeshInstance(sky_mesh, sky_mat);
 
     //LIGHTS
@@ -150,14 +146,7 @@ function initScene(): void {
         lights.push(lb);
     }
 
-    //BOX
-    const box_mat = new IWO.BasicMaterial(vec3.fromValues(1, 1, 1));
-    box_mat.setAlbedoCubeTexture(cube_tex);
-    box = new IWO.MeshInstance(box_mesh, box_mat);
-    mat4.translate(box.model_matrix, box.model_matrix, vec3.fromValues(-2, 5, 3));
-
     //SPHERES
-
     spheres = [];
     const num_cols = 8;
     const num_rows = 8;
@@ -167,8 +156,8 @@ function initScene(): void {
                 albedo_color: [1, 1, 1],
                 metallic: k / num_rows,
                 roughness: Math.min(1, Math.max(0.025, i / num_cols)),
-                irradiance_texture: irr_tex,
-                specular_env_texture: env_tex,
+                irradiance_texture: irr_texs[gui.current_environment.value],
+                specular_env_texture: env_texs[gui.current_environment.value],
             });
             const s = new IWO.MeshInstance(sphere_mesh, mat);
             spheres.push(s);
@@ -211,9 +200,7 @@ function update(): void {
         mat4.scale(lb.model_matrix, lb.model_matrix, [0.4, 0.4, 0.4]);
 
         let index = i;
-        const pos = vec3.create();
         if (gui.sun_light.value) index += 1;
-        vec3.transformMat4(pos, pos, lb.model_matrix);
         pbrShader.setUniform(`u_lights[${index}].position`, [x, y, z, 1]);
         const a = gui.point_light_attenuation.value;
         pbrShader.setUniform(`u_lights[${index}].color`, [a, a, a]);
@@ -221,28 +208,36 @@ function update(): void {
     if (gui.sun_light.value) {
         //0.5-u because we scaled x by -1 to invert sphere
         //1-v because we flipped the image
-        const sun_dir = sphereUVtoVec3(vec3.create(), 0.5 + 0.872, 1 - 0.456);
-        const sun_intensity = 24;
-        const sun_color = [(sun_intensity * 254) / 255, (sun_intensity * 238) / 255, (sun_intensity * 224) / 255];
+
         pbrShader.setUniform("u_lights[0].position", [sun_dir[0], sun_dir[1], sun_dir[2], 0]);
         pbrShader.setUniform("u_lights[0].color", sun_color);
     }
     pbrShader.setUniform("u_light_count", light_count + (gui.sun_light.value ? 1 : 0));
 
+    buildEnvironment();
+
     for (const sphere of spheres) {
-        const mat = sphere.materials[0] as PBRMaterial;
+        const mat = sphere.materials[0] as IWO.PBRMaterial;
         mat.specular_env_texture_active = gui.specular_reflectance.value;
+        mat.specular_env_texture = env_texs[gui.current_environment.value];
         mat.irradiance_texture_active = gui.diffuse_irradiance.value;
+        mat.irradiance_texture = irr_texs[gui.current_environment.value];
     }
 
+    const sky_mat = skybox.materials[0] as IWO.BasicMaterial;
+    sky_mat.setAlbedoTexture(sky_texs[gui.current_environment.value]);
+
     drawScene();
-    drawUI();
     renderer.resetSaveBindings();
+
+    drawUI();
     requestAnimationFrame(update);
 }
 
 function drawScene(): void {
+    gl.clearColor(0.05, 0.05, 0.05, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    renderer.setViewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
 
     camera.getViewMatrix(view_matrix);
 
@@ -274,15 +269,16 @@ function drawScene(): void {
 }
 
 function drawUI(): void {
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
     //imgui render
     ImGui_Impl.NewFrame(0);
     ImGui.NewFrame();
     const frame_width = 420;
     ImGui.SetNextWindowPos(new ImGui.ImVec2(gl.drawingBufferWidth - frame_width + 1, 0));
-    ImGui.SetNextWindowSize(new ImGui.ImVec2(frame_width, 280), ImGui.Cond.FirstUseEver);
+    ImGui.SetNextWindowSize(new ImGui.ImVec2(frame_width, gl.drawingBufferHeight - 10), ImGui.Cond.FirstUseEver);
     ImGui.SetNextWindowSizeConstraints(
         new ImGui.ImVec2(frame_width, 0),
-        new ImGui.ImVec2(frame_width, gl.drawingBufferHeight)
+        new ImGui.ImVec2(frame_width, gl.drawingBufferHeight - 10)
     );
     {
         ImGui.Begin("Settings");
@@ -294,15 +290,85 @@ function drawUI(): void {
         ImGui.Text("Lighting");
         ImGui.Checkbox("Diffuse Irradiance", gui.diffuse_irradiance.access);
         ImGui.Checkbox("Specular Reflectance", gui.specular_reflectance.access);
+        const names = gui.environments.map((v) => v.name);
+        ImGui.Combo("Environment", gui.current_environment.access, names, gui.environments.length);
         ImGui.Text("Other");
         ImGui.Checkbox("Sky Box", gui.sky_box.access);
         ImGui.Checkbox("Grid", gui.grid.access);
+        if (ImGui.BeginTabBar("Textures")) {
+            if (ImGui.BeginTabItem("BRDF LUT")) {
+                if (IWO.Renderer.BRDF_LUT_TEXTURE) {
+                    const uv_min: ImGui.Vec2 = new ImGui.Vec2(0.0, 1.0); // Top-left
+                    const uv_max: ImGui.Vec2 = new ImGui.Vec2(1.0, 0.0); // Lower-right
+                    ImGui.Image(IWO.Renderer.BRDF_LUT_TEXTURE, new ImGui.Vec2(250, 250), uv_min, uv_max);
+                }
+                ImGui.EndTabItem();
+            }
+            // if (ImGui.BeginTabItem("Enviroment Cubemap")) {
+            //     const uv_min: ImGui.Vec2 = new ImGui.Vec2(0.0, 1.0); // Top-left
+            //     const uv_max: ImGui.Vec2 = new ImGui.Vec2(1.0, 0.0); // Lower-right
+            //     ImGui.Image(env_tex.texture_id, new ImGui.Vec2(250, 250), uv_min, uv_max);
+            //     ImGui.EndTabItem();
+            // }
+            // if (ImGui.BeginTabItem("Irriadiance Cubemap")) {
+            //     const uv_min: ImGui.Vec2 = new ImGui.Vec2(0.0, 1.0); // Top-left
+            //     const uv_max: ImGui.Vec2 = new ImGui.Vec2(1.0, 0.0); // Lower-right
+            //     ImGui.Image(irr_tex.texture_id, new ImGui.Vec2(250, 250), uv_min, uv_max);
+            //     ImGui.EndTabItem();
+            // }
+            if (ImGui.BeginTabItem("Skybox")) {
+                const uv_min: ImGui.Vec2 = new ImGui.Vec2(0.0, 1.0); // Top-left
+                const uv_max: ImGui.Vec2 = new ImGui.Vec2(1.0, 0.0); // Lower-right
+                ImGui.Image(
+                    sky_texs[gui.current_environment.value].texture_id,
+                    new ImGui.Vec2(250, 250),
+                    uv_min,
+                    uv_max
+                );
+                ImGui.EndTabItem();
+            }
+            ImGui.EndTabBar();
+        }
+
         ImGui.End();
     }
+
     ImGui.EndFrame();
     ImGui.Render();
 
     ImGui_Impl.RenderDrawData(ImGui.GetDrawData());
+}
+
+function buildEnvironment() {
+    const i = gui.current_environment.value;
+    if (gui.environments[i].exists) return;
+    gui.environments[i].exists = true;
+
+    const cube_tex = new IWO.TextureCubeMap(gl);
+    const tex2D_opts = {
+        wrap_S: gl.CLAMP_TO_EDGE,
+        wrap_T: gl.CLAMP_TO_EDGE,
+        min_filter: gl.LINEAR,
+        flip: true,
+    };
+
+    const file_prefix = root_url + gui.environments[i].file_name;
+
+    IWO.ImageLoader.promise(file_prefix + "_8k.jpg").then((image: HTMLImageElement) => {
+        sky_texs[i].setImage(gl, image, tex2D_opts);
+    });
+
+    IWO.HDRImageLoader.promise(file_prefix + "_Env.hdr").then((data: IWO.HDRBuffer) => {
+        cube_tex.setEquirectangularHDRBuffer(renderer, data);
+        IWO.TextureCubeMap.irradianceFromCubemap(irr_texs[i], renderer, cube_tex);
+        IWO.TextureCubeMap.specularFromCubemap(env_texs[i], renderer, cube_tex);
+        IWO.HDRImageLoader.promise(file_prefix + "_2k.hdr").then((data: IWO.HDRBuffer) => {
+            cube_tex.setEquirectangularHDRBuffer(renderer, data);
+            IWO.TextureCubeMap.irradianceFromCubemap(irr_texs[i], renderer, cube_tex);
+            IWO.TextureCubeMap.specularFromCubemap(env_texs[i], renderer, cube_tex, data.width);
+            cube_tex.destroy(gl);
+        });
+    });
 }
 
 /*
