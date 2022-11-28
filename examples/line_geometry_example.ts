@@ -107,11 +107,11 @@ function update(): void {
     loop += delta * direction;
     const mod = loop / 2000;
 
-    let line_geom = new IWO.LineGeometry(generatePoints(gl, mod, -2)).getBufferedGeometry();
-    line.mesh.updateGeometryBuffer(gl, line_geom);
+    let line_geom = new IWO.LineGeometry(generatePoints(gl, mod, -2));
+    line.mesh.vertexBufferSubDataFromGeometry(gl, line_geom);
 
-    line_geom = new IWO.LineGeometry(generatePoints(gl, mod, 2)).getBufferedGeometry();
-    line2.mesh.updateGeometryBuffer(gl, line_geom);
+    line_geom = new IWO.LineGeometry(generatePoints(gl, mod, 2));
+    line2.mesh.vertexBufferSubDataFromGeometry(gl, line_geom);
 
     renderer.resetSaveBindings();
     requestAnimationFrame(update);

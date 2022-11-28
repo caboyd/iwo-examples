@@ -61,7 +61,7 @@ await (async function main(): Promise<void> {
 })();
 
 async function initScene(): Promise<void> {
-    const plane_geom = new IWO.PlaneGeometry(100, 100, 1, 1, true).getBufferedGeometry();
+    const plane_geom = new IWO.PlaneGeometry(100, 100, 1, 1, true);
     const plane_mesh = new IWO.Mesh(gl, plane_geom);
 
     //GRID
@@ -71,7 +71,7 @@ async function initScene(): Promise<void> {
     //Init Cube
     IWO.ObjLoader.promise("cube.obj", root_url + "obj/cube", { flip_image_y: true }).then((value: IWO.ObjData) => {
         cube_loaded = true;
-        const geom = value.objects[0].buffered_geometry;
+        const geom = value.objects[0].geometry;
         const mesh = new IWO.Mesh(gl, geom);
         renderer.resetSaveBindings();
         cube = new IWO.MeshInstance(mesh, value.materials.length > 0 ? value.materials : new IWO.NormalOnlyMaterial());
@@ -81,7 +81,7 @@ async function initScene(): Promise<void> {
     //Init Teapot
     IWO.ObjLoader.promise("teapot.obj", root_url + "/obj/teapot/").then((value: IWO.ObjData) => {
         teapot_loaded = true;
-        const geom = value.objects[0].buffered_geometry;
+        const geom = value.objects[0].geometry;
         const mesh = new IWO.Mesh(gl, geom);
         renderer.resetSaveBindings();
         teapot = new IWO.MeshInstance(

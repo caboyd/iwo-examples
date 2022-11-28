@@ -128,7 +128,7 @@ function initScene(): void {
         shadow_texture: depth_texture,
     });
 
-    const sphere_geom = IWO.BufferedGeometry.fromGeometry(new IWO.SphereGeometry(0.3, 8, 8));
+    const sphere_geom = new IWO.SphereGeometry(0.3, 8, 8);
     spheres = [];
     const num_cols = 4;
     const num_rows = 6;
@@ -202,11 +202,7 @@ function initRenderDepth() {
         -1.0, -1.0, 0.0, 1.0, -1.0, 0.0, -1.0, 1.0, 0.0, -1.0, 1.0, 0.0, 1.0, -1.0, 0.0, 1.0, 1.0, 0.0,
     ];
 
-    const quad_buf_geom = {
-        attributes: attrs,
-        buffers: [{ buffer: new Float32Array(quad_vertex_buffer_data), target: gl.ARRAY_BUFFER }],
-        draw_mode: gl.TRIANGLES,
-    } as IWO.BufferedGeometry;
+    const quad_buf_geom = new IWO.QuadGeometry();
 
     const quad_mesh = new IWO.Mesh(gl, quad_buf_geom);
     depth_mat = new IWO.EmptyMaterial(IWO.ShaderSource.Depth);
@@ -221,10 +217,10 @@ function update(): void {
     drawScene();
 
     let geom = getFrustumLineGeometry();
-    frustum_line.mesh.updateGeometryBuffer(gl, geom);
+    frustum_line.mesh.vertexBufferSubDataFromGeometry(gl, geom);
 
     geom = getFrustumCuboidLineGeometry();
-    cuboid_line.mesh.updateGeometryBuffer(gl, geom);
+    cuboid_line.mesh.vertexBufferSubDataFromGeometry(gl, geom);
 
     renderer.resetSaveBindings();
     requestAnimationFrame(update);
@@ -315,7 +311,7 @@ function getFrustumLineGeometry() {
     line_points.push(p[0], p[0 + 4], p[1], p[1 + 4], p[2], p[2 + 4], p[3], p[3 + 4]);
     line_points = line_points.flat(2) as number[];
 
-    let line_geom = new IWO.LineGeometry(line_points, { type: "lines" }).getBufferedGeometry();
+    let line_geom = new IWO.LineGeometry(line_points, { type: "lines" });
     return line_geom;
 }
 
@@ -348,7 +344,7 @@ function getFrustumCuboidLineGeometry() {
     }
     line_points = line_points.flat(2) as number[];
 
-    let line_geom = new IWO.LineGeometry(line_points, { type: "lines" }).getBufferedGeometry();
+    let line_geom = new IWO.LineGeometry(line_points, { type: "lines" });
     return line_geom;
 }
 

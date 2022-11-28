@@ -99,7 +99,7 @@ function initScene(): void {
     //Init Helmet
     IWO.glTFLoader.promise("DamagedHelmet.gltf", root_url + "damaged-helmet").then((value: IWO.glTFData) => {
         helmet_loaded = true;
-        const m = new IWO.Mesh(gl, value.buffered_geometries[0]);
+        const m = new IWO.Mesh(gl, value.geometries[0]);
         renderer.resetSaveBindings();
         helmet = new IWO.MeshInstance(m, value.materials);
         const pbr = (helmet.materials as IWO.Material[])[0] as IWO.PBRMaterial;
