@@ -193,15 +193,6 @@ function initRenderDepth() {
     //Completed
     if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE) throw "depth texture frame buffer error";
 
-    //setup quad
-    const attrs: IWO.Attributes = {
-        [IWO.StandardAttribute.Position.name]: IWO.StandardAttribute.Position.createAttribute(),
-    };
-
-    const quad_vertex_buffer_data = [
-        -1.0, -1.0, 0.0, 1.0, -1.0, 0.0, -1.0, 1.0, 0.0, -1.0, 1.0, 0.0, 1.0, -1.0, 0.0, 1.0, 1.0, 0.0,
-    ];
-
     const quad_buf_geom = new IWO.QuadGeometry();
 
     const quad_mesh = new IWO.Mesh(gl, quad_buf_geom);

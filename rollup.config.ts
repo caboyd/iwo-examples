@@ -19,6 +19,7 @@ const pkg = require("./package.json");
 
 const examples = {
     pbr_example: "PBR Example",
+    pbr_post_processing_example: "PBR with Post Processing Example",
     sphere_geometry_example: "Sphere Geometry Example",
     line_geometry_example: "Line Geometry Example",
     gltf_example: "glTF Model Example",
