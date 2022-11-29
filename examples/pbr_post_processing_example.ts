@@ -50,6 +50,10 @@ const gui = {
     ] as Env[],
     sphere_color: new Static<ImGui.ImTuple3<number>>([1, 1, 1]),
     sphere_color2: new Static<vec3>([1, 1, 1]),
+    gamma: new Static<number>(2.2),
+    exposure: new Static<number>(1.0),
+    current_hdr: new Static<number>(0),
+    hdrs: IWO.HDR_Type_Const,
 };
 
 type Env = {
@@ -92,11 +96,14 @@ await (async function main() {
     render_queue = new IWO.RendererQueue(renderer);
     const default_pass = new IWO.DefaultRenderPass(renderer, view_matrix, proj_matrix);
     default_pass.onBeforePass = () => {
-        gl.clearColor(0.0, 0.0, 0.0, 0.0);
+        gl.clearColor(0.05, 0.05, 0.05, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     };
     render_queue.appendRenderPass("default", default_pass);
-    render_queue.appendPostProcessPass("hdr", new IWO.HDRCorrectionPostProcess(renderer));
+    render_queue.appendPostProcessPass(
+        "hdr",
+        new IWO.HDRCorrectionPostProcess(renderer, gui.hdrs[gui.current_hdr.value], gui.gamma.value)
+    );
 
     await initScene();
 
@@ -300,51 +307,70 @@ function drawUI(): void {
     {
         ImGui.Begin("Settings");
         ImGui.PushItemWidth(-175);
-        ImGui.Text("Lights");
-        ImGui.Checkbox("Sun Light", gui.sun_light.access);
-        ImGui.SliderInt("Point Light Count", gui.point_light_count.access, 0, 15);
-        ImGui.SliderFloat("Point Light Attenuation", gui.point_light_attenuation.access, 0, 128);
-        ImGui.Text("Lighting");
-        ImGui.Checkbox("Diffuse Irradiance", gui.diffuse_irradiance.access);
-        ImGui.Checkbox("Specular Reflectance", gui.specular_reflectance.access);
-        const names = gui.environments.map((v) => v.name);
-        ImGui.Combo("Environment", gui.current_environment.access, names, gui.environments.length);
-        ImGui.Text("Other");
-        ImGui.Checkbox("Sky Box", gui.sky_box.access);
-        ImGui.Checkbox("Grid", gui.grid.access);
-        if (ImGui.BeginTabBar("Textures")) {
-            if (ImGui.BeginTabItem("BRDF LUT")) {
-                if (IWO.Renderer.BRDF_LUT_TEXTURE) {
+        if (ImGui.CollapsingHeader("Post Processing Settings", ImGui.TreeNodeFlags.DefaultOpen)) {
+            const hdr_pass = render_queue.getPostProcessPass("hdr") as IWO.HDRCorrectionPostProcess;
+            if (ImGui.Combo("Tone Mapping", gui.current_hdr.access, gui.hdrs as unknown as string[], gui.hdrs.length)) {
+                hdr_pass.setHDR(renderer, gui.hdrs[gui.current_hdr.value] as IWO.HDR_Type);
+            }
+            if (gui.current_hdr.value !== 5) {
+                if (ImGui.SliderFloat("Gamma", gui.gamma.access, 0.01, 5.0)) {
+                    hdr_pass.setGamma(renderer, gui.gamma.value);
+                }
+            }
+            if (gui.current_hdr.value === 4) {
+                if (ImGui.SliderFloat("Exposure", gui.exposure.access, 0.01, 5.0)) {
+                    hdr_pass.setExposure(renderer, gui.exposure.value);
+                }
+            }
+        }
+
+        if (ImGui.CollapsingHeader("PBR Settings")) {
+            ImGui.Text("Lights");
+            ImGui.Checkbox("Sun Light", gui.sun_light.access);
+            ImGui.SliderInt("Point Light Count", gui.point_light_count.access, 0, 15);
+            ImGui.SliderFloat("Point Light Attenuation", gui.point_light_attenuation.access, 0, 128);
+            ImGui.Text("Lighting");
+            ImGui.Checkbox("Diffuse Irradiance", gui.diffuse_irradiance.access);
+            ImGui.Checkbox("Specular Reflectance", gui.specular_reflectance.access);
+            const names = gui.environments.map((v) => v.name);
+            ImGui.Combo("Environment", gui.current_environment.access, names, gui.environments.length);
+            ImGui.Text("Other");
+            ImGui.Checkbox("Sky Box", gui.sky_box.access);
+            ImGui.Checkbox("Grid", gui.grid.access);
+            if (ImGui.BeginTabBar("Textures")) {
+                if (ImGui.BeginTabItem("BRDF LUT")) {
+                    if (IWO.Renderer.BRDF_LUT_TEXTURE) {
+                        const uv_min: ImGui.Vec2 = new ImGui.Vec2(0.0, 1.0); // Top-left
+                        const uv_max: ImGui.Vec2 = new ImGui.Vec2(1.0, 0.0); // Lower-right
+                        ImGui.Image(IWO.Renderer.BRDF_LUT_TEXTURE, new ImGui.Vec2(250, 250), uv_min, uv_max);
+                    }
+                    ImGui.EndTabItem();
+                }
+                // if (ImGui.BeginTabItem("Enviroment Cubemap")) {
+                //     const uv_min: ImGui.Vec2 = new ImGui.Vec2(0.0, 1.0); // Top-left
+                //     const uv_max: ImGui.Vec2 = new ImGui.Vec2(1.0, 0.0); // Lower-right
+                //     ImGui.Image(env_tex.texture_id, new ImGui.Vec2(250, 250), uv_min, uv_max);
+                //     ImGui.EndTabItem();
+                // }
+                // if (ImGui.BeginTabItem("Irriadiance Cubemap")) {
+                //     const uv_min: ImGui.Vec2 = new ImGui.Vec2(0.0, 1.0); // Top-left
+                //     const uv_max: ImGui.Vec2 = new ImGui.Vec2(1.0, 0.0); // Lower-right
+                //     ImGui.Image(irr_tex.texture_id, new ImGui.Vec2(250, 250), uv_min, uv_max);
+                //     ImGui.EndTabItem();
+                // }
+                if (ImGui.BeginTabItem("Skybox")) {
                     const uv_min: ImGui.Vec2 = new ImGui.Vec2(0.0, 1.0); // Top-left
                     const uv_max: ImGui.Vec2 = new ImGui.Vec2(1.0, 0.0); // Lower-right
-                    ImGui.Image(IWO.Renderer.BRDF_LUT_TEXTURE, new ImGui.Vec2(250, 250), uv_min, uv_max);
+                    ImGui.Image(
+                        sky_texs[gui.current_environment.value].texture_id,
+                        new ImGui.Vec2(250, 250),
+                        uv_min,
+                        uv_max
+                    );
+                    ImGui.EndTabItem();
                 }
-                ImGui.EndTabItem();
+                ImGui.EndTabBar();
             }
-            // if (ImGui.BeginTabItem("Enviroment Cubemap")) {
-            //     const uv_min: ImGui.Vec2 = new ImGui.Vec2(0.0, 1.0); // Top-left
-            //     const uv_max: ImGui.Vec2 = new ImGui.Vec2(1.0, 0.0); // Lower-right
-            //     ImGui.Image(env_tex.texture_id, new ImGui.Vec2(250, 250), uv_min, uv_max);
-            //     ImGui.EndTabItem();
-            // }
-            // if (ImGui.BeginTabItem("Irriadiance Cubemap")) {
-            //     const uv_min: ImGui.Vec2 = new ImGui.Vec2(0.0, 1.0); // Top-left
-            //     const uv_max: ImGui.Vec2 = new ImGui.Vec2(1.0, 0.0); // Lower-right
-            //     ImGui.Image(irr_tex.texture_id, new ImGui.Vec2(250, 250), uv_min, uv_max);
-            //     ImGui.EndTabItem();
-            // }
-            if (ImGui.BeginTabItem("Skybox")) {
-                const uv_min: ImGui.Vec2 = new ImGui.Vec2(0.0, 1.0); // Top-left
-                const uv_max: ImGui.Vec2 = new ImGui.Vec2(1.0, 0.0); // Lower-right
-                ImGui.Image(
-                    sky_texs[gui.current_environment.value].texture_id,
-                    new ImGui.Vec2(250, 250),
-                    uv_min,
-                    uv_max
-                );
-                ImGui.EndTabItem();
-            }
-            ImGui.EndTabBar();
         }
 
         ImGui.End();
