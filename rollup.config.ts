@@ -26,6 +26,7 @@ const examples = {
     obj_example: "Obj Model Example",
     frustum_example: "Camera Frustum Example",
     shadows_example: "Shadows Example",
+    instance_example: "Instanced Rendering Example",
 };
 
 const template = readFileSync("examples/template.html", "utf-8");
