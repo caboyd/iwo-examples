@@ -9,7 +9,7 @@ const view_matrix: mat4 = mat4.create();
 const proj_matrix: mat4 = mat4.create();
 const root_url = "../iwo-assets/examples/";
 
-const cPos: vec3 = vec3.fromValues(2.5, 2, 6.0);
+const cPos: vec3 = vec3.fromValues(10, 6, 10);
 let camera: IWO.Camera;
 let orbit: IWO.OrbitControl;
 
@@ -17,7 +17,6 @@ let renderer: IWO.Renderer;
 let grid: IWO.MeshInstance;
 
 let teapot: IWO.InstancedMesh;
-let teapot_loaded = false;
 
 class Static<T> {
     constructor(public value: T) {}

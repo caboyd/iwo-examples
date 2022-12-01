@@ -88,10 +88,14 @@ function initScene(): void {
 
     const pbrShader = renderer.getorCreateShader(IWO.ShaderSource.PBR);
     renderer.setAndActivateShader(pbrShader);
-    pbrShader.setUniform("u_lights[0].position", [sun_dir[0], sun_dir[1], sun_dir[2], 0]);
-    pbrShader.setUniform("u_lights[0].color", sun_color);
-    pbrShader.setUniform("light_ambient", [0.01, 0.01, 0.01]);
-    pbrShader.setUniform("u_light_count", 1);
+
+    const uniforms = new Map();
+    uniforms.set("u_lights[0].position", [sun_dir[0], sun_dir[1], sun_dir[2], 0]);
+    uniforms.set("u_lights[0].color", sun_color);
+    uniforms.set("light_ambient", [0.01, 0.01, 0.01]);
+    uniforms.set("u_light_count", 1);
+
+    renderer.setShaderVariantUniforms(IWO.ShaderSource.PBR, uniforms);
 
     const plane_geom = new IWO.PlaneGeometry(100, 100, 1, 1, true);
     const plane_mesh = new IWO.Mesh(gl, plane_geom);

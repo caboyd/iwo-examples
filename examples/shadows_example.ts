@@ -41,6 +41,7 @@ await (async function main(): Promise<void> {
     gl = IWO.initGL(canvas);
 
     renderer = new IWO.Renderer(gl);
+    renderer.setShadows(true);
     depth_frame_buffer = gl.createFramebuffer()!;
 
     window.addEventListener("resize", resizeCanvas, false);
@@ -86,15 +87,15 @@ function initScene(): void {
     });
     initRenderDepth();
 
-    const pbrShader = renderer.getorCreateShader(IWO.ShaderSource.PBR);
-    renderer.setAndActivateShader(pbrShader);
-    pbrShader.setUniform("u_lights[0].position", [LIGHT_DIRECTION[0], LIGHT_DIRECTION[1], LIGHT_DIRECTION[2], 0]);
-    pbrShader.setUniform("u_lights[0].color", [3, 3, 3]);
-    pbrShader.setUniform("u_light_count", 1);
-    pbrShader.setUniform("light_ambient", [0.03, 0.03, 0.03]);
-    pbrShader.setUniform("shadow_map_size", DEPTH_TEXTURE_SIZE);
-    pbrShader.setUniform("shadow_distance", SHADOW_DISTANCE);
-    pbrShader.setUniform("transition_distance", TRANSITION_DISTANCE);
+    const uniforms = new Map();
+    uniforms.set("u_lights[0].position", [LIGHT_DIRECTION[0], LIGHT_DIRECTION[1], LIGHT_DIRECTION[2], 0]);
+    uniforms.set("u_lights[0].color", [3, 3, 3]);
+    uniforms.set("u_light_count", 1);
+    uniforms.set("light_ambient", [0.03, 0.03, 0.03]);
+    uniforms.set("shadow_map_size", DEPTH_TEXTURE_SIZE);
+    uniforms.set("shadow_distance", SHADOW_DISTANCE);
+    uniforms.set("transition_distance", TRANSITION_DISTANCE);
+    renderer.setShaderVariantUniforms(IWO.ShaderSource.PBR, uniforms);
 
     const inverse_view = camera.getInverseViewMatrix(mat4.create());
     let line_geom = getFrustumLineGeometry();
