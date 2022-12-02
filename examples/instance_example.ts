@@ -2,6 +2,7 @@ import { glMatrix, mat4, vec3 } from "gl-matrix";
 import * as ImGui from "imgui-js/imgui";
 import * as ImGui_Impl from "imgui-js/imgui_impl";
 import * as IWO from "iwo";
+import { MeshInstance } from "../iwo/src/meshes/MeshInstance";
 
 let gl: WebGL2RenderingContext;
 
@@ -16,7 +17,7 @@ let orbit: IWO.OrbitControl;
 let renderer: IWO.Renderer;
 let grid: IWO.MeshInstance;
 
-let teapot: IWO.InstancedMesh;
+let instanced_mesh: IWO.InstancedMesh;
 
 class Static<T> {
     constructor(public value: T) {}
@@ -27,7 +28,10 @@ const gui = {
     x_instances: new Static<number>(10),
     y_instances: new Static<number>(10),
     z_instances: new Static<number>(10),
-    changed: true,
+    instances_changed: true,
+    mesh_map: new Map<string, IWO.Mesh>(),
+    meshes: ["teapot_lite", "teapot", "box", "sphere"],
+    current_mesh: new Static<number>(0),
 };
 
 await (async function main(): Promise<void> {
@@ -68,7 +72,7 @@ await (async function main(): Promise<void> {
 
 async function initScene(): Promise<void> {
     camera = new IWO.Camera(cPos);
-    orbit = new IWO.OrbitControl(camera, { minimum_distance: 5.5, maximum_distance: 20 });
+    orbit = new IWO.OrbitControl(camera, { minimum_distance: 0.01, maximum_distance: 30 });
 
     gl.clearColor(173 / 255, 196 / 255, 221 / 255, 1.0);
 
@@ -87,22 +91,44 @@ async function initScene(): Promise<void> {
     grid = new IWO.MeshInstance(plane_mesh, grid_mat);
 
     //Init Teapot
-    const value = await IWO.ObjLoader.promise("teapot.obj", root_url + "/obj/teapot/");
-    const geom = value.objects[0].geometry;
-    const mesh = new IWO.Mesh(gl, geom);
-    renderer.resetSaveBindings();
-    teapot = new IWO.InstancedMesh(mesh, new IWO.NormalOnlyMaterial());
+    let data = await IWO.ObjLoader.promise("teapot.obj", root_url + "/obj/teapot/");
+    let geom = data.objects[0].geometry;
+    let mesh = new IWO.Mesh(gl, geom);
+
+    gui.mesh_map.set("teapot", mesh);
+
+    data = await IWO.ObjLoader.promise("teapot-lite.obj", root_url + "/obj/teapot/");
+    geom = data.objects[0].geometry;
+    mesh = new IWO.Mesh(gl, geom);
+    gui.mesh_map.set("teapot_lite", mesh);
+
+    geom = new IWO.BoxGeometry({ width: 10, depth: 10, height: 10 });
+    mesh = new IWO.Mesh(gl, geom);
+    gui.mesh_map.set("box", mesh);
+
+    geom = new IWO.SphereGeometry(10, 32, 16);
+    mesh = new IWO.Mesh(gl, geom);
+    gui.mesh_map.set("sphere", mesh);
+
+    mesh = gui.mesh_map.get(gui.meshes[gui.current_mesh.value])!;
+    instanced_mesh = new IWO.InstancedMesh(mesh, new IWO.NormalOnlyMaterial());
+
     //reorient it upward
-    mat4.scale(teapot.model_matrix, teapot.model_matrix, [0.02, 0.02, 0.02]);
-    mat4.rotateX(teapot.model_matrix, teapot.model_matrix, -Math.PI / 2);
+    mat4.scale(instanced_mesh.model_matrix, instanced_mesh.model_matrix, [0.02, 0.02, 0.02]);
+    mat4.rotateX(instanced_mesh.model_matrix, instanced_mesh.model_matrix, -Math.PI / 2);
 }
 
 function update(): void {
     orbit.update();
 
-    if (gui.changed) {
-        gui.changed = false;
-        teapot.instance_matrix = [];
+    const mesh = gui.mesh_map.get(gui.meshes[gui.current_mesh.value]);
+    if (mesh) {
+        instanced_mesh.mesh = mesh;
+    }
+
+    if (gui.instances_changed) {
+        gui.instances_changed = false;
+        instanced_mesh.instance_matrix = [];
         const m = mat4.create();
         const size_z = gui.z_instances.value;
         const size_y = gui.y_instances.value;
@@ -117,7 +143,7 @@ function update(): void {
                     mat4.rotate(m, m, Math.random() * Math.PI * 2, [1, 0, 0]);
                     mat4.rotate(m, m, Math.random() * Math.PI * 2, [0, 0, 1]);
                     mat4.scale(m, m, [scale, scale, scale]);
-                    teapot.addInstance(m);
+                    instanced_mesh.addInstance(m);
                 }
             }
         }
@@ -136,7 +162,7 @@ function drawScene(): void {
     camera.getViewMatrix(view_matrix);
     renderer.setPerFrameUniforms(view_matrix, proj_matrix);
 
-    teapot.render(renderer, view_matrix, proj_matrix);
+    instanced_mesh.render(renderer, view_matrix, proj_matrix);
 
     grid.render(renderer, view_matrix, proj_matrix);
 
@@ -158,11 +184,14 @@ function drawUI(): void {
     {
         ImGui.Begin("Settings");
         //ImGui.PushItemWidth(-100);
-        gui.changed = ImGui.SliderInt("X Instances", gui.x_instances.access, 1, 50) || gui.changed;
-        gui.changed = ImGui.SliderInt("Y Instances", gui.y_instances.access, 1, 50) || gui.changed;
-        gui.changed = ImGui.SliderInt("Z Instances", gui.z_instances.access, 1, 50) || gui.changed;
+        gui.instances_changed =
+            ImGui.Combo("Mesh", gui.current_mesh.access, gui.meshes, gui.meshes.length) || gui.instances_changed;
+        gui.instances_changed = ImGui.SliderInt("X Instances", gui.x_instances.access, 1, 50) || gui.instances_changed;
+        gui.instances_changed = ImGui.SliderInt("Y Instances", gui.y_instances.access, 1, 50) || gui.instances_changed;
+        gui.instances_changed = ImGui.SliderInt("Z Instances", gui.z_instances.access, 1, 50) || gui.instances_changed;
         ImGui.Text(`Instances: ${gui.x_instances.value * gui.z_instances.value * gui.y_instances.value}`);
         ImGui.Text(`Vertices Rendered: ${renderer.stats.vertex_draw_count}`);
+        ImGui.Text(`Indices Rendered: ${renderer.stats.index_draw_count}`);
         ImGui.End();
     }
 
