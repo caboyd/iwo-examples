@@ -52,8 +52,10 @@ const gui = {
     sphere_color2: new Static<vec3>([1, 1, 1]),
     gamma: new Static<number>(2.2),
     exposure: new Static<number>(1.0),
-    current_hdr: new Static<number>(0),
-    hdrs: IWO.HDR_Type_Const,
+    current_tone: new Static<number>(0),
+    tones: IWO.Tonemappings,
+    gaussian: new Static<boolean>(false),
+    gaussian_blur_factor: new Static<number>(7),
 };
 
 type Env = {
@@ -101,8 +103,8 @@ await (async function main() {
     };
     render_queue.appendRenderPass("default", default_pass);
     render_queue.appendPostProcessPass(
-        "hdr",
-        new IWO.HDRCorrectionPostProcess(renderer, gui.hdrs[gui.current_hdr.value], gui.gamma.value)
+        "tone",
+        new IWO.TonemappingPass(renderer, gui.tones[gui.current_tone.value], gui.gamma.value)
     );
 
     await initScene();
@@ -165,8 +167,8 @@ async function initScene() {
 
     //SPHERES
     spheres = [];
-    const num_cols = 8;
-    const num_rows = 8;
+    const num_cols = 4;
+    const num_rows = 4;
     for (let i = 0; i <= num_cols; i++) {
         for (let k = 0; k <= num_rows; k++) {
             const mat = new IWO.PBRMaterial({
@@ -218,18 +220,27 @@ function update(): void {
 
         let index = i;
         if (gui.sun_light.value) index += 1;
-        pbrShader.setUniform(`u_lights[${index}].position`, [x, y, z, 1]);
-        const a = gui.point_light_attenuation.value;
-        pbrShader.setUniform(`u_lights[${index}].color`, [a, a, a]);
+        renderer.addShaderVariantUniform(IWO.ShaderSource.PBR, `u_lights[${index}].position`, [x, y, z, 1]);
+        const atten = gui.point_light_attenuation.value;
+        renderer.addShaderVariantUniform(IWO.ShaderSource.PBR, `u_lights[${index}].color`, [atten, atten, atten]);
     }
     if (gui.sun_light.value) {
         //0.5-u because we scaled x by -1 to invert sphere
         //1-v because we flipped the image
 
-        pbrShader.setUniform("u_lights[0].position", [sun_dir[0], sun_dir[1], sun_dir[2], 0]);
-        pbrShader.setUniform("u_lights[0].color", sun_color);
+        renderer.addShaderVariantUniform(IWO.ShaderSource.PBR, "u_lights[0].position", [
+            sun_dir[0],
+            sun_dir[1],
+            sun_dir[2],
+            0,
+        ]);
+        renderer.addShaderVariantUniform(IWO.ShaderSource.PBR, "u_lights[0].color", sun_color);
     }
-    pbrShader.setUniform("u_light_count", light_count + (gui.sun_light.value ? 1 : 0));
+    renderer.addShaderVariantUniform(
+        IWO.ShaderSource.PBR,
+        "u_light_count",
+        light_count + (gui.sun_light.value ? 1 : 0)
+    );
 
     buildEnvironment();
 
@@ -246,6 +257,13 @@ function update(): void {
     mat4.scale(skybox.model_matrix, skybox.model_matrix, [-1, 1, -1]);
     const sky_mat = skybox.materials[0] as IWO.BasicMaterial;
     sky_mat.setAlbedoTexture(sky_texs[gui.current_environment.value]);
+
+    if (!gui.gaussian.value) render_queue.removePostProcessPass("gauss");
+    else {
+        const pass = (render_queue.getPostProcessPass("gauss") as IWO.GaussianBlur) ?? new IWO.GaussianBlur(renderer);
+        pass.blur_factor = gui.gaussian_blur_factor.value;
+        if (!render_queue.getPostProcessPass("gauss")) render_queue.appendPostProcessPass("gauss", pass);
+    }
 
     drawScene();
     renderer.resetSaveBindings();
@@ -308,19 +326,25 @@ function drawUI(): void {
         ImGui.Begin("Settings");
         ImGui.PushItemWidth(-175);
         if (ImGui.CollapsingHeader("Post Processing Settings", ImGui.TreeNodeFlags.DefaultOpen)) {
-            const hdr_pass = render_queue.getPostProcessPass("hdr") as IWO.HDRCorrectionPostProcess;
-            if (ImGui.Combo("Tone Mapping", gui.current_hdr.access, gui.hdrs as unknown as string[], gui.hdrs.length)) {
-                hdr_pass.setHDR(renderer, gui.hdrs[gui.current_hdr.value] as IWO.HDR_Type);
+            ImGui.Text("Tonemapping");
+            const pass = render_queue.getPostProcessPass("tone") as IWO.TonemappingPass;
+            if (ImGui.Combo("Algorithm", gui.current_tone.access, gui.tones as unknown as string[], gui.tones.length)) {
+                pass.setTonemapping(renderer, gui.tones[gui.current_tone.value] as IWO.Tonemapping);
             }
-            if (gui.current_hdr.value !== 5) {
+            if (gui.current_tone.value !== 5) {
                 if (ImGui.SliderFloat("Gamma", gui.gamma.access, 0.01, 5.0)) {
-                    hdr_pass.setGamma(renderer, gui.gamma.value);
+                    pass.setGamma(renderer, gui.gamma.value);
                 }
             }
-            if (gui.current_hdr.value === 4) {
+            if (gui.current_tone.value === 4) {
                 if (ImGui.SliderFloat("Exposure", gui.exposure.access, 0.01, 5.0)) {
-                    hdr_pass.setExposure(renderer, gui.exposure.value);
+                    pass.setExposure(renderer, gui.exposure.value);
                 }
+            }
+            ImGui.Text("Gaussian Blur");
+            ImGui.Checkbox("Enabled", gui.gaussian.access);
+            if (gui.gaussian.value) {
+                ImGui.SliderFloat("Blur Factor", gui.gaussian_blur_factor.access, 0.01, 10);
             }
         }
 
