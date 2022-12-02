@@ -95,7 +95,7 @@ function initScene(): void {
     uniforms.set("light_ambient", [0.01, 0.01, 0.01]);
     uniforms.set("u_light_count", 1);
 
-    renderer.setShaderVariantUniforms(IWO.ShaderSource.PBR, uniforms);
+    renderer.addShaderVariantUniforms(IWO.ShaderSource.PBR, uniforms);
 
     const plane_geom = new IWO.PlaneGeometry(100, 100, 1, 1, true);
     const plane_mesh = new IWO.Mesh(gl, plane_geom);

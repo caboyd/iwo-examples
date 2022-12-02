@@ -24,7 +24,7 @@ let skybox: IWO.MeshInstance;
 let spheres: IWO.MeshInstance[];
 let grid: IWO.MeshInstance;
 let renderer: IWO.Renderer;
-let render_queue: IWO.RendererQueue;
+let render_queue: IWO.RenderQueue;
 
 let env_texs: IWO.TextureCubeMap[] = [];
 let irr_texs: IWO.TextureCubeMap[] = [];
@@ -95,8 +95,9 @@ await (async function main() {
 
     resizeCanvas();
 
-    render_queue = new IWO.RendererQueue(renderer);
+    render_queue = new IWO.RenderQueue(renderer);
     const default_pass = new IWO.DefaultRenderPass(renderer, view_matrix, proj_matrix);
+    default_pass.setDefaultTonemapping(renderer, false);
     default_pass.onBeforePass = () => {
         gl.clearColor(0.05, 0.05, 0.05, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
