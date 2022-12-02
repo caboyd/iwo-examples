@@ -181,8 +181,6 @@ function update(): void {
     orbit.update();
 
     //update point light positions
-    const pbrShader = renderer.getorCreateShader(IWO.ShaderSource.PBR);
-    renderer.setAndActivateShader(pbrShader);
     light_pi += delta / 500;
     const light_count = gui.point_light_count.value;
     for (let i = 0; i < light_count; i++) {
@@ -201,18 +199,27 @@ function update(): void {
 
         let index = i;
         if (gui.sun_light.value) index += 1;
-        pbrShader.setUniform(`u_lights[${index}].position`, [x, y, z, 1]);
+        renderer.addShaderVariantUniform(IWO.ShaderSource.PBR, `u_lights[${index}].position`, [x, y, z, 1]);
         const a = gui.point_light_attenuation.value;
-        pbrShader.setUniform(`u_lights[${index}].color`, [a, a, a]);
+        renderer.addShaderVariantUniform(IWO.ShaderSource.PBR, `u_lights[${index}].color`, [a, a, a]);
     }
     if (gui.sun_light.value) {
         //0.5-u because we scaled x by -1 to invert sphere
         //1-v because we flipped the image
 
-        pbrShader.setUniform("u_lights[0].position", [sun_dir[0], sun_dir[1], sun_dir[2], 0]);
-        pbrShader.setUniform("u_lights[0].color", sun_color);
+        renderer.addShaderVariantUniform(IWO.ShaderSource.PBR, "u_lights[0].position", [
+            sun_dir[0],
+            sun_dir[1],
+            sun_dir[2],
+            0,
+        ]);
+        renderer.addShaderVariantUniform(IWO.ShaderSource.PBR, "u_lights[0].color", sun_color);
     }
-    pbrShader.setUniform("u_light_count", light_count + (gui.sun_light.value ? 1 : 0));
+    renderer.addShaderVariantUniform(
+        IWO.ShaderSource.PBR,
+        "u_light_count",
+        light_count + (gui.sun_light.value ? 1 : 0)
+    );
 
     buildEnvironment();
 
