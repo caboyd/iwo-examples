@@ -29,9 +29,11 @@ let theta_start = 0;
 let theta_length = Math.PI;
 let current_material = 0;
 let flat_shading = true;
+let outline = true;
 let has_changed = true;
 
 let sphere: IWO.MeshInstance;
+let sphere_lines: IWO.MeshInstance;
 let grid: IWO.MeshInstance;
 let renderer: IWO.Renderer;
 
@@ -132,6 +134,7 @@ function buildSphere() {
 
     if (!has_changed) return;
     if (sphere) sphere.mesh.destroy(gl);
+    if (sphere_lines) sphere_lines.mesh.destroy(gl);
 
     const sphere_geom = new IWO.SphereGeometry(
         radius,
@@ -142,9 +145,16 @@ function buildSphere() {
         theta_start,
         theta_length
     );
+    const lines_geom = IWO.LineGeometry.fromGeometry(sphere_geom);
+    const lines_mesh = new IWO.Mesh(gl, lines_geom);
     const sphere_mesh = new IWO.Mesh(gl, sphere_geom);
     sphere = new IWO.MeshInstance(sphere_mesh, sphere_mat);
+    sphere_lines = new IWO.MeshInstance(
+        lines_mesh,
+        new IWO.LineMaterial([gl.drawingBufferWidth, gl.drawingBufferHeight], [1, 1, 1, 1], 1.5, false)
+    );
     mat4.translate(sphere.model_matrix, sphere.model_matrix, [0, 3, 0]);
+    mat4.translate(sphere_lines.model_matrix, sphere_lines.model_matrix, [0, 3, 0]);
     has_changed = false;
 }
 
@@ -155,6 +165,7 @@ function drawScene(): void {
     renderer.setPerFrameUniforms(view_matrix, proj_matrix);
 
     sphere.render(renderer, view_matrix, proj_matrix);
+    if (outline) sphere_lines.render(renderer, view_matrix, proj_matrix);
 
     grid.render(renderer, view_matrix, proj_matrix);
 
@@ -168,7 +179,7 @@ function drawUI(): void {
     ImGui.NewFrame();
     const frame_width = 420;
     ImGui.SetNextWindowPos(new ImGui.ImVec2(gl.drawingBufferWidth - frame_width + 1, 0));
-    ImGui.SetNextWindowSize(new ImGui.ImVec2(frame_width, 280), ImGui.Cond.FirstUseEver);
+    ImGui.SetNextWindowSize(new ImGui.ImVec2(frame_width, 320), ImGui.Cond.FirstUseEver);
     ImGui.SetNextWindowSizeConstraints(
         new ImGui.ImVec2(frame_width, 0),
         new ImGui.ImVec2(frame_width, gl.drawingBufferHeight)
@@ -195,6 +206,7 @@ function drawUI(): void {
         ImGui.ColorEdit3("Color", c);
         vec3.set(color, c[0], c[1], c[2]);
         ImGui.Checkbox("Flat Shading", (v = flat_shading) => (flat_shading = v));
+        ImGui.Checkbox("Outline", (v = outline) => (outline = v));
         ImGui.End();
     }
     ImGui.EndFrame();
