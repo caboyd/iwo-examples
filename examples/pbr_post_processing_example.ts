@@ -96,7 +96,7 @@ await (async function main() {
     resizeCanvas();
 
     render_queue = new IWO.RenderQueue(renderer);
-    const default_pass = new IWO.BasicRenderPass(renderer, view_matrix, proj_matrix);
+    const default_pass = new IWO.RenderPass(renderer, view_matrix, proj_matrix);
     default_pass.setDefaultTonemapping(renderer, false);
     default_pass.onBeforePass = () => {
         gl.clearColor(0.05, 0.05, 0.05, 1.0);

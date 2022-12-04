@@ -88,7 +88,7 @@ function initScene(): void {
         true
     );
     render_queue.appendRenderPass("depth", depth_pass);
-    const default_pass = new IWO.BasicRenderPass(renderer, view_matrix, proj_matrix);
+    const default_pass = new IWO.RenderPass(renderer, view_matrix, proj_matrix);
     default_pass.onBeforePass = () => {
         gl.clearColor(173 / 255, 196 / 255, 221 / 255, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
