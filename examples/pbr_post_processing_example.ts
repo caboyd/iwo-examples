@@ -96,13 +96,13 @@ await (async function main() {
     resizeCanvas();
 
     render_queue = new IWO.RenderQueue(renderer);
-    const d_pass = new IWO.RenderPass(renderer, view_matrix, proj_matrix);
-    d_pass.setDefaultTonemapping(renderer, false);
-    d_pass.onBeforePass = () => {
+    const default_pass = new IWO.DefaultRenderPass(renderer, view_matrix, proj_matrix);
+    default_pass.setDefaultTonemapping(renderer, false);
+    default_pass.onBeforePass = () => {
         gl.clearColor(0.05, 0.05, 0.05, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     };
-    render_queue.appendRenderPass("default", d_pass);
+    render_queue.appendRenderPass("default", default_pass);
     render_queue.appendPostProcessPass(
         "tone",
         new IWO.TonemappingPass(renderer, gui.tones[gui.current_tone.value], gui.gamma.value)
