@@ -15,8 +15,9 @@ let orbit: IWO.OrbitControl;
 
 let color: vec3 = [0.54, 0.81, 0.94];
 let mat_map = {
-    "PBR Material": new IWO.PBRMaterial({ albedo_color: color }),
-    "Basic Material": new IWO.BasicMaterial(color),
+    "PBR Material": new IWO.PBRMaterial(),
+    "Basic Unlit Material": new IWO.BasicUnlitMaterial(color),
+    "Toon Material": new IWO.ToonMaterial(),
     "Normal Only Material": new IWO.NormalOnlyMaterial(),
 };
 
@@ -28,7 +29,7 @@ let phi_length = Math.PI * 2;
 let theta_start = 0;
 let theta_length = Math.PI;
 let current_material = 0;
-let flat_shading = true;
+let flat_shading = false;
 let outline = true;
 let has_changed = true;
 
@@ -85,19 +86,17 @@ function initScene(): void {
     mat4.perspective(proj_matrix, glMatrix.toRadian(90), gl.drawingBufferWidth / gl.drawingBufferHeight, 0.1, 1000.0);
 
     const sun_dir = [-0.3, 0, 1];
-    const sun_intensity = 3.14;
+    const sun_intensity = 1;
     const sun_color = [sun_intensity, sun_intensity, sun_intensity];
-
-    const pbrShader = renderer.getorCreateShader(IWO.ShaderSource.PBR);
-    renderer.setAndActivateShader(pbrShader);
 
     const uniforms = new Map();
     uniforms.set("u_lights[0].position", [sun_dir[0], sun_dir[1], sun_dir[2], 0]);
     uniforms.set("u_lights[0].color", sun_color);
-    uniforms.set("light_ambient", [0.01, 0.01, 0.01]);
+    uniforms.set("light_ambient", [0.02, 0.02, 0.02]);
     uniforms.set("u_light_count", 1);
 
     renderer.addShaderVariantUniforms(IWO.ShaderSource.PBR, uniforms);
+    renderer.addShaderVariantUniforms(IWO.ShaderSource.Toon, uniforms);
 
     const plane_geom = new IWO.PlaneGeometry(100, 100, 1, 1, true);
     const plane_mesh = new IWO.Mesh(gl, plane_geom);

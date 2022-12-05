@@ -35,7 +35,7 @@ const output_dir = "docs";
 
 export default {
     //NOTE: Enable node_modules and src imports to keep in original files and location
-    //preserveModules: true,
+    preserveModules: true,
     input: Object.keys(examples).map((key) => `examples/${key}.ts`),
     output: {
         dir: output_dir,
@@ -61,7 +61,7 @@ export default {
                 fileName: `examples/${key}.html`,
                 template: ({ attributes, bundle, files, publicPath, title }) => {
                     const html = template
-                        .replace("</body>", `<script type="module" src="../${key}.js"></script></body>`)
+                        .replace("</body>", `<script type="module" src="./${key}.js"></script></body>`)
                         .replace("</title>", `${examples[key]}</title>`);
                     return html;
                 },

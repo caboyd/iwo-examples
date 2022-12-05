@@ -141,10 +141,11 @@ function initScene(): void {
     });
 
     //SKYBOX
-    const sky_geom = new IWO.SphereGeometry(1, 48, 48);
+    //const sky_geom = new IWO.SphereGeometry(1, 48, 48);
+    const sky_geom = new IWO.BoxGeometry();
     const sky_mesh = new IWO.Mesh(gl, sky_geom);
-    const sky_mat = new IWO.BasicMaterial([1, 1, 1]);
-    sky_mat.setAlbedoTexture(sky_tex);
+    const sky_mat = new IWO.SkyboxMaterial([1, 1, 1]);
+    sky_mat.setAlbedoTexture(sky_tex, true);
     skybox = new IWO.MeshInstance(sky_mesh, sky_mat);
 }
 

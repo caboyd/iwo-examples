@@ -133,13 +133,13 @@ async function initScene() {
     //SKYBOX
     const sky_geom = new IWO.SphereGeometry(1, 48, 48);
     const sky_mesh = new IWO.Mesh(gl, sky_geom);
-    const sky_mat = new IWO.BasicMaterial([1, 1, 1]);
-    sky_mat.setAlbedoTexture(sky_texs[gui.current_environment.value]);
+    const sky_mat = new IWO.SkyboxMaterial([1, 1, 1]);
+    sky_mat.albedo_texture = sky_texs[gui.current_environment.value];
     skybox = new IWO.MeshInstance(sky_mesh, sky_mat);
 
     //LIGHTS
     const light_mesh = new IWO.Mesh(gl, sphere_geom);
-    const light_mat = new IWO.BasicMaterial([1, 1, 1]);
+    const light_mat = new IWO.BasicUnlitMaterial([1, 1, 1]);
     lights = [];
     for (let i = 0; i < 15; i++) {
         const lb = new IWO.MeshInstance(light_mesh, light_mat);
@@ -231,8 +231,8 @@ function update(): void {
         mat.irradiance_texture = irr_texs[gui.current_environment.value];
     }
 
-    const sky_mat = skybox.materials[0] as IWO.BasicMaterial;
-    sky_mat.setAlbedoTexture(sky_texs[gui.current_environment.value]);
+    const sky_mat = skybox.materials[0] as IWO.SkyboxMaterial;
+    sky_mat.albedo_texture = sky_texs[gui.current_environment.value];
 
     drawScene();
     renderer.resetSaveBindings();

@@ -50,10 +50,17 @@ await (async function main(): Promise<void> {
 
     gl.enable(gl.DEPTH_TEST);
 
-    const light = 1.0 / Math.PI;
-    const pbrShader = renderer.getorCreateShader(IWO.ShaderSource.PBR);
-    renderer.setAndActivateShader(pbrShader);
-    pbrShader.setUniform("light_ambient", [light, light, light]);
+    const sun_dir = [-0.3, 0, 1];
+    const sun_intensity = 1;
+    const sun_color = [sun_intensity, sun_intensity, sun_intensity];
+    const uniforms = new Map();
+    uniforms.set("u_lights[0].position", [sun_dir[0], sun_dir[1], sun_dir[2], 0]);
+    uniforms.set("u_lights[0].color", sun_color);
+    uniforms.set("light_ambient", [0.02, 0.02, 0.02]);
+    uniforms.set("u_light_count", 1);
+
+    renderer.addShaderVariantUniforms(IWO.ShaderSource.PBR, uniforms);
+    renderer.addShaderVariantUniforms(IWO.ShaderSource.Toon, uniforms);
 
     await initScene();
 
@@ -86,7 +93,7 @@ async function initScene(): Promise<void> {
         renderer.resetSaveBindings();
         teapot = new IWO.MeshInstance(
             mesh,
-            value.materials.length > 0 ? value.materials : new IWO.NormalOnlyMaterial()
+            value.materials.length > 0 ? value.materials : new IWO.ToonMaterial({ albedo_color: [0.4, 0.4, 0.8] })
         );
         mat4.scale(teapot.model_matrix, teapot.model_matrix, [0.1, 0.1, 0.1]);
         mat4.rotateX(teapot.model_matrix, teapot.model_matrix, -Math.PI / 2);

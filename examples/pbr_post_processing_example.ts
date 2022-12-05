@@ -153,13 +153,13 @@ async function initScene() {
     //SKYBOX
     const sky_geom = new IWO.SphereGeometry(1, 48, 48);
     const sky_mesh = new IWO.Mesh(gl, sky_geom);
-    const sky_mat = new IWO.BasicMaterial([1, 1, 1]);
-    sky_mat.setAlbedoTexture(sky_texs[gui.current_environment.value]);
+    const sky_mat = new IWO.SkyboxMaterial([1, 1, 1]);
+    sky_mat.albedo_texture = sky_texs[gui.current_environment.value];
     skybox = new IWO.MeshInstance(sky_mesh, sky_mat);
 
     //LIGHTS
     const light_mesh = new IWO.Mesh(gl, sphere_geom);
-    const light_mat = new IWO.BasicMaterial([100, 100, 100]);
+    const light_mat = new IWO.BasicUnlitMaterial([100, 100, 100]);
     lights = [];
     for (let i = 0; i < 15; i++) {
         const lb = new IWO.MeshInstance(light_mesh, light_mat);
@@ -256,8 +256,8 @@ function update(): void {
     mat4.identity(skybox.model_matrix);
     mat4.translate(skybox.model_matrix, skybox.model_matrix, camera.position);
     mat4.scale(skybox.model_matrix, skybox.model_matrix, [-1, 1, -1]);
-    const sky_mat = skybox.materials[0] as IWO.BasicMaterial;
-    sky_mat.setAlbedoTexture(sky_texs[gui.current_environment.value]);
+    const sky_mat = skybox.materials[0] as IWO.SkyboxMaterial;
+    sky_mat.albedo_texture = sky_texs[gui.current_environment.value];
 
     if (!gui.gaussian.value) render_queue.removePostProcessPass("gauss");
     else {

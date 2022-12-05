@@ -121,7 +121,10 @@ function initScene(): void {
     const grid_mat = new IWO.GridMaterial();
     grid = new IWO.MeshInstance(plane_mesh, grid_mat);
 
-    const plane_mat = new IWO.PBRMaterial({ albedo_color: [1, 1, 1], shadow_texture: depth_pass.depth_texture_float });
+    const plane_mat = new IWO.PBRMaterial({
+        albedo_color: [0.4, 0.4, 0.4],
+        shadow_texture: depth_pass.depth_texture_float,
+    });
     plane = new IWO.MeshInstance(plane_mesh, plane_mat);
     mat4.translate(plane.model_matrix, plane.model_matrix, [0, -0.01, 0]);
 
@@ -149,7 +152,7 @@ function initScene(): void {
     }
 
     //add a sun
-    const mat = new IWO.BasicMaterial(vec3.fromValues(1, 1, 1));
+    const mat = new IWO.BasicUnlitMaterial(vec3.fromValues(1, 1, 1));
     const sphere_mesh = new IWO.Mesh(gl, sphere_geom);
     const s = new IWO.MeshInstance(sphere_mesh, mat);
     spheres.push(s);
