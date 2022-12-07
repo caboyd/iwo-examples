@@ -169,7 +169,7 @@ function drawScene(): void {
     grid.render(renderer, view_matrix, proj_matrix);
 
     //after last object rendered
-    renderer.cleanupGLState();
+    renderer.cleanupPrevMaterialState();
 }
 
 function drawUI(): void {

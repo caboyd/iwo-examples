@@ -272,7 +272,7 @@ function drawScene(): void {
     }
 
     if (gui.grid.value) grid.render(renderer, view_matrix, proj_matrix);
-    renderer.cleanupGLState();
+    renderer.cleanupPrevMaterialState();
 }
 
 function drawUI(): void {

@@ -30,8 +30,18 @@ const gui = {
     z_instances: new Static<number>(10),
     instances_changed: true,
     mesh_map: new Map<string, IWO.Mesh>(),
-    meshes: ["teapot_lite", "teapot", "box", "sphere"],
+    meshes: ["teapot_lite", "teapot", "box", "sphere", "grass quad"],
     current_mesh: new Static<number>(0),
+    color: new Static<vec3>([0.54, 0.81, 0.94]),
+    current_material: new Static<number>(0),
+    mat_map: {
+        "PBR Material": new IWO.PBRMaterial(),
+        "Basic Unlit Material": new IWO.BasicUnlitMaterial([1, 1, 1]),
+        "Toon Material": new IWO.ToonMaterial(),
+        "Normal Only Material": new IWO.NormalOnlyMaterial(),
+    },
+    grass_mat: new IWO.PBRMaterial({ is_billboard: true }),
+    is_billboard: new Static<boolean>(false),
 };
 
 await (async function main(): Promise<void> {
@@ -78,10 +88,18 @@ async function initScene(): Promise<void> {
 
     gl.enable(gl.DEPTH_TEST);
 
-    const light = 1.0 / Math.PI;
-    const pbrShader = renderer.getorCreateShader(IWO.ShaderSource.PBR);
-    renderer.setAndActivateShader(pbrShader);
-    pbrShader.setUniform("light_ambient", [light, light, light]);
+    const sun_dir = [-0.3, 0, 1];
+    const sun_intensity = 2;
+    const sun_color = [sun_intensity, sun_intensity, sun_intensity];
+
+    const uniforms = new Map();
+    uniforms.set("u_lights[0].position", [sun_dir[0], sun_dir[1], sun_dir[2], 0]);
+    uniforms.set("u_lights[0].color", sun_color);
+    uniforms.set("light_ambient", [0.02, 0.02, 0.02]);
+    uniforms.set("u_light_count", 1);
+
+    renderer.addShaderVariantUniforms(IWO.ShaderSource.PBR, uniforms);
+    renderer.addShaderVariantUniforms(IWO.ShaderSource.Toon, uniforms);
 
     const plane_geom = new IWO.PlaneGeometry(100, 100, 1, 1, true);
     const plane_mesh = new IWO.Mesh(gl, plane_geom);
@@ -110,6 +128,12 @@ async function initScene(): Promise<void> {
     mesh = new IWO.Mesh(gl, geom);
     gui.mesh_map.set("sphere", mesh);
 
+    const tex = await IWO.TextureLoader.load(gl, "grass.png", root_url + "/images/", { flip: true });
+    gui.grass_mat.albedo_texture = tex;
+    geom = new IWO.QuadGeometry([0.2, 0.2]);
+    mesh = new IWO.Mesh(gl, geom);
+    gui.mesh_map.set("grass quad", mesh);
+
     mesh = gui.mesh_map.get(gui.meshes[gui.current_mesh.value])!;
     instanced_mesh = new IWO.InstancedMesh(mesh, new IWO.NormalOnlyMaterial());
 
@@ -119,11 +143,18 @@ async function initScene(): Promise<void> {
 }
 
 function update(): void {
+    let io = ImGui.GetIO();
+    orbit.mouse_active = !io.WantCaptureMouse;
     orbit.update();
 
     const mesh = gui.mesh_map.get(gui.meshes[gui.current_mesh.value]);
     if (mesh) {
         instanced_mesh.mesh = mesh;
+    }
+
+    mat4.identity(instanced_mesh.model_matrix);
+    if (gui.meshes[gui.current_mesh.value] !== "grass quad") {
+        mat4.scale(instanced_mesh.model_matrix, instanced_mesh.model_matrix, [0.02, 0.02, 0.02]);
     }
 
     if (gui.instances_changed) {
@@ -149,6 +180,28 @@ function update(): void {
         }
     }
 
+    const mat = Object.values(gui.mat_map)[gui.current_material.value];
+    instanced_mesh.materials[0] = mat;
+
+    // if (gui.meshes[gui.current_mesh.value] === "grass") instanced_mesh.materials[0] = gui.grass_mat;
+    //@ts-ignore
+    if (mat.albedo_color !== undefined) {
+        //@ts-ignore
+        mat.albedo_color = gui.color.value;
+        if (gui.meshes[gui.current_mesh.value] === "grass quad") {
+            //@ts-ignore
+            mat.albedo_texture = gui.grass_mat.albedo_texture;
+        } else {
+            //@ts-ignore
+            mat.albedo_texture = undefined;
+        }
+    }
+    //@ts-ignore
+    if (instanced_mesh.materials[0].is_billboard !== undefined) {
+        //@ts-ignore
+        instanced_mesh.materials[0].is_billboard = gui.is_billboard.value;
+    }
+
     drawScene();
     drawUI();
     renderer.resetStats();
@@ -162,6 +215,9 @@ function drawScene(): void {
     camera.getViewMatrix(view_matrix);
     renderer.setPerFrameUniforms(view_matrix, proj_matrix);
 
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE);
     instanced_mesh.render(renderer, view_matrix, proj_matrix);
 
     grid.render(renderer, view_matrix, proj_matrix);
@@ -192,6 +248,16 @@ function drawUI(): void {
         ImGui.Text(`Instances: ${gui.x_instances.value * gui.z_instances.value * gui.y_instances.value}`);
         ImGui.Text(`Vertices Rendered: ${renderer.stats.vertex_draw_count}`);
         ImGui.Text(`Indices Rendered: ${renderer.stats.index_draw_count}`);
+        ImGui.Text("Material");
+        const keys = Object.keys(gui.mat_map);
+        ImGui.Combo("Material", gui.current_material.access, keys, keys.length);
+        {
+            let c: ImGui.ImTuple3<number> = [gui.color.value[0], gui.color.value[1], gui.color.value[2]];
+            ImGui.ColorEdit3("Color", c);
+            vec3.set(gui.color.value, c[0], c[1], c[2]);
+        }
+        if (gui.meshes[gui.current_mesh.value] === "grass quad") ImGui.Checkbox("Billboard", gui.is_billboard.access);
+        else gui.is_billboard.value = false;
         ImGui.End();
     }
 

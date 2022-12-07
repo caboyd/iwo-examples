@@ -304,7 +304,7 @@ function drawScene(): void {
         render_queue.addCommandToAllPasses({
             mesh_instance: grid,
             onAfterRender: () => {
-                renderer.cleanupGLState();
+                renderer.cleanupPrevMaterialState();
             },
         });
 
