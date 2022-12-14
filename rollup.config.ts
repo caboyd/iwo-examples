@@ -27,6 +27,7 @@ const examples = {
     shadows_example: "Shadows Example",
     pbr_post_processing_example: "PBR with Post Processing Example",
     instance_example: "Instanced Rendering Example",
+    billboard_example: "Billboard Example",
 };
 
 const template = readFileSync("examples/template.html", "utf-8");
