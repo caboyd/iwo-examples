@@ -95,7 +95,7 @@ async function initScene(): Promise<void> {
     const uniforms = new Map();
     uniforms.set("u_lights[0].position", [sun_dir[0], sun_dir[1], sun_dir[2], 0]);
     uniforms.set("u_lights[0].color", sun_color);
-    uniforms.set("light_ambient", [0.02, 0.02, 0.02]);
+    uniforms.set("light_ambient", [0.1, 0.1, 0.1]);
     uniforms.set("u_light_count", 1);
 
     renderer.addShaderVariantUniforms(IWO.ShaderSource.PBR, uniforms);
@@ -128,7 +128,10 @@ async function initScene(): Promise<void> {
     mesh = new IWO.Mesh(gl, geom);
     gui.mesh_map.set("sphere", mesh);
 
-    const tex = await IWO.TextureLoader.load(gl, "grass.png", root_url + "/images/", { flip: true });
+    const tex = await IWO.TextureLoader.load(gl, "grass.png", root_url + "/images/", {
+        flip: true,
+        internal_format: gl.SRGB8_ALPHA8,
+    });
     gui.grass_mat.albedo_texture = tex;
     geom = new IWO.QuadGeometry([0.2, 0.2]);
     mesh = new IWO.Mesh(gl, geom);

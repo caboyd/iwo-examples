@@ -35,7 +35,7 @@ const gui = {
     color: new Static<vec3>([1, 1, 1]),
     current_material: new Static<number>(0),
     mat_map: {
-        "PBR Material": new IWO.PBRMaterial({ metallic: 1.0, is_billboard: true }),
+        "PBR Material": new IWO.PBRMaterial({ metallic: 1.0, is_billboard: true, light_factor: [0.1, 0.1, 0.1] }),
         //"Basic Unlit Material": new IWO.BasicUnlitMaterial([1, 1, 1]),
         "Toon Material": new IWO.ToonMaterial({ is_billboard: true }),
         "Normal Only Material": new IWO.NormalOnlyMaterial({ is_billboard: true }),
@@ -87,13 +87,13 @@ async function initScene(): Promise<void> {
     gl.enable(gl.DEPTH_TEST);
 
     const sun_dir = [-0.3, 4, 1];
-    const sun_intensity = 10;
+    const sun_intensity = 4;
     const sun_color = [sun_intensity, sun_intensity, sun_intensity];
 
     const uniforms = new Map();
     uniforms.set("u_lights[0].position", [sun_dir[0], sun_dir[1], sun_dir[2], 0]);
     uniforms.set("u_lights[0].color", sun_color);
-    uniforms.set("light_ambient", [0.04, 0.04, 0.04]);
+    uniforms.set("light_ambient", [0.9, 0.9, 0.9]);
     uniforms.set("u_light_count", 1);
 
     renderer.addShaderVariantUniforms(IWO.ShaderSource.PBR, uniforms);
@@ -168,6 +168,7 @@ function update(): void {
             instanced_mesh.addInstance(m);
         }
     }
+    instanced_mesh.sortBackToFront(camera.position);
 
     drawScene();
     drawUI();
@@ -211,7 +212,7 @@ function drawUI(): void {
         //ImGui.PushItemWidth(-100);
         gui.instances_changed =
             ImGui.Combo("Mesh", gui.current_mesh.access, gui.meshes, gui.meshes.length) || gui.instances_changed;
-        gui.instances_changed = ImGui.SliderInt("Instances", gui.instances.access, 1, 1000) || gui.instances_changed;
+        gui.instances_changed = ImGui.SliderInt("Instances", gui.instances.access, 1, 10000) || gui.instances_changed;
         ImGui.Text(`Vertices Rendered: ${renderer.stats.vertex_draw_count}`);
         ImGui.Text(`Indices Rendered: ${renderer.stats.index_draw_count}`);
         ImGui.Text("Material");
