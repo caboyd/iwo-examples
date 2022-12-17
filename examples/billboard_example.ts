@@ -36,7 +36,7 @@ const gui = {
     mat_map: {
         "PBR Material": new IWO.PBRMaterial({ metallic: 1.0, is_billboard: true, light_factor: [0.1, 0.1, 0.1] }),
         //"Basic Unlit Material": new IWO.BasicUnlitMaterial([1, 1, 1]),
-        "Toon Material": new IWO.ToonMaterial({ is_billboard: true }),
+        "Toon Material": new IWO.ToonMaterial({ is_billboard: true, specular_levels: 0 }),
         "Normal Only Material": new IWO.NormalOnlyMaterial({ is_billboard: true }),
     } as Record<string, IWO.Material>,
 };
@@ -121,7 +121,7 @@ async function initScene(): Promise<void> {
 
     mat4.translate(floor.model_matrix, floor.model_matrix, [0, -0.01, 0]);
 
-    let geom = new IWO.QuadGeometry();
+    let geom = new IWO.QuadGeometry([1.34, 1.0]);
     let mesh = new IWO.Mesh(gl, geom);
     gui.mesh_map.set("grass quad", mesh);
 
@@ -149,6 +149,8 @@ function update(): void {
         instanced_mesh.mesh = mesh;
     }
     const mat = Object.values(gui.mat_map)[gui.current_material.value];
+    //@ts-ignore
+    mat.albedo_color = gui.color.value;
     instanced_mesh.materials[0] = mat;
 
     if (gui.instances_changed) {
@@ -167,6 +169,7 @@ function update(): void {
             instanced_mesh.addInstance(m);
         }
     }
+    const adjusted_position = vec3.fromValues(camera.position[0], 0, camera.position[2]);
     instanced_mesh.sortBackToFront(camera.position);
 
     drawScene();
