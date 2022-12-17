@@ -2,7 +2,6 @@ import { glMatrix, mat4, vec3 } from "gl-matrix";
 import * as ImGui from "imgui-js/imgui";
 import * as ImGui_Impl from "imgui-js/imgui_impl";
 import * as IWO from "iwo";
-import { XY } from "../lib/imgui-js/imgui";
 import { PBRMaterial } from "../iwo/src/materials/PBRMaterial";
 
 let gl: WebGL2RenderingContext;
