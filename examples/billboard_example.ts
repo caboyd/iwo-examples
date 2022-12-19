@@ -170,7 +170,8 @@ function update(): void {
         }
     }
     const adjusted_position = vec3.fromValues(camera.position[0], 0, camera.position[2]);
-    instanced_mesh.sortBackToFront(camera.position);
+    instanced_mesh.sortBackToFrontInViewSpace(view_matrix);
+    //instanced_mesh.sortBackToFront(camera.position);
 
     drawScene();
     drawUI();
