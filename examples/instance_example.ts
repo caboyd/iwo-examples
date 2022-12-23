@@ -42,6 +42,7 @@ const gui = {
     },
     grass_mat: new IWO.PBRMaterial({ is_billboard: true }),
     is_billboard: new Static<boolean>(false),
+    billboard_rot_y: new Static<boolean>(true),
 };
 
 await (async function main(): Promise<void> {
@@ -203,6 +204,8 @@ function update(): void {
     if (instanced_mesh.materials[0].is_billboard !== undefined) {
         //@ts-ignore
         instanced_mesh.materials[0].is_billboard = gui.is_billboard.value;
+        //@ts-ignore
+        instanced_mesh.materials[0].is_billboard_rot_y = gui.billboard_rot_y.value;
     }
 
     drawScene();
@@ -259,8 +262,10 @@ function drawUI(): void {
             ImGui.ColorEdit3("Color", c);
             vec3.set(gui.color.value, c[0], c[1], c[2]);
         }
-        if (gui.meshes[gui.current_mesh.value] === "grass quad") ImGui.Checkbox("Billboard", gui.is_billboard.access);
-        else gui.is_billboard.value = false;
+        if (gui.meshes[gui.current_mesh.value] === "grass quad") {
+            ImGui.Checkbox("Billboard", gui.is_billboard.access);
+            if (gui.is_billboard.value) ImGui.Checkbox("Billboard Disable Y Rotation", gui.billboard_rot_y.access);
+        } else gui.is_billboard.value = false;
         ImGui.End();
     }
 
