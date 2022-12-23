@@ -1,5 +1,5 @@
 import { glMatrix, mat4, vec3 } from "gl-matrix";
-import * as ImGui from "imgui-js/imgui";
+import imgui, * as ImGui from "imgui-js/imgui";
 import * as ImGui_Impl from "imgui-js/imgui_impl";
 import * as IWO from "iwo";
 import { PBRMaterial } from "../iwo/src/materials/PBRMaterial";
@@ -28,17 +28,24 @@ class Static<T> {
 const gui = {
     instances: new Static<number>(1000),
     instances_changed: true,
+    current_mesh: new Static<number>(0),
     mesh_map: new Map<string, IWO.Mesh>(),
     meshes: ["grass quad"],
-    current_mesh: new Static<number>(0),
-    color: new Static<vec3>([1, 1, 1]),
-    current_material: new Static<number>(0),
+    current_material: new Static<number>(1),
     mat_map: {
         "PBR Material": new IWO.PBRMaterial({ metallic: 1.0, is_billboard: true, light_factor: [0.1, 0.1, 0.1] }),
         //"Basic Unlit Material": new IWO.BasicUnlitMaterial([1, 1, 1]),
-        "Toon Material": new IWO.ToonMaterial({ is_billboard: true, specular_levels: 0 }),
+        "Toon Material": new IWO.ToonMaterial({
+            is_billboard: true,
+            specular_levels: 0,
+            light_factor: [0.1, 0.1, 0.1],
+        }),
         "Normal Only Material": new IWO.NormalOnlyMaterial({ is_billboard: true }),
     } as Record<string, IWO.Material>,
+    color: new Static<vec3>([1, 1, 1]),
+    billboard: new Static<boolean>(true),
+    billboard_rot_y: new Static<boolean>(true),
+    sort: new Static<boolean>(true),
 };
 
 await (async function main(): Promise<void> {
@@ -151,6 +158,10 @@ function update(): void {
     const mat = Object.values(gui.mat_map)[gui.current_material.value];
     //@ts-ignore
     mat.albedo_color = gui.color.value;
+    //@ts-ignore
+    mat.is_billboard = gui.billboard.value;
+    //@ts-ignore
+    mat.is_billboard_rot_y = gui.billboard_rot_y.value;
     instanced_mesh.materials[0] = mat;
 
     if (gui.instances_changed) {
@@ -169,8 +180,8 @@ function update(): void {
             instanced_mesh.addInstance(m);
         }
     }
-    const adjusted_position = vec3.fromValues(camera.position[0], 0, camera.position[2]);
-    instanced_mesh.sortBackToFrontInViewSpace(view_matrix);
+
+    if (gui.sort.value) instanced_mesh.sortBackToFrontInViewSpace(view_matrix);
     //instanced_mesh.sortBackToFront(camera.position);
 
     drawScene();
@@ -181,7 +192,7 @@ function update(): void {
 
 function drawScene(): void {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    gl.enable(gl.CULL_FACE);
+    //gl.enable(gl.CULL_FACE);
 
     camera.getViewMatrix(view_matrix);
     renderer.setPerFrameUniforms(view_matrix, proj_matrix);
@@ -216,6 +227,7 @@ function drawUI(): void {
         gui.instances_changed =
             ImGui.Combo("Mesh", gui.current_mesh.access, gui.meshes, gui.meshes.length) || gui.instances_changed;
         gui.instances_changed = ImGui.SliderInt("Instances", gui.instances.access, 1, 10000) || gui.instances_changed;
+        ImGui.Checkbox("Sort Back To Front", gui.sort.access);
         ImGui.Text(`Vertices Rendered: ${renderer.stats.vertex_draw_count}`);
         ImGui.Text(`Indices Rendered: ${renderer.stats.index_draw_count}`);
         ImGui.Text("Material");
@@ -225,6 +237,8 @@ function drawUI(): void {
             let c: ImGui.ImTuple3<number> = [gui.color.value[0], gui.color.value[1], gui.color.value[2]];
             ImGui.ColorEdit3("Color", c);
             vec3.set(gui.color.value, c[0], c[1], c[2]);
+            ImGui.Checkbox("Billboard", gui.billboard.access);
+            if (gui.billboard.value) ImGui.Checkbox("Billboard Disable Y Rotation", gui.billboard_rot_y.access);
         }
         ImGui.End();
     }
