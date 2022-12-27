@@ -1,7 +1,7 @@
 import { glMatrix, mat4, vec3 } from "gl-matrix";
 import * as ImGui from "imgui-js/imgui";
 import * as ImGui_Impl from "imgui-js/imgui_impl";
-import * as IWO from "../iwo/src/iwo";
+import * as IWO from "iwo";
 
 let gl: WebGL2RenderingContext;
 
