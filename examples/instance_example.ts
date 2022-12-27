@@ -2,7 +2,6 @@ import { glMatrix, mat4, vec3 } from "gl-matrix";
 import * as ImGui from "imgui-js/imgui";
 import * as ImGui_Impl from "imgui-js/imgui_impl";
 import * as IWO from "iwo";
-import { MeshInstance } from "../iwo/src/meshes/MeshInstance";
 
 let gl: WebGL2RenderingContext;
 
@@ -45,7 +44,7 @@ const gui = {
     billboard_rot_y: new Static<boolean>(true),
 };
 
-await (async function main(): Promise<void> {
+(async function main(): Promise<void> {
     const canvas = <HTMLCanvasElement>document.getElementById("canvas");
 
     gl = IWO.initGL(canvas);

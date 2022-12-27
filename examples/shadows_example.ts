@@ -33,7 +33,7 @@ let renderer: IWO.Renderer;
 let render_queue: IWO.RenderQueue;
 let depth_pass: IWO.DepthPass;
 
-await (async function main(): Promise<void> {
+(async function main(): Promise<void> {
     canvas = <HTMLCanvasElement>document.getElementById("canvas");
     gl = IWO.initGL(canvas);
 

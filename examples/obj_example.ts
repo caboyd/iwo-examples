@@ -19,7 +19,7 @@ let cube_loaded = false;
 let teapot: IWO.MeshInstance;
 let teapot_loaded = false;
 
-await (async function main(): Promise<void> {
+(async function main(): Promise<void> {
     const canvas = <HTMLCanvasElement>document.getElementById("canvas");
 
     gl = IWO.initGL(canvas);

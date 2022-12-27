@@ -1,8 +1,7 @@
 import { glMatrix, mat4, vec3 } from "gl-matrix";
-import imgui, * as ImGui from "imgui-js/imgui";
+import * as ImGui from "imgui-js/imgui";
 import * as ImGui_Impl from "imgui-js/imgui_impl";
 import * as IWO from "iwo";
-import { PBRMaterial } from "../iwo/src/materials/PBRMaterial";
 
 let gl: WebGL2RenderingContext;
 
@@ -48,7 +47,7 @@ const gui = {
     sort: new Static<boolean>(true),
 };
 
-await (async function main(): Promise<void> {
+(async function main(): Promise<void> {
     const canvas = <HTMLCanvasElement>document.getElementById("canvas");
 
     gl = IWO.initGL(canvas);
@@ -111,7 +110,7 @@ async function initScene(): Promise<void> {
     //GRID
     const grid_mat = new IWO.GridMaterial({ frequency: 10 });
     grid = new IWO.MeshInstance(plane_mesh, grid_mat);
-    const floor_mat = new PBRMaterial({ albedo_color: [0.4, 0.4, 0.4], roughness: 1.0, metallic: 1.0 });
+    const floor_mat = new IWO.PBRMaterial({ albedo_color: [0.4, 0.4, 0.4], roughness: 1.0, metallic: 1.0 });
     floor_mat.albedo_image = await IWO.ImageLoader.promise("Grass001_1K_Color.jpg", root_url + "/pbr/grass/");
     floor_mat.normal_texture = await IWO.TextureLoader.load(gl, "Grass001_1K_NormalGL.jpg", root_url + "/pbr/grass/");
     floor_mat.occlusion_texture = await IWO.TextureLoader.load(

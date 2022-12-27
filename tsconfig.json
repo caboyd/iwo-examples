@@ -5,39 +5,23 @@
     "module": "ES2020",
     "sourceMap": true,
     "esModuleInterop": true,
-    "declaration": false,
+    "noEmit": true,
     "baseUrl": ".",
     "rootDir": ".",
-    "paths":{
-      "@*":[
-        "iwo/src/*",
-      ],
-      "iwo":[
-        "iwo/src/iwo"
-      ],
-      "imgui-js/*":[
-        "lib/imgui-js/*",
-      ]
+    "paths": {
+      "@*": ["iwo/src/*"],
+      "iwo": ["iwo/src/iwo"],
+      "imgui-js/*": ["lib/imgui-js/*"]
     },
     "outDir": "docs",
     "strict": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
     "noImplicitReturns": true,
     "strictNullChecks": true,
-    "strictPropertyInitialization" : true
+    "strictPropertyInitialization": true
   },
-  "typedef":[
-    true,
-    "call-signature",
-    "property-declaration"
-  ],
-  "exclude": [
-    "docs",
-    "node_modules",
-    "rollup.config"
-  ],
-  "include": [
-    "examples/*",
-    "iwo/src/*"
-  ]
-
+  "typedef": [true, "call-signature", "property-declaration"],
+  "exclude": ["dist", "node_modules"],
+  "include": ["examples/*", "iwo/src/*", "vite-env.d.ts"]
 }

@@ -115,15 +115,15 @@ export class ImStringBuffer {
     constructor(public size: number, public buffer: string = "") {}
 }
 
-export type ImAccess<T> = Bind.ImAccess<T>; export { ImAccess as Access }
-export type ImScalar<T> = Bind.ImScalar<T>; export { ImScalar as Scalar }
-export type ImTuple2<T> = Bind.ImTuple2<T>; export { ImTuple2 as Tuple2 }
-export type ImTuple3<T> = Bind.ImTuple3<T>; export { ImTuple3 as Tuple3 }
-export type ImTuple4<T> = Bind.ImTuple4<T>; export { ImTuple4 as Tuple4 }
+export type ImAccess<T> = Bind.ImAccess<T>; export type { ImAccess as Access }
+export type ImScalar<T> = Bind.ImScalar<T>; export type { ImScalar as Scalar }
+export type ImTuple2<T> = Bind.ImTuple2<T>; export type { ImTuple2 as Tuple2 }
+export type ImTuple3<T> = Bind.ImTuple3<T>; export type { ImTuple3 as Tuple3 }
+export type ImTuple4<T> = Bind.ImTuple4<T>; export type { ImTuple4 as Tuple4 }
 
-export { ImTextureID as TextureID }
+export type { ImTextureID as TextureID }
 export type ImTextureID = WebGLTexture;
-export { ImGuiID as ID }
+export type { ImGuiID as ID }
 export type ImGuiID = Bind.ImGuiID;
 
 // Flags for ImGui::Begin()
@@ -805,11 +805,11 @@ export enum ImDrawListFlags
     AllowVtxOffset          = 1 << 3   // Can emit 'VtxOffset > 0' to allow large meshes. Set when 'ImGuiBackendFlags_RendererHasVtxOffset' is enabled.
 }
 
-export { ImU32 as U32 }
+export type { ImU32 as U32 }
 export type ImU32 = Bind.ImU32;
 
-export { interface_ImVec2 } from "./bind-imgui";
-export { reference_ImVec2 } from "./bind-imgui";
+export type{ interface_ImVec2 } from "./bind-imgui";
+export type{ reference_ImVec2 } from "./bind-imgui";
 
 export { ImVec2 as Vec2 }
 export class ImVec2 implements Bind.interface_ImVec2 {
@@ -839,8 +839,8 @@ export class ImVec2 implements Bind.interface_ImVec2 {
     }
 }
 
-export { interface_ImVec4 } from "./bind-imgui";
-export { reference_ImVec4 } from "./bind-imgui";
+export type{ interface_ImVec4 } from "./bind-imgui";
+export type{ reference_ImVec4 } from "./bind-imgui";
 
 export { ImVec4 as Vec4 }
 export class ImVec4 implements Bind.interface_ImVec4 {
@@ -1166,7 +1166,7 @@ export class ImGuiStorage
 }
 
 // Data payload for Drag and Drop operations
-export { ImGuiPayload as Payload }
+export type { ImGuiPayload as Payload }
 export interface ImGuiPayload<T>
 {
     // Members
@@ -1277,7 +1277,7 @@ export class ImColor
 export { ImGuiInputTextDefaultSize as InputTextDefaultSize }
 export const ImGuiInputTextDefaultSize: number = 128;
 
-export { ImGuiInputTextCallback as InputTextCallback }
+export type { ImGuiInputTextCallback as InputTextCallback }
 export type ImGuiInputTextCallback<T> = (data: ImGuiInputTextCallbackData<T>) => number;
 
 // Shared state of InputText(), passed to callback when a ImGuiInputTextFlags_Callback* flag is used and the corresponding callback is triggered.
@@ -1334,7 +1334,7 @@ export class ImGuiInputTextCallbackData<T> {
     public HasSelection(): boolean { return this.native.HasSelection(); }
 }
 
-export { ImGuiSizeCallback as SizeCallback }
+export type { ImGuiSizeCallback as SizeCallback }
 export type ImGuiSizeCallback<T> = (data: ImGuiSizeCallbackData<T>) => void;
 
 // Resizing callback data to apply custom constraint. As enabled by SetNextWindowSizeConstraints(). Callback is called during the next Begin().
@@ -1484,7 +1484,7 @@ export class ImDrawCmd
 // #endif
 export { ImDrawIdxSize as DrawIdxSize }
 export const ImDrawIdxSize: number = 2; // bind.ImDrawIdxSize;
-export { ImDrawIdx as DrawIdx }
+export type { ImDrawIdx as DrawIdx }
 export type ImDrawIdx = number;
 
 // Vertex layout

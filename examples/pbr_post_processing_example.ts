@@ -64,7 +64,7 @@ type Env = {
     exists: boolean;
 };
 
-await (async function main() {
+(async function main() {
     const canvas = <HTMLCanvasElement>document.getElementById("canvas");
 
     gl = IWO.initGL(canvas, { antialias: false });
