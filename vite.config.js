@@ -34,9 +34,9 @@ export default defineConfig({
     resolve: {
         alias: [
             //We need to match all @ but skip @vite to not break it
-            { find: /(?!\@vite)\@/, replacement: resolve(__dirname, "iwo/src/") + "/" },
-            { find: "iwo", replacement: resolve(__dirname, "iwo/src/iwo") },
-            { find: "imgui-js", replacement: resolve(__dirname, "lib/imgui-js") },
+            { find: /(?!\@vite)\@/, replacement: "/iwo/src/" },
+            { find: "iwo", replacement: "/iwo/src/iwo" },
+            { find: "imgui-js", replacement: "/lib/imgui-js" },
         ],
     },
     plugins: [
