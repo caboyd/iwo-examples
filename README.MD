@@ -32,14 +32,13 @@ npm install
 
 Run development environment  
 ```
-npm run start
+npm run dev
 ```
 
 ## Built With
-* [es-dev-server](https://open-wc.org/developing/es-dev-server.html) - A web server for development without bundling.
 * [gl-matrix](http://glmatrix.net/) - Math library
 * [Typescript](https://www.typescriptlang.org/)
-* [Rollup](https://rollupjs.org) - Bundler
+* [Vite](https://vitejs.dev) - dev environment and bundler
 
 ## License
 
