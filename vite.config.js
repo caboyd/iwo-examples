@@ -21,7 +21,7 @@ export default defineConfig({
     build: {
         minify: false,
         rollupOptions: {
-            input: examples.map((name) => resolve(__dirname, `examples/${name}.html`)),
+            input: examples.map((name) => `/examples/${name}.html`),
         },
         sourcemap: true,
     },
