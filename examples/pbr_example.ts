@@ -37,6 +37,8 @@ class Static<T> {
 const gui = {
     point_light_count: new Static<number>(4),
     point_light_attenuation: new Static<number>(16),
+    point_light_linear_falloff: new Static<number>(1),
+    point_light_squared_falloff: new Static<number>(1),
     sun_light: new Static<boolean>(true),
     sky_box: new Static<boolean>(true),
     grid: new Static<boolean>(true),
@@ -202,6 +204,16 @@ function update(): void {
         renderer.addShaderVariantUniform(IWO.ShaderSource.PBR, `u_lights[${index}].position`, [x, y, z, 1]);
         const a = gui.point_light_attenuation.value;
         renderer.addShaderVariantUniform(IWO.ShaderSource.PBR, `u_lights[${index}].color`, [a, a, a]);
+        renderer.addShaderVariantUniform(
+            IWO.ShaderSource.PBR,
+            `u_lights[${index}].linear_falloff`,
+            gui.point_light_linear_falloff.value
+        );
+        renderer.addShaderVariantUniform(
+            IWO.ShaderSource.PBR,
+            `u_lights[${index}].squared_falloff`,
+            gui.point_light_squared_falloff.value
+        );
     }
     if (gui.sun_light.value) {
         //0.5-u because we scaled x by -1 to invert sphere
@@ -292,8 +304,25 @@ function drawUI(): void {
         ImGui.PushItemWidth(-175);
         ImGui.Text("Lights");
         ImGui.Checkbox("Sun Light", gui.sun_light.access);
+        ImGui.Text("Point Lights");
         ImGui.SliderInt("Point Light Count", gui.point_light_count.access, 0, 15);
-        ImGui.SliderFloat("Point Light Attenuation", gui.point_light_attenuation.access, 0, 128);
+        ImGui.SliderFloat("Attenuation", gui.point_light_attenuation.access, 0, 128);
+        ImGui.SliderFloat(
+            "Linear Falloff",
+            gui.point_light_linear_falloff.access,
+            0.001,
+            5,
+            undefined,
+            ImGui.SliderFlags.Logarithmic
+        );
+        ImGui.SliderFloat(
+            "Squared Falloff",
+            gui.point_light_squared_falloff.access,
+            0.001,
+            5,
+            undefined,
+            ImGui.SliderFlags.Logarithmic
+        );
         ImGui.Text("Lighting");
         ImGui.Checkbox("Diffuse Irradiance", gui.diffuse_irradiance.access);
         ImGui.Checkbox("Specular Reflectance", gui.specular_reflectance.access);

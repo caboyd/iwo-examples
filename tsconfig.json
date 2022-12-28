@@ -13,7 +13,6 @@
       "iwo": ["iwo/src/iwo"],
       "imgui-js/*": ["lib/imgui-js/*"]
     },
-    "outDir": "docs",
     "strict": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
