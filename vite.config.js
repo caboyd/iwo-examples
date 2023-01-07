@@ -3,6 +3,7 @@ import { resolve } from "path";
 import { defineConfig } from "vite";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 import vitePluginString from "vite-plugin-string";
+import tsconfigPaths from 'vite-tsconfig-paths'
 
 const examples = [
     "pbr_example",
@@ -31,15 +32,8 @@ export default defineConfig({
         port: 8080,
         open: true,
     },
-    resolve: {
-        alias: [
-            //We need to match all @ but skip @vite to not break it
-            { find: /(?!\@vite)\@/, replacement: "/iwo/src/" },
-            { find: "iwo", replacement: "/iwo/src/iwo" },
-            { find: "imgui-js", replacement: "/lib/imgui-js" },
-        ],
-    },
     plugins: [
+        tsconfigPaths(),
         vitePluginString({
             include: [`**/*.vert`, `**/*.frag`],
         }),
